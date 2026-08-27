@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="在关系拓扑、3D 银河与思想时间轴之间，探索心理学、哲学、系统论和神经科学人物的连接。"
+    />
+    <meta name="theme-color" content="#1a1713" />
+    <meta property="og:title" content="关系的银河" />
+    <meta
+      property="og:description"
+      content="一张可以探索、聚焦和核查的人物关系知识图谱。"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="关系的银河" />
+    <meta
+      name="twitter:description"
+      content="在关系拓扑、3D 银河与思想时间轴之间，探索人物、思想与具体连接。"
+    />
+    <meta name="twitter:image" content="/og.png" />
+    <title>关系的银河 - 人物关系知识图谱</title>
+  </head>
+  <body>
+    <main id="app" data-active-view="topology">
+      <section id="topologyView" class="view-surface is-active" aria-label="人物关系拓扑图">
+        <svg id="topologyGraph"></svg>
+        <div class="topology-caption" aria-hidden="true">
+          <span>策展布局</span>
+          <strong>选择人物，沿连线阅读具体关系</strong>
+        </div>
+        <div id="relationLegend" class="relation-legend" aria-label="关系类型图例"></div>
+      </section>
+
+      <section id="scene" class="view-surface" aria-label="3D 人物关系银河"></section>
+
+      <section id="timelineView" class="view-surface timeline-view" aria-label="人物思想时间轴">
+        <div class="timeline-shell">
+          <div class="timeline-intro">
+            <span>Chronology of ideas</span>
+            <h2>思想关系的时间剖面</h2>
+            <p>按出生年代观察人物如何跨越流派与代际。选择任一人物，可在右侧继续阅读其具体关系。</p>
+            <div class="timeline-summary" aria-label="时间轴数据概览">
+              <strong id="timelineVisibleCount">45</strong><span>位人物</span>
+              <strong>1813—1965</strong><span>出生年份跨度</span>
+            </div>
+          </div>
+          <div id="timelineContent" class="timeline-content"></div>
+        </div>
+      </section>
+
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div>
+            <h1>关系的银河</h1>
+            <p>Atlas of minds & relations</p>
+          </div>
+        </div>
+
+        <nav id="viewSwitcher" class="view-switcher" aria-label="视图切换">
+          <button type="button" class="active" data-view="topology" aria-pressed="true">关系拓扑</button>
+          <button type="button" data-view="galaxy" aria-pressed="false">银河模式</button>
+          <button type="button" data-view="timeline" aria-pressed="false">时间轴</button>
+        </nav>
+
+        <div class="search-wrap">
+          <i data-lucide="search" aria-hidden="true"></i>
+          <input
+            id="searchInput"
+            type="search"
+            autocomplete="off"
+            placeholder="搜索人物、关系、流派"
+            aria-label="搜索人物、关系、流派"
+          />
+          <div id="searchResults" class="search-results" role="listbox"></div>
+        </div>
+
+        <nav id="groupFilters" class="segmented" aria-label="流派筛选"></nav>
+
+        <div class="view-actions">
+          <button id="godView" class="icon-button active" type="button" aria-label="上帝视角" title="上帝视角">
+            <i data-lucide="telescope" aria-hidden="true"></i>
+          </button>
+          <button id="orbitToggle" class="icon-button" type="button" aria-label="自动旋转" title="自动旋转">
+            <i data-lucide="orbit" aria-hidden="true"></i>
+          </button>
+          <button id="resetView" class="icon-button" type="button" aria-label="重置视角" title="重置视角">
+            <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+          </button>
+          <button id="sourceToggle" class="icon-button" type="button" aria-label="原始图谱" title="原始图谱">
+            <i data-lucide="map" aria-hidden="true"></i>
+          </button>
+        </div>
+      </header>
+
+      <aside id="detailPanel" class="detail-panel" aria-live="polite" aria-label="人物与关系详情"></aside>
+
+      <div class="depth-control" aria-label="关系层级">
+        <button type="button" data-depth="1" class="active">一度</button>
+        <button type="button" data-depth="2">二度</button>
+        <button type="button" data-depth="all">全部</button>
+      </div>
+
+      <section id="sourceMap" class="source-map" aria-label="原始图谱预览">
+        <div class="source-map-head">
+          <span>原始 XMind 图谱</span>
+          <button id="closeSourceMap" class="icon-button" type="button" aria-label="关闭原始图谱" title="关闭">
+            <i data-lucide="x" aria-hidden="true"></i>
+          </button>
+        </div>
+        <img src="/assets/freud-map-preview.png" alt="弗洛伊德人物关系原始脑图预览" />
+      </section>
+
+      <div id="linkToast" class="link-toast" aria-live="polite"></div>
+      <p id="viewStatus" class="sr-only" aria-live="polite"></p>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
