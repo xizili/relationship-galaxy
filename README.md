@@ -15,6 +15,14 @@ pnpm dev
 http://127.0.0.1:5173/
 ```
 
+## GitHub Pages
+
+推送到 `xizili/relationship-galaxy` 的 `main` 分支后，GitHub Actions 会自动构建并发布到：
+
+```text
+https://xizili.github.io/relationship-galaxy/
+```
+
 ## 主要文件
 
 - `src/data.js`：人物节点与关系线数据。

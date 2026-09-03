@@ -16,6 +16,7 @@ function stageStaticWorker() {
 }
 
 export default defineConfig({
+  base: process.env.GITHUB_ACTIONS ? "/relationship-galaxy/" : "/",
   plugins: [sites(), stageStaticWorker()],
   build: {
     target: "es2022",
