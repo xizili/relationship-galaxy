@@ -14,6 +14,11 @@ function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
+function clampRange(value, min, max) {
+  if (max < min) return (min + max) / 2;
+  return clamp(value, min, max);
+}
+
 function colorFromNumber(value) {
   return `#${Number(value ?? 0xffffff).toString(16).padStart(6, "0")}`;
 }
@@ -64,6 +69,7 @@ export function initTopology({
 
   const adjacency = new Map(nodes.map((node) => [node.id, new Set()]));
   const degree = new Map(nodes.map((node) => [node.id, 0]));
+  const nodeIndexById = new Map(nodes.map((node, index) => [node.id, index]));
   links.forEach((link) => {
     adjacency.get(link.source)?.add(link.target);
     adjacency.get(link.target)?.add(link.source);
@@ -111,8 +117,15 @@ export function initTopology({
   viewport.append(edgeLayer, labelLayer, nodeLayer);
   svg.appendChild(viewport);
 
-  let dimensions = { width: 1, height: 1, usableWidth: 1 };
+  let dimensions = {
+    width: 1,
+    height: 1,
+    usableWidth: 1,
+    topInset: 86,
+    bottomInset: 78
+  };
   let positions = new Map();
+  let nodeLayouts = new Map();
   let transform = { x: 0, y: 0, k: 1 };
   let state = {
     activeGroup: "all",
@@ -136,13 +149,81 @@ export function initTopology({
     return node.id === "freud" ? 15 : base;
   }
 
+  function compactRoleText(node) {
+    return node.role.length > 11 ? `${node.role.slice(0, 10)}…` : node.role;
+  }
+
+  function shouldPersistLabel(node, width) {
+    const nodeDegree = degree.get(node.id) ?? 0;
+    if (width <= 760) return nodeDegree > 4;
+    if (width <= 1240) return nodeDegree > 3;
+    return true;
+  }
+
+  function nodeLabelLayout(node, index, { includeCard = true } = {}) {
+    const radius = nodeRadius(node);
+    const roleText = compactRoleText(node);
+    const labelWidth = clamp(
+      Math.max(node.cn.length * 12, roleText.length * 9) + 20,
+      68,
+      132
+    );
+    const rawX = Number(node.x) || 0;
+    const labelSide = rawX < -12 || (Math.abs(rawX) <= 12 && index % 2 === 1) ? -1 : 1;
+    const cardX = labelSide > 0 ? radius + 8 : -radius - 8 - labelWidth;
+    const markerFootprint = {
+      left: -radius - 4,
+      right: radius + 4,
+      top: -radius - 4,
+      bottom: radius + 4
+    };
+
+    return {
+      radius,
+      labelWidth,
+      cardX,
+      textX: cardX + 10,
+      roleText,
+      footprint: includeCard
+        ? {
+            left: Math.min(markerFootprint.left, cardX - 4),
+            right: Math.max(markerFootprint.right, cardX + labelWidth + 4),
+            top: -20,
+            bottom: 20
+          }
+        : markerFootprint
+    };
+  }
+
   function computeLayout() {
     const rect = svg.getBoundingClientRect();
     const width = Math.max(320, rect.width || svg.clientWidth || window.innerWidth);
     const height = Math.max(420, rect.height || svg.clientHeight || window.innerHeight);
-    const sidePanel = width >= 980 ? 408 : 22;
-    const usableWidth = Math.max(300, width - sidePanel);
-    dimensions = { width, height, usableWidth };
+    const topbarRect = document.querySelector(".topbar")?.getBoundingClientRect();
+    const captionRect = document.querySelector(".topology-caption")?.getBoundingClientRect();
+    const panel = document.querySelector("#detailPanel");
+    const panelRect = panel?.getBoundingClientRect();
+    const panelOpen = Boolean(panel && panelRect && !panel.classList.contains("is-collapsed"));
+
+    let rightInset = 22;
+    let bottomInset = 78;
+    if (panelOpen) {
+      const panelIsBottomSheet = panelRect.width >= width * 0.72;
+      if (panelIsBottomSheet) {
+        bottomInset = Math.max(bottomInset, height - (panelRect.top - rect.top) + 18);
+      } else {
+        rightInset = Math.max(rightInset, width - (panelRect.left - rect.left) + 18);
+      }
+    }
+
+    const overlayBottom = Math.max(
+      68,
+      topbarRect ? topbarRect.bottom - rect.top : 0,
+      captionRect ? captionRect.bottom - rect.top : 0
+    );
+    const topInset = clamp(overlayBottom + 18, 86, height - 170);
+    const usableWidth = Math.max(300, width - rightInset);
+    dimensions = { width, height, usableWidth, topInset, bottomInset };
     svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 
     const xs = nodes.map((node) => Number(node.x) || 0);
@@ -153,10 +234,11 @@ export function initTopology({
     const maxY = Math.max(...ys);
     const spanX = Math.max(1, maxX - minX);
     const spanY = Math.max(1, maxY - minY);
-    const padX = width < 720 ? 54 : 92;
-    const padY = width < 720 ? 104 : 132;
-    const availableX = Math.max(200, usableWidth - padX * 2);
-    const availableY = Math.max(240, height - padY - 94);
+    const padX = width < 720 ? 42 : 76;
+    const startY = topInset + 24;
+    const endY = Math.max(startY + 96, height - bottomInset - 24);
+    const availableX = Math.max(120, usableWidth - padX * 2);
+    const availableY = Math.max(80, endY - startY);
 
     positions = new Map(
       nodes.map((node, index) => {
@@ -167,51 +249,99 @@ export function initTopology({
           node.id,
           {
             x: padX + ((rawX - minX) / spanX) * availableX,
-            y: padY + ((rawY - minY) / spanY) * availableY
+            y: startY + ((rawY - minY) / spanY) * availableY
           }
         ];
       })
     );
 
-    // Deterministic collision pass keeps the curated map recognizable while
-    // preventing the worst label and node overlaps.
-    for (let iteration = 0; iteration < 72; iteration += 1) {
-      for (let i = 0; i < nodes.length; i += 1) {
-        const a = nodes[i];
-        const pa = positions.get(a.id);
-        for (let j = i + 1; j < nodes.length; j += 1) {
-          const b = nodes[j];
-          const pb = positions.get(b.id);
-          let dx = pb.x - pa.x;
-          let dy = pb.y - pa.y;
-          let distance = Math.hypot(dx, dy);
-          const minimum = width < 720 ? 38 : 48;
-          if (distance >= minimum) continue;
-          if (distance < 0.01) {
-            dx = ((i + j) % 2 ? 1 : -1) * 0.1;
-            dy = ((i * 3 + j) % 2 ? 1 : -1) * 0.1;
-            distance = Math.hypot(dx, dy);
-          }
-          const shift = (minimum - distance) * 0.52;
-          const nx = dx / distance;
-          const ny = dy / distance;
-          pa.x -= nx * shift;
-          pa.y -= ny * shift;
-          pb.x += nx * shift;
-          pb.y += ny * shift;
-        }
-      }
-
-      positions.forEach((point) => {
-        point.x = clamp(point.x, 34, usableWidth - 34);
-        point.y = clamp(point.y, 86, height - 74);
-      });
-    }
-
     const freud = positions.get("freud");
     if (freud) {
       freud.x = usableWidth * 0.48;
-      freud.y = height * 0.48;
+      freud.y = startY + availableY * 0.48;
+    }
+
+    const anchors = new Map(
+      [...positions].map(([id, point]) => [id, { x: point.x, y: point.y }])
+    );
+    nodeLayouts = new Map(
+      nodes.map((node, index) => [
+        node.id,
+        nodeLabelLayout(node, index, { includeCard: shouldPersistLabel(node, width) })
+      ])
+    );
+
+    // Deterministic collision pass keeps the curated map recognizable while
+    // giving both node markers and name cards room to read as a loose constellation.
+    for (let iteration = 0; iteration < 150; iteration += 1) {
+      for (let i = 0; i < nodes.length; i += 1) {
+        const a = nodes[i];
+        const pa = positions.get(a.id);
+        const boxA = nodeLayouts.get(a.id).footprint;
+        for (let j = i + 1; j < nodes.length; j += 1) {
+          const b = nodes[j];
+          const pb = positions.get(b.id);
+          const boxB = nodeLayouts.get(b.id).footprint;
+          let dx = pb.x - pa.x;
+          let dy = pb.y - pa.y;
+          let distance = Math.hypot(dx, dy);
+          const radiusAllowance = (nodeRadius(a) + nodeRadius(b)) * 0.24;
+          const minimum = width < 720 ? 48 : 68 + radiusAllowance;
+          if (distance < minimum) {
+            if (distance < 0.01) {
+              dx = ((i + j) % 2 ? 1 : -1) * 0.1;
+              dy = ((i * 3 + j) % 2 ? 1 : -1) * 0.1;
+              distance = Math.hypot(dx, dy);
+            }
+            const shift = (minimum - distance) * 0.52;
+            const nx = dx / distance;
+            const ny = dy / distance;
+            pa.x -= nx * shift;
+            pa.y -= ny * shift;
+            pb.x += nx * shift;
+            pb.y += ny * shift;
+          }
+
+          const overlapX =
+            Math.min(pa.x + boxA.right, pb.x + boxB.right) -
+            Math.max(pa.x + boxA.left, pb.x + boxB.left);
+          const overlapY =
+            Math.min(pa.y + boxA.bottom, pb.y + boxB.bottom) -
+            Math.max(pa.y + boxA.top, pb.y + boxB.top);
+
+          if (overlapX > 0 && overlapY > 0) {
+            const separationPadding = 9;
+            if (overlapX < overlapY * 1.45) {
+              const direction = pb.x >= pa.x ? 1 : -1;
+              const boxShift = (overlapX + separationPadding) * 0.52;
+              pa.x -= direction * boxShift;
+              pb.x += direction * boxShift;
+            } else {
+              const direction = pb.y >= pa.y ? 1 : -1;
+              const boxShift = (overlapY + separationPadding) * 0.52;
+              pa.y -= direction * boxShift;
+              pb.y += direction * boxShift;
+            }
+          }
+        }
+      }
+
+      positions.forEach((point, id) => {
+        const anchor = anchors.get(id);
+        const footprint = nodeLayouts.get(id).footprint;
+        point.x += (anchor.x - point.x) * 0.0025;
+        point.y += (anchor.y - point.y) * 0.0025;
+        point.x = clampRange(
+          point.x,
+          18 - footprint.left,
+          usableWidth - 18 - footprint.right
+        );
+        point.y = clampRange(
+          point.y,
+          topInset + 12 - footprint.top,
+          height - bottomInset - 12 - footprint.bottom
+        );
+      });
     }
   }
 
@@ -231,7 +361,7 @@ export function initTopology({
         class: "topology-edge",
         "data-link-index": index,
         stroke: color,
-        "stroke-dasharray": link.type === "conflict" ? "7 5" : null,
+        "stroke-dasharray": link.projected ? "3 7" : link.type === "conflict" ? "7 5" : null,
         "marker-end": link.directed ? `url(#topology-arrow-${link.type})` : null
       });
       const hitPath = svgElement("path", {
@@ -239,7 +369,7 @@ export function initTopology({
         "data-link-index": index,
         tabindex: 0,
         role: "button",
-        "aria-label": `${link.label}`
+        "aria-label": `${link.fullText ?? link.label}`
       });
       hitPath.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -283,12 +413,16 @@ export function initTopology({
     nodeLayer.innerHTML = "";
     nodeRecords.clear();
 
-    nodes.forEach((node) => {
-      const radius = nodeRadius(node);
+    nodes.forEach((node, index) => {
+      const labelLayout = nodeLabelLayout(node, index);
+      const { radius, labelWidth, cardX, textX, roleText } = labelLayout;
       const groupColor = groups[node.group]?.css ?? "#777066";
-      const labelWidth = clamp(node.cn.length * 13 + 22, 72, 146);
+      const persistentLabel = shouldPersistLabel(node, dimensions.width);
+      const nodeDegree = degree.get(node.id) ?? 0;
       const record = svgElement("g", {
-        class: `topology-node${(degree.get(node.id) ?? 0) <= 1 ? " is-minor" : ""}`,
+        class: `topology-node${nodeDegree <= 3 ? " is-minor" : ""}${
+          persistentLabel ? "" : " is-label-hidden"
+        }`,
         "data-node-id": node.id,
         tabindex: 0,
         role: "button",
@@ -304,30 +438,32 @@ export function initTopology({
       record.appendChild(
         svgElement("circle", { class: "topology-node-core", r: radius })
       );
+      const accessibleTitle = svgElement("title");
+      accessibleTitle.textContent = `${node.cn}：${node.role}`;
+      record.appendChild(accessibleTitle);
 
       const card = svgElement("g", { class: "topology-node-card" });
       card.appendChild(
         svgElement("rect", {
-          x: radius + 8,
-          y: -21,
+          x: cardX,
+          y: -16,
           width: labelWidth,
-          height: 42,
+          height: 32,
           rx: 6
         })
       );
       const name = svgElement("text", {
         class: "topology-node-name",
-        x: radius + 16,
-        y: -4
+        x: textX,
+        y: -2
       });
       name.textContent = node.cn;
       const role = svgElement("text", {
         class: "topology-node-role",
-        x: radius + 16,
-        y: 13
+        x: textX,
+        y: 12
       });
-      const compactRole = node.role.length > 15 ? `${node.role.slice(0, 14)}…` : node.role;
-      role.textContent = compactRole;
+      role.textContent = roleText;
       card.append(name, role);
       record.appendChild(card);
 
@@ -368,6 +504,7 @@ export function initTopology({
         `translate(${geometry.midpoint.x} ${geometry.midpoint.y})`
       );
     });
+    positionPopover();
   }
 
   function depthSet(startId) {
@@ -429,10 +566,42 @@ export function initTopology({
     });
   }
 
+  function positionPopover(nodeId = state.selectedNodeId) {
+    const popover = document.querySelector("#topologyPopover");
+    const point = nodeId ? positions.get(nodeId) : null;
+    if (!popover || popover.hidden || !point) return;
+
+    const screenX = transform.x + point.x * transform.k;
+    const screenY = transform.y + point.y * transform.k;
+    const cardWidth = popover.offsetWidth || 324;
+    const cardHeight = popover.offsetHeight || 260;
+    const graphRight = Math.min(dimensions.width - 12, dimensions.usableWidth - 12);
+    const preferredRight = screenX + 24;
+    const preferredLeft = screenX - cardWidth - 24;
+    const desiredLeft = preferredRight + cardWidth <= graphRight
+      ? preferredRight
+      : preferredLeft;
+    const minLeft = 12;
+    const maxLeft = Math.max(minLeft, graphRight - cardWidth);
+    const minTop = Math.max(12, dimensions.topInset + 6);
+    const maxTop = Math.max(
+      minTop,
+      dimensions.height - dimensions.bottomInset - cardHeight - 12
+    );
+
+    popover.style.left = `${clampRange(desiredLeft, minLeft, maxLeft)}px`;
+    popover.style.top = `${clampRange(
+      screenY - Math.min(72, cardHeight * 0.28),
+      minTop,
+      maxTop
+    )}px`;
+  }
+
   function applyTransform() {
     viewport.setAttribute("transform", `translate(${transform.x} ${transform.y}) scale(${transform.k})`);
     svg.classList.toggle("is-far", transform.k < 0.7);
     svg.classList.toggle("is-near", transform.k > 1.35);
+    positionPopover();
   }
 
   function animateTransform(target, duration = 360) {
@@ -538,8 +707,18 @@ export function initTopology({
     }
     const graphPoint = clientToGraph(event.clientX, event.clientY);
     const point = positions.get(pointerAction.nodeId);
-    point.x = graphPoint.x - pointerAction.offsetX;
-    point.y = graphPoint.y - pointerAction.offsetY;
+    const node = nodes[nodeIndexById.get(pointerAction.nodeId)];
+    const layout = nodeLabelLayout(node, nodeIndexById.get(pointerAction.nodeId));
+    point.x = clampRange(
+      graphPoint.x - pointerAction.offsetX,
+      18 - layout.footprint.left,
+      dimensions.usableWidth - 18 - layout.footprint.right
+    );
+    point.y = clampRange(
+      graphPoint.y - pointerAction.offsetY,
+      dimensions.topInset + 12 - layout.footprint.top,
+      dimensions.height - dimensions.bottomInset - 12 - layout.footprint.bottom
+    );
     renderGeometry();
   });
 
@@ -567,9 +746,13 @@ export function initTopology({
     applyTransform();
   }
 
+  let resizeFrame = null;
   const resizeObserver = new ResizeObserver(() => {
-    if (svg.clientWidth < 100 || svg.clientHeight < 100) return;
-    resize({ preserveTransform: false });
+    if (svg.clientWidth < 100 || svg.clientHeight < 100 || resizeFrame) return;
+    resizeFrame = requestAnimationFrame(() => {
+      resizeFrame = null;
+      resize({ preserveTransform: true });
+    });
   });
   resizeObserver.observe(svg);
 
@@ -584,12 +767,15 @@ export function initTopology({
         centerNode(state.selectedNodeId);
       }
       if (state.overviewMode && options.fit) fit();
+      positionPopover();
     },
     fit,
     centerNode,
+    positionPopover,
     resize,
     destroy() {
       resizeObserver.disconnect();
+      if (resizeFrame) cancelAnimationFrame(resizeFrame);
     }
   };
 }

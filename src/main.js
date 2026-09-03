@@ -30,11 +30,14 @@ const viewSwitcher = document.querySelector("#viewSwitcher");
 const viewStatus = document.querySelector("#viewStatus");
 const relationLegend = document.querySelector("#relationLegend");
 const timelineContent = document.querySelector("#timelineContent");
+const topologyPopover = document.querySelector("#topologyPopover");
+const topologyPopoverContent = document.querySelector("#topologyPopoverContent");
 
 const nodeById = new Map(nodes.map((node) => [node.id, node]));
 const nodeRecords = new Map();
 const linkRecords = [];
 const groupKeys = Object.keys(groups);
+const galaxyPositionScale = new THREE.Vector3(0.62, 1.12, 2.2);
 const graphBounds = new THREE.Box3().setFromPoints(nodes.map((node) => getNodePosition(node)));
 const graphCenter = graphBounds.getCenter(new THREE.Vector3());
 const graphSize = graphBounds.getSize(new THREE.Vector3());
@@ -42,6 +45,8 @@ const graphSize = graphBounds.getSize(new THREE.Vector3());
 let activeGroup = "all";
 let depthMode = "all";
 let overviewMode = true;
+let detailPanelOpen = true;
+let overviewSection = "highlights";
 let selectedNodeId = null;
 let selectedLinkIndex = null;
 let hoveredNodeId = null;
@@ -115,7 +120,7 @@ function displayName(node) {
 
 function getNodePosition(nodeOrId) {
   const node = typeof nodeOrId === "string" ? nodeById.get(nodeOrId) : nodeOrId;
-  return new THREE.Vector3(node.x, node.y, node.z);
+  return new THREE.Vector3(node.x, node.y, node.z).multiply(galaxyPositionScale);
 }
 
 function relationColor(type) {
@@ -124,6 +129,15 @@ function relationColor(type) {
 
 function relationLabel(type) {
   return relationTypes[type]?.label ?? "关系";
+}
+
+function relationFullText(link) {
+  return link.fullText?.trim() || link.note?.trim() || link.label;
+}
+
+function relationDirectionMark(link, nodeId) {
+  if (!link.directed) return "↔";
+  return link.source === nodeId ? "→" : "←";
 }
 
 function renderRelationLegend() {
@@ -175,9 +189,12 @@ function setActiveView(view, options = {}) {
   if (view === "topology") {
     topologyApi?.resize({ preserveTransform: true });
     syncSecondaryViews({ center: Boolean(selectedNodeId) });
+    if (selectedNodeId) renderTopologyPopover(nodeById.get(selectedNodeId));
   } else if (view === "galaxy") {
+    hideTopologyPopover();
     requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
   } else if (view === "timeline") {
+    hideTopologyPopover();
     timelineApi?.update(
       { activeGroup, selectedNodeId },
       { center: Boolean(selectedNodeId) }
@@ -197,7 +214,33 @@ function updateDepthButtons() {
 }
 
 function updateOverviewButton() {
-  document.querySelector("#godView")?.classList.toggle("active", overviewMode);
+  const button = document.querySelector("#overviewToggle");
+  if (!button) return;
+
+  const overviewPanelOpen = overviewMode && detailPanelOpen;
+  const label = overviewPanelOpen ? "关闭全览视角侧页" : "打开全览视角";
+  button.classList.toggle("active", overviewPanelOpen);
+  button.setAttribute("aria-pressed", String(overviewPanelOpen));
+  button.setAttribute("aria-expanded", String(overviewPanelOpen));
+  button.setAttribute("aria-label", label);
+  button.setAttribute("title", label);
+}
+
+function setDetailPanelOpen(open) {
+  detailPanelOpen = Boolean(open);
+  detailPanel.classList.toggle("is-collapsed", !detailPanelOpen);
+  detailPanel.setAttribute("aria-hidden", String(!detailPanelOpen));
+
+  if (detailPanelOpen) {
+    detailPanel.removeAttribute("inert");
+  } else {
+    detailPanel.setAttribute("inert", "");
+  }
+
+  updateOverviewButton();
+  if (activeView === "topology") {
+    requestAnimationFrame(() => topologyApi?.resize({ preserveTransform: true }));
+  }
 }
 
 function getOverviewCameraPlacement() {
@@ -257,8 +300,80 @@ function topConnectedNodes(limit = 5) {
     .slice(0, limit);
 }
 
-function renderOverviewPanel() {
-  const relationTypeCount = new Set(links.map((link) => link.type)).size;
+function renderOverviewPeople() {
+  return `
+    <div class="overview-section-heading">
+      <strong>全部人物</strong>
+      <span>${nodes.length} 位</span>
+    </div>
+    <div class="relation-list overview-list">
+      ${nodes
+        .map(
+          (node) => `
+            <button type="button" class="relation-row" data-focus-node="${node.id}">
+              <span class="relation-dot" style="--relation-color:${groups[node.group].css}"></span>
+              <span>
+                <strong>${escapeHtml(node.cn)}</strong>
+                <small>${escapeHtml(node.name)} · ${escapeHtml(groups[node.group].label)} · ${escapeHtml(node.role)}</small>
+              </span>
+            </button>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function renderOverviewGroups() {
+  const groupRows = groupStats()
+    .map(
+      (group) => `
+        <div class="overview-entry">
+          <span class="relation-dot" style="--relation-color:${group.color}"></span>
+          <span>
+            <strong>${escapeHtml(group.label)}</strong>
+            <small>${group.count} 位人物</small>
+          </span>
+        </div>
+      `
+    )
+    .join("");
+
+  return `
+    <div class="overview-section-heading">
+      <strong>全部流派</strong>
+      <span>${groupStats().length} 个</span>
+    </div>
+    <div class="overview-list">${groupRows}</div>
+  `;
+}
+
+function renderOverviewRelationTypes() {
+  const typeRows = Object.entries(relationTypes)
+    .map(([key, meta]) => {
+      const count = links.filter((link) => link.type === key).length;
+      return `
+        <div class="overview-entry">
+          <span class="relation-dot" style="--relation-color:${cssColor(meta.color)}"></span>
+          <span>
+            <strong>${escapeHtml(meta.label)}</strong>
+            <small>${count} 条关系</small>
+          </span>
+        </div>
+      `;
+    })
+    .join("");
+
+  return `
+    <div class="overview-section-heading">
+      <strong>全部关系类型</strong>
+      <span>${Object.keys(relationTypes).length} 类</span>
+    </div>
+    <div class="overview-list">${typeRows}</div>
+  `;
+}
+
+function renderOverviewHighlights() {
   const clusters = groupStats()
     .map(
       (group) => `
@@ -282,21 +397,48 @@ function renderOverviewPanel() {
     )
     .join("");
 
+  return `
+    <div class="cluster-list">${clusters}</div>
+    <div class="overview-section-heading">
+      <strong>核心枢纽</strong>
+      <span>关系数前 5 位</span>
+    </div>
+    <div class="relation-list overview-list">${hubs}</div>
+  `;
+}
+
+function renderOverviewSection() {
+  if (overviewSection === "people") return renderOverviewPeople();
+  if (overviewSection === "groups") return renderOverviewGroups();
+  if (overviewSection === "relation-types") return renderOverviewRelationTypes();
+  return renderOverviewHighlights();
+}
+
+function renderOverviewPanel() {
+  const relationTypeCount = Object.keys(relationTypes).length;
+  const statButton = (section, label) => `
+    <button
+      type="button"
+      class="overview-stat${overviewSection === section ? " is-active" : ""}"
+      data-overview-section="${section}"
+      aria-pressed="${overviewSection === section}"
+    >${label}</button>
+  `;
+
   detailPanel.innerHTML = `
     <div class="panel-kicker" style="--node-color:#f4b94f">
       <span></span>全局视角
     </div>
-    <h2>上帝视角</h2>
+    <h2>全览视角</h2>
     <p class="latin-name">${nodes.length} nodes · ${links.length} relations</p>
     <p class="role">从精神分析核心延展到存在主义、系统论与当代神经科学。</p>
     <div class="panel-stats">
-      <span>${nodes.length} 个人物</span>
-      <span>${links.length} 条关系</span>
-      <span>${groupStats().length} 个流派</span>
-      <span>${relationTypeCount} 类关系</span>
+      ${statButton("people", `${nodes.length} 个人物`)}
+      <span title="关系总数">${links.length} 条关系</span>
+      ${statButton("groups", `${groupStats().length} 个流派`)}
+      ${statButton("relation-types", `${relationTypeCount} 类关系`)}
     </div>
-    <div class="cluster-list">${clusters}</div>
-    <div class="relation-list">${hubs}</div>
+    ${renderOverviewSection()}
   `;
 }
 
@@ -395,21 +537,30 @@ function createNode(node) {
 function makeCurve(sourceNode, targetNode) {
   const start = getNodePosition(sourceNode);
   const end = getNodePosition(targetNode);
-  const mid = start.clone().add(end).multiplyScalar(0.5);
+  const midpoint = start.clone().add(end).multiplyScalar(0.5);
+  const chord = end.clone().sub(start);
   const distance = start.distanceTo(end);
-  const lift = mid.clone();
+  const chordDirection = chord.normalize();
+  const bendDirection = midpoint.clone().sub(graphCenter);
 
-  if (lift.lengthSq() < 0.001) {
-    lift.set(0, 0, 1);
+  // Project the outward direction onto the plane perpendicular to the link.
+  // This creates a gentle bow without the overshoot of a three-point spline.
+  bendDirection.addScaledVector(
+    chordDirection,
+    -bendDirection.dot(chordDirection)
+  );
+
+  if (bendDirection.lengthSq() < 0.001) {
+    const fallbackAxis = Math.abs(chordDirection.y) < 0.82
+      ? new THREE.Vector3(0, 1, 0)
+      : new THREE.Vector3(1, 0, 0);
+    bendDirection.crossVectors(chordDirection, fallbackAxis);
   }
 
-  lift.normalize().multiplyScalar(36 + distance * 0.12);
-  mid.add(lift);
+  const bend = THREE.MathUtils.clamp(distance * 0.045, 9, 36);
+  const control = midpoint.add(bendDirection.normalize().multiplyScalar(bend));
 
-  const zBend = Math.sin((start.x + end.y) * 0.01) * 34;
-  mid.z += zBend;
-
-  return new THREE.CatmullRomCurve3([start, mid, end]);
+  return new THREE.QuadraticBezierCurve3(start, control, end);
 }
 
 function createLink(link, index) {
@@ -449,7 +600,7 @@ function createLink(link, index) {
   const linkLabel = document.createElement("div");
   linkLabel.className = "link-label";
   linkLabel.textContent = link.label.length > 28 ? `${link.label.slice(0, 27)}…` : link.label;
-  linkLabel.title = link.label;
+  linkLabel.title = relationFullText(link);
   linkLabel.style.setProperty("--relation-color", cssColor(relationColor(link.type)));
   const linkLabelObject = new CSS2DObject(linkLabel);
   linkLabelObject.position.copy(curve.getPoint(0.5));
@@ -609,6 +760,60 @@ function focusCameraOnNode(nodeId) {
   targetGoal = position;
 }
 
+function hideTopologyPopover() {
+  if (!topologyPopover) return;
+  topologyPopover.hidden = true;
+  topologyPopover.removeAttribute("data-node-id");
+}
+
+function renderTopologyPopover(node) {
+  if (!topologyPopover || !topologyPopoverContent || activeView !== "topology") {
+    hideTopologyPopover();
+    return;
+  }
+
+  const group = groups[node.group];
+  const relations = adjacentLinks(node.id);
+  const relationItems = relations
+    .map((link) => {
+      const otherNode = nodeById.get(getOtherNodeId(link, node.id));
+      const qualifier = link.projected ? " · 经主题节点" : link.sourceAnnotated === false ? " · 原图未写文字" : "";
+      return `
+        <li>
+          <strong>${relationDirectionMark(link, node.id)} ${escapeHtml(otherNode.cn)}${escapeHtml(qualifier)}</strong>
+          <span>${escapeHtml(relationFullText(link))}</span>
+        </li>
+      `;
+    })
+    .join("");
+  const works = node.works?.length
+    ? `<div class="topology-popover-works">${node.works
+        .slice(0, 3)
+        .map((work) => `<span>${escapeHtml(work)}</span>`)
+        .join("")}</div>`
+    : "";
+
+  topologyPopover.style.setProperty("--node-color", group.css);
+  topologyPopover.dataset.nodeId = node.id;
+  topologyPopoverContent.innerHTML = `
+    <div class="topology-popover-kicker">
+      <span></span>${escapeHtml(group.label)}
+    </div>
+    <h3 id="topologyPopoverTitle">${escapeHtml(node.cn)}</h3>
+    <p class="topology-popover-latin">${escapeHtml(node.name)} · ${escapeHtml(node.years)}</p>
+    <p class="topology-popover-role">${escapeHtml(node.role)}</p>
+    <p class="topology-popover-summary">${escapeHtml(node.summary)}</p>
+    ${works}
+    <div class="topology-popover-relations">
+      <p class="topology-popover-count">原图关系注释 · ${relations.length} 条</p>
+      <ul>${relationItems}</ul>
+    </div>
+  `;
+  topologyPopover.setAttribute("aria-labelledby", "topologyPopoverTitle");
+  topologyPopover.hidden = false;
+  requestAnimationFrame(() => topologyApi?.positionPopover(node.id));
+}
+
 function focusNode(nodeId, options = {}) {
   const node = nodeById.get(nodeId);
   if (!node) return;
@@ -624,10 +829,16 @@ function focusNode(nodeId, options = {}) {
     updateDepthButtons();
   }
 
-  updateOverviewButton();
+  setDetailPanelOpen(true);
   renderDetailPanel(node);
   updateHighlights();
   syncSecondaryViews({ center: activeView === "topology" });
+
+  if (activeView === "topology") {
+    renderTopologyPopover(node);
+  } else {
+    hideTopologyPopover();
+  }
 
   if (options.camera !== false && activeView === "galaxy") {
     focusCameraOnNode(nodeId);
@@ -652,8 +863,8 @@ function renderRelationList(nodeId) {
             <button type="button" class="relation-row" data-focus-node="${otherId}" data-link-index="${link.index}">
               <span class="relation-dot" style="--relation-color:${color}"></span>
               <span>
-                <strong>${escapeHtml(otherNode.cn)}</strong>
-                <small>${escapeHtml(link.label)}</small>
+                <strong>${relationDirectionMark(link, nodeId)} ${escapeHtml(otherNode.cn)}${link.projected ? " · 经主题节点" : ""}</strong>
+                <small>${escapeHtml(relationFullText(link))}</small>
               </span>
             </button>
           `;
@@ -696,7 +907,8 @@ function renderLinkDetail(linkIndex) {
   overviewMode = false;
   selectedLinkIndex = linkIndex;
   selectedNodeId = null;
-  updateOverviewButton();
+  hideTopologyPopover();
+  setDetailPanelOpen(true);
 
   detailPanel.innerHTML = `
     <div class="panel-kicker" style="--node-color:${cssColor(relationColor(link.type))}">
@@ -705,11 +917,11 @@ function renderLinkDetail(linkIndex) {
     <h2>${escapeHtml(source.cn)} ${link.directed ? "→" : "↔"} ${escapeHtml(target.cn)}</h2>
     <p class="latin-name">${escapeHtml(source.name)} / ${escapeHtml(target.name)}</p>
     <p class="role">${escapeHtml(link.label)}</p>
-    <p class="summary">${escapeHtml(link.note)}</p>
+    <p class="summary">${escapeHtml(relationFullText(link))}</p>
     <div class="evidence-status">
       <span>${escapeHtml(relationLabel(link.type))}</span>
       <span>${link.directed ? "有方向关系" : "双向／对称关系"}</span>
-      <span>来源待补充</span>
+      <span>${link.projected ? "经原图主题节点投影" : link.sourceAnnotated === false ? "原图直连，未写关系文字" : "原图逐字校正"}</span>
     </div>
     <div class="relation-actions">
       <button type="button" data-focus-node="${source.id}">${escapeHtml(source.cn)}</button>
@@ -721,13 +933,16 @@ function renderLinkDetail(linkIndex) {
 }
 
 function enterOverview(options = {}) {
+  const wasOverview = overviewMode;
   overviewMode = true;
+  if (!wasOverview) overviewSection = "highlights";
   activeGroup = "all";
   depthMode = "all";
   selectedNodeId = null;
   selectedLinkIndex = null;
   hoveredNodeId = null;
   hoveredLinkIndex = null;
+  hideTopologyPopover();
   controls.autoRotate = false;
   document.querySelector("#orbitToggle").classList.remove("active");
   searchResults.classList.remove("is-open");
@@ -735,8 +950,8 @@ function enterOverview(options = {}) {
 
   renderFilters();
   updateDepthButtons();
-  updateOverviewButton();
   renderOverviewPanel();
+  setDetailPanelOpen(options.panelOpen !== false);
   updateHighlights();
   moveCameraToOverview(options);
   syncSecondaryViews({ fit: activeView === "topology" });
@@ -780,7 +995,17 @@ function nodeSearchText(node) {
 function linkSearchText(link) {
   const source = nodeById.get(link.source);
   const target = nodeById.get(link.target);
-  return normalize([source.cn, source.name, target.cn, target.name, link.label, link.note, relationLabel(link.type)].join(" "));
+  return normalize(
+    [
+      source.cn,
+      source.name,
+      target.cn,
+      target.name,
+      link.label,
+      relationFullText(link),
+      relationLabel(link.type)
+    ].join(" ")
+  );
 }
 
 function renderSearchResults(query) {
@@ -869,7 +1094,7 @@ function showLinkToast(event, index) {
   const source = nodeById.get(record.link.source);
   const target = nodeById.get(record.link.target);
   linkToast.innerHTML = `
-    <strong>${escapeHtml(source.cn)} → ${escapeHtml(target.cn)}</strong>
+    <strong>${escapeHtml(source.cn)} ${record.link.directed ? "→" : "↔"} ${escapeHtml(target.cn)}</strong>
     <span>${escapeHtml(record.link.label)}</span>
   `;
   linkToast.style.left = `${Math.min(event.clientX + 16, window.innerWidth - 300)}px`;
@@ -946,6 +1171,13 @@ depthControl.addEventListener("click", (event) => {
 });
 
 detailPanel.addEventListener("click", (event) => {
+  const overviewButton = event.target.closest("[data-overview-section]");
+  if (overviewButton) {
+    overviewSection = overviewButton.dataset.overviewSection;
+    renderOverviewPanel();
+    return;
+  }
+
   const relationButton = event.target.closest("[data-link-index]");
   if (relationButton) {
     renderLinkDetail(Number(relationButton.dataset.linkIndex));
@@ -956,6 +1188,10 @@ detailPanel.addEventListener("click", (event) => {
   if (focusButton) {
     focusNode(focusButton.dataset.focusNode);
   }
+});
+
+document.querySelector("#closeTopologyPopover")?.addEventListener("click", () => {
+  hideTopologyPopover();
 });
 
 viewSwitcher.addEventListener("click", (event) => {
@@ -993,7 +1229,12 @@ document.querySelector("#orbitToggle").addEventListener("click", (event) => {
   event.currentTarget.classList.toggle("active", controls.autoRotate);
 });
 
-document.querySelector("#godView").addEventListener("click", () => {
+document.querySelector("#overviewToggle").addEventListener("click", () => {
+  if (overviewMode && detailPanelOpen) {
+    setDetailPanelOpen(false);
+    return;
+  }
+
   enterOverview();
 });
 
@@ -1012,6 +1253,7 @@ window.addEventListener("keydown", (event) => {
     searchResults.classList.remove("is-open");
     sourceMap.classList.remove("is-open");
     hideLinkToast();
+    hideTopologyPopover();
   }
 });
 

@@ -30,6 +30,25 @@
     <main id="app" data-active-view="topology">
       <section id="topologyView" class="view-surface is-active" aria-label="人物关系拓扑图">
         <svg id="topologyGraph"></svg>
+        <aside
+          id="topologyPopover"
+          class="topology-popover"
+          role="dialog"
+          aria-label="人物简介"
+          aria-live="polite"
+          hidden
+        >
+          <button
+            id="closeTopologyPopover"
+            class="topology-popover-close"
+            type="button"
+            aria-label="关闭人物简介"
+            title="关闭"
+          >
+            <i data-lucide="x" aria-hidden="true"></i>
+          </button>
+          <div id="topologyPopoverContent"></div>
+        </aside>
         <div class="topology-caption" aria-hidden="true">
           <span>策展布局</span>
           <strong>选择人物，沿连线阅读具体关系</strong>
@@ -84,7 +103,16 @@
         <nav id="groupFilters" class="segmented" aria-label="流派筛选"></nav>
 
         <div class="view-actions">
-          <button id="godView" class="icon-button active" type="button" aria-label="上帝视角" title="上帝视角">
+          <button
+            id="overviewToggle"
+            class="icon-button active"
+            type="button"
+            aria-label="关闭全览视角侧页"
+            aria-controls="detailPanel"
+            aria-pressed="true"
+            aria-expanded="true"
+            title="关闭全览视角侧页"
+          >
             <i data-lucide="telescope" aria-hidden="true"></i>
           </button>
           <button id="orbitToggle" class="icon-button" type="button" aria-label="自动旋转" title="自动旋转">
@@ -109,12 +137,12 @@
 
       <section id="sourceMap" class="source-map" aria-label="原始图谱预览">
         <div class="source-map-head">
-          <span>原始 XMind 图谱</span>
+          <span>本轮校正依据 · 原始 XMind 图谱</span>
           <button id="closeSourceMap" class="icon-button" type="button" aria-label="关闭原始图谱" title="关闭">
             <i data-lucide="x" aria-hidden="true"></i>
           </button>
         </div>
-        <img src="/assets/freud-map-preview.png" alt="弗洛伊德人物关系原始脑图预览" />
+        <img src="/assets/freud-map-preview.webp" alt="本轮关系校正所依据的弗洛伊德人物关系原始脑图" />
       </section>
 
       <div id="linkToast" class="link-toast" aria-live="polite"></div>

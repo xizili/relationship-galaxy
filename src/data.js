@@ -65,7 +65,7 @@ export const nodes = [
     y: 0,
     z: 0,
     size: 18,
-    summary: "犹太人，精神分析创始人。PDF 图谱以他为中心，向荣格、阿德勒、安娜·弗洛伊德、拉康、弗洛姆、霍妮、现代神经精神分析等方向展开。",
+    summary: "犹太人，精神分析创始人。原始图谱以他为中心，向早期精神分析、存在主义心理治疗与后续心理学人物展开。",
     works: ["《梦的解析》", "精神分析理论"]
   },
   {
@@ -163,7 +163,7 @@ export const nodes = [
     y: 112,
     z: -92,
     size: 10,
-    summary: "精神分析师。图谱提到他小时候见过弗洛伊德，母亲评价弗洛伊德为对欧洲影响极大的人物之一。",
+    summary: "精神分析师与发展心理学家。原图将他连接至弗洛伊德、安娜·弗洛伊德、露丝·本尼迪克特与格雷戈里·贝特森。",
     works: ["心理社会发展阶段"]
   },
   {
@@ -247,7 +247,7 @@ export const nodes = [
     y: 8,
     z: 92,
     size: 9,
-    summary: "犹太人，社会生态学家。图谱把他放在弗洛伊德周边的社会思想谱系里。",
+    summary: "犹太人，社会生态学家。原图记载他小时候见过弗洛伊德；母亲评价弗洛伊德是对欧洲影响极大的人物之一。",
     works: ["《旁观者》", "《生态愿景》"]
   },
   {
@@ -261,7 +261,7 @@ export const nodes = [
     y: 38,
     z: 118,
     size: 10,
-    summary: "图谱标注《存在》，并把他与阿德勒、克尔凯郭尔、欧文·亚隆连接起来。",
+    summary: "图谱标注《存在》，并把他与阿德勒和欧文·亚隆连接起来。",
     works: ["《存在》"]
   },
   {
@@ -317,7 +317,7 @@ export const nodes = [
     y: 164,
     z: 40,
     size: 9,
-    summary: "图谱标注他是 Fromm 的两位精神导师之一，关注机体整体理论。",
+    summary: "神经学家与精神科医师，以机体整体理论著称；原图将他连接到马斯洛。",
     works: ["整体机体理论"]
   },
   {
@@ -345,7 +345,7 @@ export const nodes = [
     y: 196,
     z: 24,
     size: 11,
-    summary: "图谱标注《恐惧与战栗》，并连接卡夫卡、罗洛·梅、欧文·亚隆等存在主义心理治疗线索。",
+    summary: "图谱标注《恐惧与战栗》，并连接卡夫卡、彼得·德鲁克与欧文·亚隆。",
     works: ["《恐惧与战栗》"]
   },
   {
@@ -387,7 +387,7 @@ export const nodes = [
     y: -238,
     z: -82,
     size: 10,
-    summary: "图谱标注《存在与时间》，连接阿伦特、萨特及存在主义谱系。",
+    summary: "图谱标注《存在与时间》，并明确连接汉娜·阿伦特。",
     works: ["《存在与时间》"]
   },
   {
@@ -415,7 +415,7 @@ export const nodes = [
     y: -274,
     z: 96,
     size: 10,
-    summary: "法国人类学家、社会学家、哲学家、语言学家。图谱中与结构主义和拉康语境相邻。",
+    summary: "法国人类学家、社会学家、哲学家、语言学家。原图将他与皮亚杰的结构主义脉络相连。",
     works: ["《忧郁的热带》", "《结构人类学》"]
   },
   {
@@ -527,7 +527,7 @@ export const nodes = [
     y: 142,
     z: -18,
     size: 9,
-    summary: "图谱标注《菊与刀》，与玛格丽特·米德、贝特森所在的人类学谱系相邻。",
+    summary: "图谱标注《菊与刀》，并记录她与玛格丽特·米德的朋友及论文指导关系。",
     works: ["《菊与刀》"]
   },
   {
@@ -686,360 +686,312 @@ export const nodes = [
   }
 ];
 
+function makeLink(source, target, type, label, fullText, options = {}) {
+  return {
+    source,
+    target,
+    type,
+    label,
+    fullText,
+    ...options
+  };
+}
+
 export const links = [
-  {
-    source: "freud",
-    target: "jung",
-    type: "mentor",
-    label: "师徒；偶像，后来决裂",
-    note: "图谱同时标注两人的继承关系和后来的理论分歧。",
+  makeLink("freud", "jung", "conflict", "偶像；后来决裂", "偶像，后来决裂", {
     directed: true,
     weight: 2.2
-  },
-  {
-    source: "freud",
-    target: "adler",
-    type: "mentor",
-    label: "早期同圈；后分化",
-    note: "阿德勒从早期精神分析圈中分化出个体心理学。",
+  }),
+  makeLink("freud", "adler", "mentor", "师徒", "师徒", {
     directed: true,
     weight: 1.7
-  },
-  {
-    source: "freud",
-    target: "anna",
-    type: "family",
-    label: "父女",
-    note: "安娜·弗洛伊德延续并发展儿童精神分析方向。",
-    weight: 1.8
-  },
-  {
-    source: "freud",
-    target: "klein",
-    type: "school",
-    label: "精神分析谱系",
-    note: "克莱因处在儿童精神分析和客体关系传统中。",
+  }),
+  makeLink("freud", "klein", "school", "同流派", "同流派", {
     weight: 1.2
-  },
-  {
-    source: "freud",
-    target: "fromm",
-    type: "conflict",
-    label: "受启发，也尖锐反对部分观点",
-    note: "图谱强调 Fromm 把社会文化纳入心理塑造的解释。",
-    directed: true,
-    weight: 1.5
-  },
-  {
-    source: "freud",
-    target: "horney",
-    type: "conflict",
-    label: "受启发，也反对部分观点",
-    note: "霍妮发展出带有文化和女性主义视角的新弗洛伊德主义。",
-    directed: true,
-    weight: 1.3
-  },
-  {
-    source: "freud",
-    target: "lacan",
-    type: "influence",
-    label: "重读弗洛伊德",
-    note: "拉康以语言、结构主义和哲学重读弗洛伊德理论。",
-    directed: true,
-    weight: 1.5
-  },
-  {
-    source: "freud",
-    target: "kandel",
-    type: "influence",
-    label: "精神分析与记忆研究的远端连接",
-    note: "图谱把坎德尔放在心理学与神经科学的延伸线路上。",
+  }),
+  makeLink(
+    "freud",
+    "fromm",
+    "influence",
+    "精神导师；启发人本主义精神分析",
+    "Fromm的两位精神导师之一，关注社会性对人的塑造，启发其开创“人本主义精神分析”",
+    { directed: true, weight: 1.6 }
+  ),
+  makeLink(
+    "freud",
+    "horney",
+    "conflict",
+    "受启发，也尖锐反对",
+    "受启发于，但也尖锐反对弗洛伊德的一些观点，称应当考虑社会文化对人的心理塑造，亦提出女性主义精神分析视角",
+    { directed: true, weight: 1.5 }
+  ),
+  makeLink("freud", "emma", "collaboration", "共事", "共事", {
+    weight: 1.1
+  }),
+  makeLink(
+    "freud",
+    "drucker",
+    "dialogue",
+    "童年见过并握手",
+    "小时候见过，握过手，其母亲尽管不赞成弗洛伊德观点，但评价其为“对欧洲影响最大的人之一”",
+    { directed: true, weight: 1.4 }
+  ),
+  makeLink("freud", "yalom", "influence", "启发", "启发", {
     directed: true,
     weight: 1.1
-  },
-  {
-    source: "freud",
-    target: "solms",
-    type: "influence",
-    label: "神经精神分析",
-    note: "Solms 的方向试图把弗洛伊德理论与当代神经科学重新接上。",
+  }),
+  makeLink("freud", "erikson", "mentor", "师徒", "师徒", {
     directed: true,
     weight: 1.4
-  },
-  {
-    source: "jung",
-    target: "emma",
-    type: "spouse",
-    label: "配偶",
-    note: "图谱标注艾玛·荣格是荣格的配偶和分析心理学家。",
-    weight: 1.2
-  },
-  {
-    source: "jung",
-    target: "sabina",
-    type: "mentor",
-    label: "博士导师、同僚、咨询师；曾有亲密关系",
-    note: "图谱把这段复杂关系作为早期精神分析史的一条重要线。",
-    weight: 1.5
-  },
-  {
-    source: "jung",
-    target: "campbell",
-    type: "influence",
-    label: "启发神话学理解",
-    note: "图谱写到荣格启发 Campbell 领悟梦与神话的关系。",
-    directed: true,
-    weight: 1.4
-  },
-  {
-    source: "kierkegaard",
-    target: "kafka",
-    type: "influence",
-    label: "句子被摘抄",
-    note: "图谱标注 Kafka 摘抄过克尔凯郭尔的句子。",
-    directed: true,
-    weight: 1
-  },
-  {
-    source: "kierkegaard",
-    target: "rollo",
-    type: "influence",
-    label: "存在主义思想影响",
-    note: "克尔凯郭尔是图谱中通向存在主义心理治疗的源头之一。",
-    directed: true,
-    weight: 1.2
-  },
-  {
-    source: "kierkegaard",
-    target: "yalom",
-    type: "influence",
-    label: "存在主义课程线索",
-    note: "图谱标注 Yalom 上过包含克尔凯郭尔内容的存在主义课程。",
-    directed: true,
-    weight: 1.2
-  },
-  {
-    source: "adler",
-    target: "rollo",
-    type: "influence",
-    label: "见过并讨论，启发进入心理学",
-    note: "图谱标注阿德勒与 Rollo May 的讨论启发其进入心理学。",
-    directed: true,
-    weight: 1.2
-  },
-  {
-    source: "rollo",
-    target: "yalom",
-    type: "influence",
-    label: "存在主义心理治疗谱系",
-    note: "两人位于存在主义心理治疗的连续线路上。",
+  }),
+  makeLink("freud", "kandel", "influence", "启发", "启发", {
     directed: true,
     weight: 1.1
-  },
-  {
-    source: "maslow",
-    target: "rogers",
-    type: "peer",
-    label: "人本主义心理学运动",
-    note: "图谱把两人放在人本主义心理学运动中。",
-    weight: 1.3
-  },
-  {
-    source: "fromm",
-    target: "goldstein",
-    type: "mentor",
-    label: "Fromm 的精神导师之一",
-    note: "图谱称 Goldstein 是 Fromm 的两位精神导师之一。",
-    directed: true,
+  }),
+  makeLink("freud", "sabina", "peer", "朋友", "朋友", {
     weight: 1.1
-  },
-  {
-    source: "fromm",
-    target: "suzuki",
-    type: "collaboration",
-    label: "合著/对谈《禅与心理分析》",
-    note: "图谱连接弗洛姆与铃木大拙的禅宗和心理分析对话。",
-    weight: 1.4
-  },
-  {
-    source: "fromm",
-    target: "horney",
-    type: "peer",
-    label: "新弗洛伊德主义同域",
-    note: "二者都把社会文化因素纳入精神分析视角。",
-    weight: 1
-  },
-  {
-    source: "heidegger",
-    target: "arendt",
-    type: "mentor",
-    label: "导师、恋人、通信多年",
-    note: "图谱标注两人的导师与恋人关系，以及多年通信。",
-    weight: 1.3
-  },
-  {
-    source: "heidegger",
-    target: "sartre",
-    type: "influence",
-    label: "存在主义哲学影响",
-    note: "海德格尔在图谱中连接到 Sartre 的存在主义哲学。",
+  }),
+  makeLink("freud", "sartre", "influence", "影响", "影响", {
     directed: true,
-    weight: 1.1
-  },
-  {
-    source: "lacan",
-    target: "levi",
-    type: "dialogue",
-    label: "结构主义语境",
-    note: "图谱中拉康与结构主义、人类学和语言学语境相邻。",
-    weight: 1
-  },
-  {
-    source: "piaget",
-    target: "kuhn",
-    type: "influence",
-    label: "启发；见《必要的张力》",
-    note: "图谱用这条线把结构主义、科学哲学和认知发展连接起来。",
-    directed: true,
-    weight: 1
-  },
-  {
-    source: "lewin",
-    target: "bertalanffy",
-    type: "school",
-    label: "场论与系统论相邻",
-    note: "二者在图谱中共同构成系统、整体和场的解释路径。",
-    weight: 1.1
-  },
-  {
-    source: "lewin",
-    target: "bateson",
-    type: "influence",
-    label: "系统视角延伸",
-    note: "图谱把社会心理、系统论和控制论放在连续区域。",
-    directed: true,
-    weight: 1
-  },
-  {
-    source: "bertalanffy",
-    target: "piaget",
-    type: "school",
-    label: "结构与系统",
-    note: "图谱中两人共同指向结构主义、系统论与发展理论的交界。",
-    weight: 1
-  },
-  {
-    source: "wertheimer",
-    target: "piaget",
-    type: "influence",
-    label: "格式塔与结构主义",
-    note: "格式塔心理学和皮亚杰结构主义在图谱中有延伸关系。",
-    directed: true,
-    weight: 1
-  },
-  {
-    source: "bateson",
-    target: "mead",
-    type: "spouse",
-    label: "夫妻；合作",
-    note: "图谱标注玛格丽特·米德是贝特森的第三任妻子。",
-    weight: 1.3
-  },
-  {
-    source: "mead",
-    target: "benedict",
-    type: "peer",
-    label: "人类学同域",
-    note: "两人处于文化人类学谱系中。",
-    weight: 1
-  },
-  {
-    source: "bateson",
-    target: "maturana",
-    type: "dialogue",
-    label: "控制论与观察者问题",
-    note: "图谱把 Bateson、Maturana 与二阶控制论放在同一区域。",
     weight: 1.2
-  },
-  {
-    source: "maturana",
-    target: "foerster",
-    type: "collaboration",
-    label: "二阶控制论谱系",
-    note: "图谱写到后者发展前者相关的二阶控制论方向。",
-    weight: 1.3
-  },
-  {
-    source: "kandel",
-    target: "edelman",
-    type: "peer",
-    label: "神经科学同域",
-    note: "两人都把心理过程推进到神经科学解释层面。",
-    weight: 1
-  },
-  {
-    source: "edelman",
-    target: "tononi",
-    type: "collaboration",
-    label: "合著《意识的宇宙》",
-    note: "图谱把 Edelman 和 Tononi 放在意识科学的合作线路上。",
-    weight: 1.3
-  },
-  {
-    source: "koch",
-    target: "tononi",
-    type: "collaboration",
-    label: "意识研究伙伴",
-    note: "图谱将 Koch 与 Tononi 放在当代意识研究同一区域。",
+  }),
+  makeLink(
+    "freud",
+    "campbell",
+    "influence",
+    "启发其理解梦与神话",
+    "启发Campbell领悟“神话是公开的梦，梦是私人的神话”",
+    { directed: true, weight: 1.4 }
+  ),
+  makeLink("jung", "emma", "spouse", "配偶", "配偶", {
     weight: 1.2
-  },
-  {
-    source: "tononi",
-    target: "sporns",
-    type: "peer",
-    label: "复杂网络与意识研究相邻",
-    note: "图谱把网络神经科学与意识理论放在远右侧当代脑科学区域。",
-    weight: 1
-  },
-  {
-    source: "changeux",
-    target: "dehaene",
-    type: "collaboration",
-    label: "合作提出全局工作空间理论",
-    note: "图谱标注二者合作提出 Global Workspace Theory。",
-    weight: 1.4
-  },
-  {
-    source: "friston",
-    target: "solms",
-    type: "dialogue",
-    label: "自由能原理整合弗洛伊德理论",
-    note: "图谱标注 Solms 在《The Hidden Spring》中强调 Friston 自由能原理的整合作用。",
-    weight: 1.5
-  },
-  {
-    source: "friston",
-    target: "changeux",
-    type: "dialogue",
-    label: "心智、脑与数学的对谈区域",
-    note: "图谱把自由能、全局工作空间和当代脑科学放在同一片区。",
-    weight: 1.1
-  },
-  {
-    source: "dehaene",
-    target: "koch",
-    type: "peer",
-    label: "意识机制研究同域",
-    note: "两人位于当代意识与认知神经科学的相邻区域。",
-    weight: 1
-  },
-  {
-    source: "marx",
-    target: "fromm",
-    type: "influence",
-    label: "社会思想背景",
-    note: "图谱把 Marx 放在 Fromm 所在的社会文化解释路径附近。",
+  }),
+  makeLink(
+    "jung",
+    "sabina",
+    "mentor",
+    "导师、同僚、咨询师；亲密关系",
+    "卡尔是萨宾娜的博士导师、同僚、咨询师，有过亲密关系",
+    { directed: true, weight: 1.5 }
+  ),
+  makeLink("jung", "campbell", "influence", "启发", "启发", {
     directed: true,
-    weight: 1
-  }
+    weight: 1.1
+  }),
+  makeLink("anna", "erikson", "collaboration", "训练伙伴", "训练伙伴", {
+    weight: 1.1
+  }),
+  makeLink(
+    "kierkegaard",
+    "kafka",
+    "influence",
+    "摘抄其句子",
+    "Kafka摘抄了克尔凯郭尔的句子：“没有人既能有真正的精神生活，又能同时保持身心绝对健康”",
+    { directed: true, weight: 1.2 }
+  ),
+  makeLink(
+    "kierkegaard",
+    "yalom",
+    "influence",
+    "课程包含其思想",
+    "Yalom上过存在主义的课，包含克尔凯郭尔内容。",
+    { directed: true, weight: 1.2 }
+  ),
+  makeLink(
+    "kierkegaard",
+    "drucker",
+    "influence",
+    "启发其写作",
+    "启发peter写下《“不合时宜”的克尔凯郭尔》",
+    { directed: true, weight: 1.2 }
+  ),
+  makeLink("marx", "fromm", "influence", "精神导师之一", "Fromm的两位精神导师之一", {
+    directed: true,
+    weight: 1.2
+  }),
+  makeLink(
+    "fromm",
+    "suzuki",
+    "collaboration",
+    "合著／对谈",
+    "合著作品《禅宗与精神分析》（亦有对谈版作品《禅与心理分析》）",
+    { weight: 1.4 }
+  ),
+  makeLink("suzuki", "horney", "influence", "结识并启发", "结识并启发", {
+    directed: true,
+    weight: 1.1
+  }),
+  makeLink("fromm", "horney", "spouse", "情侣", "情侣", {
+    weight: 1.2
+  }),
+  makeLink(
+    "adler",
+    "rollo",
+    "influence",
+    "见面讨论；启发进入心理学",
+    "见过+讨论过，启发May进入心理学领域",
+    { directed: true, weight: 1.2 }
+  ),
+  makeLink("yalom", "rollo", "dialogue", "同行；互相启发", "同行，互相启发", {
+    weight: 1.1
+  }),
+  makeLink("horney", "maslow", "mentor", "导师", "mentor", {
+    directed: true,
+    weight: 1.2
+  }),
+  makeLink("adler", "maslow", "mentor", "良师益友", "良师益友", {
+    directed: true,
+    weight: 1.2
+  }),
+  makeLink("goldstein", "maslow", "influence", "影响", "influence", {
+    directed: true,
+    weight: 1.3
+  }),
+  makeLink("benedict", "maslow", "mentor", "督导", "supervise", {
+    directed: true,
+    weight: 1.3
+  }),
+  makeLink("wertheimer", "maslow", "mentor", "督导", "supervise", {
+    directed: true,
+    weight: 1.3
+  }),
+  makeLink(
+    "bertalanffy",
+    "maslow",
+    "school",
+    "直接关联（未标文字）",
+    "原图在两人之间画有直接连线，但未标注关系文字。",
+    { sourceAnnotated: false, weight: 1 }
+  ),
+  makeLink(
+    "maslow",
+    "rogers",
+    "collaboration",
+    "共创人本主义运动",
+    "开创人本主义心理学的运动",
+    { directed: true, weight: 1.3 }
+  ),
+  makeLink("sabina", "piaget", "dialogue", "为其做咨询", "为皮亚杰做咨询", {
+    directed: true,
+    weight: 1.1
+  }),
+  makeLink("heidegger", "arendt", "mentor", "导师；恋人", "导师+恋人", {
+    directed: true,
+    weight: 1.3
+  }),
+  makeLink("sartre", "lacan", "influence", "影响", "影响", {
+    directed: true,
+    weight: 1.2
+  }),
+  makeLink("bertalanffy", "lewin", "school", "场论处有重叠", "场论处有重叠", {
+    weight: 1.1
+  }),
+  makeLink(
+    "wertheimer",
+    "lewin",
+    "collaboration",
+    "合作并影响",
+    "co-work and influence",
+    { directed: true, weight: 1.3 }
+  ),
+  makeLink("wertheimer", "piaget", "influence", "启发", "启发", {
+    directed: true,
+    weight: 1.1
+  }),
+  makeLink("lewin", "piaget", "influence", "启发", "启发", {
+    directed: true,
+    weight: 1.1
+  }),
+  makeLink("piaget", "levi", "influence", "启发", "启发", {
+    directed: true,
+    weight: 1.2
+  }),
+  makeLink("erikson", "benedict", "peer", "朋友", "朋友", {
+    weight: 1.1
+  }),
+  makeLink("erikson", "bateson", "peer", "朋友", "朋友", {
+    weight: 1.1
+  }),
+  makeLink(
+    "benedict",
+    "mead",
+    "mentor",
+    "朋友；硕士论文指导",
+    "朋友；指导后者硕士论文",
+    { directed: true, weight: 1.3 }
+  ),
+  makeLink(
+    "mead",
+    "bateson",
+    "spouse",
+    "夫妻",
+    "夫妻。玛格丽特的第三任丈夫",
+    { weight: 1.3 }
+  ),
+  makeLink(
+    "mead",
+    "foerster",
+    "influence",
+    "发展二阶控制论",
+    "后者发展了前者的二阶控制论",
+    { directed: true, weight: 1.3 }
+  ),
+  makeLink(
+    "bateson",
+    "maturana",
+    "dialogue",
+    "经二阶控制论主题关联",
+    "二者在原图中共同连接主题节点：“Topic: cybernetics of cybernetics —— 当观察者不再隐身，成为环境。”原图没有画成直接人物关系。",
+    { projected: true, weight: 1 }
+  ),
+  makeLink(
+    "maturana",
+    "foerster",
+    "dialogue",
+    "经二阶控制论主题关联",
+    "二者在原图中共同连接主题节点：“Topic: cybernetics of cybernetics —— 当观察者不再隐身，成为环境。”原图没有画成直接人物关系。",
+    { projected: true, weight: 1 }
+  ),
+  makeLink("edelman", "sporns", "mentor", "师生", "师生", {
+    directed: true,
+    weight: 1.3
+  }),
+  makeLink("edelman", "tononi", "collaboration", "合著《意识的宇宙》", "合著《意识的宇宙》", {
+    weight: 1.3
+  }),
+  makeLink("koch", "tononi", "collaboration", "合作者", "合作者", {
+    weight: 1.2
+  }),
+  makeLink(
+    "changeux",
+    "dehaene",
+    "collaboration",
+    "全局工作空间理论",
+    "合作提出全局工作空间理论（Global Workspace Theory, GWT）",
+    { weight: 1.4 }
+  ),
+  makeLink(
+    "edelman",
+    "changeux",
+    "influence",
+    "神经达尔文主义：提出与发展",
+    "前者是“神经达尔文主义”提出者，后者是进一步发展该理论的人。",
+    { directed: true, weight: 1.4 }
+  ),
+  makeLink(
+    "friston",
+    "changeux",
+    "dialogue",
+    "精神同道；同台发言",
+    "精神同道，曾在多个重要会议上同台发言；一些综述文章把他们放在一起讨论",
+    { weight: 1.2 }
+  ),
+  makeLink(
+    "solms",
+    "friston",
+    "dialogue",
+    "自由能原理与神经精神分析",
+    "Mark在其新书《The Hidden Spring》中明确强调，“Friston的自由能原理提供了我们整合弗洛伊德理论与当代表征神经科学的方式。”Karl在一次访谈中说：“我对精神分析的重新崛起很感兴趣，尤其是在试图理解我们为什么要有欲望和自我调节机制方面。”",
+    { weight: 1.5 }
+  )
 ];

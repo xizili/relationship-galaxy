@@ -24,7 +24,7 @@ for (const [index, link] of links.entries()) {
   if (!nodeIds.has(link.target)) errors.push(`关系 ${index} 的终点不存在：${link.target}`);
   if (!relationTypes[link.type]) errors.push(`关系 ${index} 使用了未知类型：${link.type}`);
   if (!link.label?.trim()) errors.push(`关系 ${index} 缺少连线文字`);
-  if (!link.note?.trim()) warnings.push(`关系 ${index} 缺少详情说明`);
+  if (!link.fullText?.trim()) errors.push(`关系 ${index} 缺少人物卡片中的完整原图文字`);
   if (link.source === link.target) warnings.push(`关系 ${index} 是自连接：${link.source}`);
 
   const endpoints = link.directed ? `${link.source}>${link.target}` : [link.source, link.target].sort().join("~");
