@@ -1,3 +1,5 @@
+import { portraitAssetUrl } from "./portraits.js";
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -65,8 +67,19 @@ export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
                   >
                     <span class="timeline-card-year">${birthYear(node)}</span>
                     <span class="timeline-card-school"><i></i>${escapeHtml(group.label)}</span>
-                    <strong>${escapeHtml(node.cn)}</strong>
-                    <em>${escapeHtml(node.name)}</em>
+                    <span class="timeline-card-person">
+                      <img
+                        class="timeline-card-portrait"
+                        src="${escapeHtml(portraitAssetUrl(node.id))}"
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <span class="timeline-card-identity">
+                        <strong>${escapeHtml(node.cn)}</strong>
+                        <em>${escapeHtml(node.name)}</em>
+                      </span>
+                    </span>
                     <span class="timeline-card-role">${escapeHtml(node.role)}</span>
                     <span class="timeline-card-meta">${escapeHtml(node.years)} · ${degreeMap.get(node.id) ?? 0} 条关系</span>
                   </button>

@@ -1,4 +1,7 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { groups, links, nodes, relationTypes } from "../src/data.js";
+import { portraits } from "../src/portraits.js";
 
 const errors = [];
 const warnings = [];
@@ -16,6 +19,27 @@ for (const node of nodes) {
   if (!/^\d{4}-(?:\d{4})?$/.test(node.years)) {
     warnings.push(`${node.id} 的年份格式需人工核查：${node.years}`);
   }
+
+  const portrait = portraits[node.id];
+  if (!portrait) {
+    errors.push(`${node.id} 缺少人物头像资料`);
+  } else {
+    if (!existsSync(resolve("public", portrait.file))) {
+      errors.push(`${node.id} 的人物头像文件不存在：${portrait.file}`);
+    }
+    if (!portrait.sourcePageUrl?.startsWith("https://")) {
+      errors.push(`${node.id} 的人物头像缺少 HTTPS 来源页`);
+    }
+    if (!portrait.creator?.trim()) errors.push(`${node.id} 的人物头像缺少作者或来源机构`);
+    if (!portrait.license?.trim()) errors.push(`${node.id} 的人物头像缺少许可说明`);
+    if (portrait.licenseUrl && !portrait.licenseUrl.startsWith("https://")) {
+      errors.push(`${node.id} 的人物头像许可链接不是 HTTPS`);
+    }
+  }
+}
+
+for (const portraitId of Object.keys(portraits)) {
+  if (!nodeIds.has(portraitId)) errors.push(`头像资料对应了未知人物：${portraitId}`);
 }
 
 const linkKeys = new Set();

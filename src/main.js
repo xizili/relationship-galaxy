@@ -4,6 +4,13 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { CSS2DObject, CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import { createIcons, Map as MapIcon, Orbit, RotateCcw, Search, Telescope, X } from "lucide";
 import { groups, links, nodes, relationTypes } from "./data.js";
+import { portraitAssetUrl, portraits } from "./portraits.js";
+import {
+  buildFocusLayout,
+  buildGalaxyLayout,
+  clonePositionMap,
+  focusRadiusForCount
+} from "./galaxy-layout.js";
 import { initTopology } from "./topology.js";
 import { initTimeline } from "./timeline.js";
 
@@ -32,20 +39,25 @@ const relationLegend = document.querySelector("#relationLegend");
 const timelineContent = document.querySelector("#timelineContent");
 const topologyPopover = document.querySelector("#topologyPopover");
 const topologyPopoverContent = document.querySelector("#topologyPopoverContent");
+const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 const nodeById = new Map(nodes.map((node) => [node.id, node]));
 const nodeRecords = new Map();
 const linkRecords = [];
 const groupKeys = Object.keys(groups);
-const galaxyPositionScale = new THREE.Vector3(0.62, 1.12, 2.2);
-const graphBounds = new THREE.Box3().setFromPoints(nodes.map((node) => getNodePosition(node)));
+const galaxyPositionScale = new THREE.Vector3(1.18, 0.84, 1.03);
+const baseGalaxyPositions = buildGalaxyLayout(nodes, links, galaxyPositionScale);
+const currentGalaxyPositions = clonePositionMap(baseGalaxyPositions);
+let targetGalaxyPositions = clonePositionMap(baseGalaxyPositions);
+let galaxyLayoutTransitionActive = false;
+const graphBounds = new THREE.Box3().setFromPoints([...baseGalaxyPositions.values()]);
 const graphCenter = graphBounds.getCenter(new THREE.Vector3());
 const graphSize = graphBounds.getSize(new THREE.Vector3());
 
 let activeGroup = "all";
 let depthMode = "all";
 let overviewMode = true;
-let detailPanelOpen = true;
+let detailPanelOpen = false;
 let overviewSection = "highlights";
 let selectedNodeId = null;
 let selectedLinkIndex = null;
@@ -53,6 +65,7 @@ let hoveredNodeId = null;
 let hoveredLinkIndex = null;
 let cameraGoal = null;
 let targetGoal = null;
+let lastGalaxyGeometryUpdate = 0;
 let activeView = "topology";
 let topologyApi = null;
 let timelineApi = null;
@@ -114,13 +127,65 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+function renderPersonPortrait(node, variant = "") {
+  const portrait = portraits[node.id];
+  if (!portrait) return "";
+
+  const license = portrait.licenseUrl
+    ? `<a href="${escapeHtml(portrait.licenseUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(portrait.license)}</a>`
+    : `<span>${escapeHtml(portrait.license)}</span>`;
+
+  return `
+    <figure class="person-portrait ${escapeHtml(variant)}">
+      <a
+        class="person-portrait-image"
+        href="${escapeHtml(portrait.sourcePageUrl)}"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="查看${escapeHtml(node.cn)}肖像来源"
+      >
+        <img
+          src="${escapeHtml(portraitAssetUrl(node.id))}"
+          alt="${escapeHtml(node.cn)}肖像"
+          loading="lazy"
+          decoding="async"
+        />
+      </a>
+      <figcaption title="${escapeHtml(`${portrait.creator} · ${portrait.license}`)}">
+        <a href="${escapeHtml(portrait.sourcePageUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(portrait.sourceLabel)}</a>
+        <span>· ${escapeHtml(portrait.creator)} · </span>${license}
+      </figcaption>
+    </figure>
+  `;
+}
+
 function displayName(node) {
   return `${node.cn} ${node.name}`;
 }
 
 function getNodePosition(nodeOrId) {
   const node = typeof nodeOrId === "string" ? nodeById.get(nodeOrId) : nodeOrId;
-  return new THREE.Vector3(node.x, node.y, node.z).multiply(galaxyPositionScale);
+  return currentGalaxyPositions.get(node.id)?.clone() ?? new THREE.Vector3();
+}
+
+function getTargetNodePosition(nodeOrId) {
+  const node = typeof nodeOrId === "string" ? nodeById.get(nodeOrId) : nodeOrId;
+  return targetGalaxyPositions.get(node.id)?.clone() ?? getNodePosition(node);
+}
+
+function setGalaxyLayoutTargets(positionMap) {
+  targetGalaxyPositions = clonePositionMap(positionMap);
+  galaxyLayoutTransitionActive = true;
+}
+
+function restoreGalaxyLayout() {
+  setGalaxyLayoutTargets(baseGalaxyPositions);
+}
+
+function focusGalaxyLayout(nodeId) {
+  setGalaxyLayoutTargets(
+    buildFocusLayout(nodes, links, baseGalaxyPositions, nodeId)
+  );
 }
 
 function relationColor(type) {
@@ -192,6 +257,11 @@ function setActiveView(view, options = {}) {
     if (selectedNodeId) renderTopologyPopover(nodeById.get(selectedNodeId));
   } else if (view === "galaxy") {
     hideTopologyPopover();
+    if (selectedNodeId) {
+      focusGalaxyLayout(selectedNodeId);
+    } else {
+      restoreGalaxyLayout();
+    }
     requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
   } else if (view === "timeline") {
     hideTopologyPopover();
@@ -557,7 +627,12 @@ function makeCurve(sourceNode, targetNode) {
     bendDirection.crossVectors(chordDirection, fallbackAxis);
   }
 
-  const bend = THREE.MathUtils.clamp(distance * 0.045, 9, 36);
+  const connectedToFocus = selectedNodeId && (
+    sourceNode.id === selectedNodeId || targetNode.id === selectedNodeId
+  );
+  const bend = connectedToFocus
+    ? THREE.MathUtils.clamp(distance * 0.018, 4, 12)
+    : THREE.MathUtils.clamp(distance * 0.032, 7, 24);
   const control = midpoint.add(bendDirection.normalize().multiplyScalar(bend));
 
   return new THREE.QuadraticBezierCurve3(start, control, end);
@@ -617,6 +692,63 @@ function createLink(link, index) {
     arrowMaterial: arrow?.material,
     curve
   });
+}
+
+function refreshLinkGeometry(record) {
+  const sourceNode = nodeById.get(record.link.source);
+  const targetNode = nodeById.get(record.link.target);
+  if (!sourceNode || !targetNode) return;
+
+  const curve = makeCurve(sourceNode, targetNode);
+  const nextGeometry = new THREE.TubeGeometry(
+    curve,
+    42,
+    0.68 + (record.link.weight ?? 1) * 0.18,
+    8,
+    false
+  );
+  record.mesh.geometry.dispose();
+  record.mesh.geometry = nextGeometry;
+
+  if (record.arrow) {
+    const point = curve.getPoint(0.68);
+    const tangent = curve.getTangent(0.68).normalize();
+    record.arrow.position.copy(point);
+    record.arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent);
+  }
+
+  record.labelObject.position.copy(curve.getPoint(0.5));
+  record.curve = curve;
+}
+
+function updateGalaxyLayoutFrame(timestamp) {
+  if (!galaxyLayoutTransitionActive) return;
+
+  const reducedMotion = reducedMotionQuery.matches;
+  const interpolation = reducedMotion ? 1 : 0.095;
+  let stillMoving = false;
+
+  currentGalaxyPositions.forEach((position, id) => {
+    const target = targetGalaxyPositions.get(id);
+    if (!target) return;
+    const distance = position.distanceTo(target);
+    if (distance > 0.08) {
+      position.lerp(target, interpolation);
+      stillMoving = true;
+    } else {
+      position.copy(target);
+    }
+
+    const record = nodeRecords.get(id);
+    record?.mesh.position.copy(position);
+    record?.glow.position.copy(position);
+  });
+
+  if (timestamp - lastGalaxyGeometryUpdate >= 64 || !stillMoving) {
+    linkRecords.forEach(refreshLinkGeometry);
+    lastGalaxyGeometryUpdate = timestamp;
+  }
+  galaxyLayoutTransitionActive = stillMoving;
 }
 
 nodes.forEach(createNode);
@@ -741,7 +873,7 @@ function updateHighlights() {
 }
 
 function focusCameraOnNode(nodeId) {
-  const position = getNodePosition(nodeId);
+  const position = getTargetNodePosition(nodeId);
   const direction = position.clone();
 
   if (direction.lengthSq() < 0.01) {
@@ -750,7 +882,18 @@ function focusCameraOnNode(nodeId) {
 
   direction.normalize();
   const side = new THREE.Vector3(-direction.z, 0.22, direction.x).normalize();
-  const distance = nodeId === "freud" ? 430 : 265;
+  const relationshipCount = new Set(
+    adjacentLinks(nodeId).map((link) => getOtherNodeId(link, nodeId))
+  ).size;
+  const focusRadius = focusRadiusForCount(relationshipCount);
+  const halfVerticalFov = THREE.MathUtils.degToRad(camera.fov * 0.5);
+  const halfHorizontalFov = Math.atan(Math.tan(halfVerticalFov) * Math.max(camera.aspect, 0.36));
+  const limitingHalfFov = Math.min(halfVerticalFov, halfHorizontalFov);
+  const distance = THREE.MathUtils.clamp(
+    (focusRadius / Math.sin(limitingHalfFov)) * 1.15,
+    340,
+    1180
+  );
   const cameraPosition = position
     .clone()
     .add(direction.multiplyScalar(distance))
@@ -796,12 +939,17 @@ function renderTopologyPopover(node) {
   topologyPopover.style.setProperty("--node-color", group.css);
   topologyPopover.dataset.nodeId = node.id;
   topologyPopoverContent.innerHTML = `
-    <div class="topology-popover-kicker">
-      <span></span>${escapeHtml(group.label)}
+    <div class="topology-person-header">
+      ${renderPersonPortrait(node, "is-topology")}
+      <div class="person-card-copy">
+        <div class="topology-popover-kicker">
+          <span></span>${escapeHtml(group.label)}
+        </div>
+        <h3 id="topologyPopoverTitle">${escapeHtml(node.cn)}</h3>
+        <p class="topology-popover-latin">${escapeHtml(node.name)} · ${escapeHtml(node.years)}</p>
+        <p class="topology-popover-role">${escapeHtml(node.role)}</p>
+      </div>
     </div>
-    <h3 id="topologyPopoverTitle">${escapeHtml(node.cn)}</h3>
-    <p class="topology-popover-latin">${escapeHtml(node.name)} · ${escapeHtml(node.years)}</p>
-    <p class="topology-popover-role">${escapeHtml(node.role)}</p>
     <p class="topology-popover-summary">${escapeHtml(node.summary)}</p>
     ${works}
     <div class="topology-popover-relations">
@@ -841,6 +989,7 @@ function focusNode(nodeId, options = {}) {
   }
 
   if (options.camera !== false && activeView === "galaxy") {
+    focusGalaxyLayout(nodeId);
     focusCameraOnNode(nodeId);
   }
 }
@@ -882,12 +1031,17 @@ function renderDetailPanel(node) {
     : "";
 
   detailPanel.innerHTML = `
-    <div class="panel-kicker" style="--node-color:${group.css}">
-      <span></span>${escapeHtml(group.label)}
+    <div class="person-card-header">
+      ${renderPersonPortrait(node, "is-detail")}
+      <div class="person-card-copy">
+        <div class="panel-kicker" style="--node-color:${group.css}">
+          <span></span>${escapeHtml(group.label)}
+        </div>
+        <h2>${escapeHtml(node.cn)}</h2>
+        <p class="latin-name">${escapeHtml(node.name)} · ${escapeHtml(node.years)}</p>
+        <p class="role">${escapeHtml(node.role)}</p>
+      </div>
     </div>
-    <h2>${escapeHtml(node.cn)}</h2>
-    <p class="latin-name">${escapeHtml(node.name)} · ${escapeHtml(node.years)}</p>
-    <p class="role">${escapeHtml(node.role)}</p>
     <p class="summary">${escapeHtml(node.summary)}</p>
     ${works}
     <div class="panel-stats">
@@ -907,6 +1061,7 @@ function renderLinkDetail(linkIndex) {
   overviewMode = false;
   selectedLinkIndex = linkIndex;
   selectedNodeId = null;
+  if (activeView === "galaxy") restoreGalaxyLayout();
   hideTopologyPopover();
   setDetailPanelOpen(true);
 
@@ -947,6 +1102,7 @@ function enterOverview(options = {}) {
   document.querySelector("#orbitToggle").classList.remove("active");
   searchResults.classList.remove("is-open");
   searchInput.value = "";
+  restoreGalaxyLayout();
 
   renderFilters();
   updateDepthButtons();
@@ -1271,13 +1427,15 @@ function resize() {
 
 window.addEventListener("resize", resize);
 
-function animate() {
+function animate(timestamp = 0) {
   requestAnimationFrame(animate);
 
   if (activeView !== "galaxy") return;
 
   stars.rotation.y += 0.00008;
   stars.rotation.x += 0.000025;
+
+  updateGalaxyLayoutFrame(timestamp);
 
   if (cameraGoal && targetGoal) {
     camera.position.lerp(cameraGoal, 0.055);
@@ -1313,5 +1471,5 @@ timelineApi = initTimeline({
 });
 setActiveView("topology", { announce: false });
 resize();
-enterOverview({ immediate: true });
+enterOverview({ immediate: true, panelOpen: false });
 animate();

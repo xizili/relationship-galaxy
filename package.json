@@ -7,7 +7,8 @@
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "check:data": "node scripts/validate-data.mjs"
+    "check:data": "node scripts/validate-data.mjs",
+    "check:layout": "node scripts/validate-layout.mjs"
   },
   "dependencies": {
     "lucide": "^0.468.0",

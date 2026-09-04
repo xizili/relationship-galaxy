@@ -327,6 +327,63 @@ button {
   pointer-events: none;
 }
 
+.person-card-header,
+.topology-person-header {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.person-card-copy {
+  min-width: 0;
+}
+
+.person-portrait {
+  width: 112px;
+  margin: 0;
+}
+
+.person-portrait-image {
+  display: block;
+  overflow: hidden;
+  border: 1px solid rgba(255, 244, 219, 0.15);
+  border-radius: 7px;
+  background: #17140f;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+}
+
+.person-portrait img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  filter: saturate(0.88) contrast(1.02);
+}
+
+.person-portrait figcaption {
+  display: -webkit-box;
+  margin-top: 6px;
+  overflow: hidden;
+  color: rgba(246, 241, 230, 0.46);
+  font-size: 8.5px;
+  line-height: 1.42;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.person-portrait figcaption a {
+  color: rgba(244, 215, 154, 0.72);
+  text-decoration: none;
+}
+
+.person-portrait figcaption a:hover,
+.person-portrait figcaption a:focus-visible {
+  color: #fff0c9;
+  text-decoration: underline;
+  outline: none;
+}
+
 .panel-kicker {
   display: inline-flex;
   align-items: center;
@@ -1043,6 +1100,38 @@ button {
   color: #796b5a;
   font-size: 11px;
   letter-spacing: 0.08em;
+}
+
+.topology-person-header {
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 12px;
+  padding-right: 24px;
+}
+
+.person-portrait.is-topology {
+  width: 88px;
+}
+
+.person-portrait.is-topology .person-portrait-image {
+  border-color: rgba(100, 79, 55, 0.18);
+  box-shadow: 0 9px 24px rgba(57, 41, 25, 0.16);
+}
+
+.person-portrait.is-topology figcaption {
+  color: #8b7d6d;
+  font-size: 7.8px;
+}
+
+.person-portrait.is-topology figcaption a {
+  color: #713333;
+}
+
+.topology-person-header .topology-popover-kicker {
+  padding-right: 0;
+}
+
+.topology-person-header h3 {
+  margin-right: 0;
 }
 
 .topology-popover-kicker span {
@@ -1799,6 +1888,30 @@ button {
   background: var(--card-color);
 }
 
+.timeline-card-person {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 11px;
+  align-items: center;
+}
+
+.timeline-card-portrait {
+  display: block;
+  width: 58px;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border: 1px solid rgba(105, 84, 59, 0.16);
+  border-radius: 4px;
+  background: #17140f;
+  box-shadow: 0 6px 16px rgba(66, 49, 31, 0.11);
+  filter: saturate(0.86) contrast(1.02);
+}
+
+.timeline-card-identity {
+  display: grid;
+  min-width: 0;
+}
+
 .timeline-card strong {
   font-family: Georgia, "Noto Serif SC", "Songti SC", serif;
   font-size: 17px;
@@ -1901,6 +2014,28 @@ button {
   .topology-popover-summary {
     font-size: 12px;
     line-height: 1.55;
+  }
+
+  .person-card-header {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 11px;
+  }
+
+  .person-portrait.is-detail {
+    width: 88px;
+  }
+
+  .topology-person-header {
+    grid-template-columns: 68px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .person-portrait.is-topology {
+    width: 68px;
+  }
+
+  .person-portrait.is-topology figcaption {
+    -webkit-line-clamp: 2;
   }
 
   #app[data-active-view="topology"] .detail-panel,

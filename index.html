@@ -105,13 +105,13 @@
         <div class="view-actions">
           <button
             id="overviewToggle"
-            class="icon-button active"
+            class="icon-button"
             type="button"
-            aria-label="关闭全览视角侧页"
+            aria-label="打开全览视角"
             aria-controls="detailPanel"
-            aria-pressed="true"
-            aria-expanded="true"
-            title="关闭全览视角侧页"
+            aria-pressed="false"
+            aria-expanded="false"
+            title="打开全览视角"
           >
             <i data-lucide="telescope" aria-hidden="true"></i>
           </button>
@@ -127,7 +127,14 @@
         </div>
       </header>
 
-      <aside id="detailPanel" class="detail-panel" aria-live="polite" aria-label="人物与关系详情"></aside>
+      <aside
+        id="detailPanel"
+        class="detail-panel is-collapsed"
+        aria-live="polite"
+        aria-label="人物与关系详情"
+        aria-hidden="true"
+        inert
+      ></aside>
 
       <div class="depth-control" aria-label="关系层级">
         <button type="button" data-depth="1" class="active">一度</button>
