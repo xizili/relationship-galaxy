@@ -18,6 +18,8 @@
 
 > 弗洛伊德 Sigmund Freud（1856-1939），犹太人，精神分析创始人
 
+网页导航领域：心理治疗与人格；标签：精神分析
+
 ### 罗洛·梅 · Rollo May
 
 网页 ID：rollo；XMind ID：7e8453b9-b2b4-435b-82e3-f67aecc0c251
@@ -29,6 +31,8 @@
 **XMind 节点原文：**
 
 > 罗洛·梅 Rollo May（1909-1994）《存在》
+
+网页导航领域：心理治疗与人格；标签：存在主义心理治疗
 
 ### 埃里希·弗洛姆 · Erich Fromm
 
@@ -42,6 +46,8 @@
 
 > 埃里希·弗洛姆 Erich Fromm（1900-1980），犹太人，《在幻想锁链的彼岸》，《爱的艺术》
 
+网页导航领域：心理治疗与人格；标签：精神分析、人本主义精神分析、社会思想
+
 ### 卡伦·霍妮 · Karen Horney
 
 网页 ID：horney；XMind ID：a9590c4d-4545-405c-875c-44083b77994f
@@ -53,6 +59,8 @@
 **XMind 节点原文：**
 
 > 卡伦·霍妮 Karen Horney （1885-1952）《我们时代的神经症人格》
+
+网页导航领域：心理治疗与人格；标签：精神分析、文化心理
 
 ### 欧文·亚隆 · Irvin D. Yalom
 
@@ -66,6 +74,8 @@
 
 > 欧文·亚隆 Irvin D. Yalom（1931-今）《成为我自己》
 
+网页导航领域：心理治疗与人格；标签：存在主义心理治疗
+
 ### 铃木大拙 · D. T. Suzuki
 
 网页 ID：suzuki；XMind ID：1f1e0bae-8e35-4a0b-a58a-d11c9f4f1f83
@@ -77,6 +87,8 @@
 **XMind 节点原文：**
 
 > 铃木大拙 D. T. Suzuki（1870-1966），日本哲学家，属于禅宗，禅风西渐的先锋人物，《禅与心理分析》
+
+网页导航领域：哲学与宗教；标签：禅学、宗教思想
 
 ### 克尔凯郭尔 · Soren Kierkegaard
 
@@ -90,6 +102,8 @@
 
 > 索伦·奥贝·克尔凯郭尔 Søren Aabye Kierkegaard （1813-1855），丹麦哲学家 《恐惧与战栗》
 
+网页导航领域：哲学与宗教；标签：存在思想、宗教哲学
+
 ### 弗朗茨·卡夫卡 · Franz Kafka
 
 网页 ID：kafka；XMind ID：b12da2c8-31ab-4db5-bbcd-d30b1c261937
@@ -101,6 +115,8 @@
 **XMind 节点原文：**
 
 > 弗朗茨·卡夫卡 Franz Kafka （1883-1924）《变形记》
+
+网页导航领域：文学与评论；标签：文学、小说
 
 ### 卡尔·马克思 · Karl Marx
 
@@ -114,6 +130,8 @@
 
 > 卡尔·马克思 Karl Marx (1818-1883)， 《资本论》
 
+网页导航领域：哲学与宗教；标签：哲学、政治经济学、社会理论
+
 ### 阿德勒 · Alfred Adler
 
 网页 ID：adler；XMind ID：38cb98d7ec8a2efc8b238a04d5
@@ -125,6 +143,8 @@
 **XMind 节点原文：**
 
 > 阿德勒 Alfred Adler （1870-1937）《自卑与超越》
+
+网页导航领域：心理治疗与人格；标签：个体心理学
 
 ### 约瑟夫·坎贝尔 · Joseph Campbell
 
@@ -138,6 +158,8 @@
 
 > 约瑟夫·坎贝尔 Joseph Campbell (1904-1987)，文学及比较神话学者，《千面英雄》（好莱坞编剧必读）
 
+网页导航领域：文学与评论；标签：比较神话、文学研究
+
 ### 卡尔·荣格 · Carl Gustav Jung
 
 网页 ID：jung；XMind ID：db9eb3fa-baa8-4333-ab39-254fe61710cd
@@ -149,6 +171,8 @@
 **XMind 节点原文：**
 
 > 卡尔·古斯塔夫·荣格 Carl Gustav Jung (1875－1961)，分析心理学鼻祖
+
+网页导航领域：心理治疗与人格；标签：分析心理学
 
 ### 艾玛·荣格 · Emma Jung
 
@@ -162,6 +186,8 @@
 
 > 艾玛·荣格 Emma Jung (1882 - 1955)，分析心理学家，传记《Love and Sacrifice: The Life of Emma Jung》 by Imelda Gaudissart
 
+网页导航领域：心理治疗与人格；标签：分析心理学
+
 ### 埃里克·坎德尔 · Eric R. Kandel
 
 网页 ID：kandel；XMind ID：3fb8cafccff854f05ea2c813bd
@@ -173,6 +199,8 @@
 **XMind 节点原文：**
 
 > 埃里克·坎德尔 Eric R. Kandel （1929-今），犹太人，诺贝尔生理学奖得主，神经科学家，《追寻记忆的痕迹》
+
+网页导航领域：神经科学；标签：神经科学、学习与记忆
 
 ### 彼得·德鲁克 · Peter F. Drucker
 
@@ -186,6 +214,8 @@
 
 > 彼得·德鲁克 Peter F. Drucker（1909-2005），犹太人，社会生态学家，管理学创始人，《旁观者》，《生态愿景》
 
+网页导航领域：社会科学；标签：管理学、社会生态
+
 ### 亚伯拉罕·马斯洛 · Abraham Maslow
 
 网页 ID：maslow；XMind ID：8e9c59e5-182d-40aa-910b-69474efa3883
@@ -197,6 +227,8 @@
 **XMind 节点原文：**
 
 > 亚伯拉罕·马斯洛 Abraham Harold Maslow （1908-1970），犹太人，马斯洛需求金字塔
+
+网页导航领域：心理治疗与人格；标签：人本主义心理学、动机与人格
 
 ### 马克斯·韦特墨 · Max Wertheimer
 
@@ -210,6 +242,8 @@
 
 > 马科斯·韦特墨 Max Wertheimer (1880–1943)，犹太人，格式塔心理学(Gestalt psychology)三创始人之一。Gestalt一言以蔽之: “the whole is more than the sum of its parts.”
 
+网页导航领域：心理学；标签：格式塔心理学、知觉
+
 ### 斯宾诺莎 · Baruch Spinoza
 
 网页 ID：spinoza；XMind ID：59577aab-2c67-422e-8c5e-fa1cffae1677
@@ -221,6 +255,8 @@
 **XMind 节点原文：**
 
 > 斯宾诺莎 Spinoza (1632-1677)，半葡萄牙半犹太血统，哲学家
+
+网页导航领域：哲学与宗教；标签：哲学、伦理学、实体一元论
 
 ### 露丝·本尼迪克特 · Ruth Benedict
 
@@ -234,6 +270,8 @@
 
 > 露丝·本尼迪克特 Ruth Benedict （1887—1948），人类学家与民俗学家，《菊与刀》 
 
+网页导航领域：社会科学；标签：文化人类学、民俗学
+
 ### 库尔特·戈德斯坦 · Kurt Goldstein
 
 网页 ID：goldstein；XMind ID：382f1c4b-f890-4c50-8ac1-f19fea44dea9
@@ -245,6 +283,8 @@
 **XMind 节点原文：**
 
 > Kurt Goldstein (1878.11.6 - 1965), neurologist and psychiatrist，the holistic theory of the organism.
+
+网页导航领域：神经科学；标签：神经学、整体机体理论
 
 ### 沃尔特·坎农 · Walter Bradford Cannon
 
@@ -258,6 +298,8 @@
 
 > Walter Cannon（1871-1945），心理学家和生理学家，Fight-or-flight response, 战逃反应， 提出重要的概念 homeostasis
 
+网页导航领域：生物与生理；标签：生理学、内稳态
+
 ### 路德维希·冯·贝塔朗菲 · Ludwig von Bertalanffy
 
 网页 ID：bertalanffy；XMind ID：fd3495f6-e3b9-4a00-8bc4-afc20e99d2e3
@@ -269,6 +311,8 @@
 **XMind 节点原文：**
 
 > Ludwig von Betarlanffy (1901.8.19 - 1972)， GST一般系统理论创始人，生物学家
+
+网页导航领域：系统与控制论；标签：一般系统论、生物学
 
 ### 库尔特·勒温 · Kurt Lewin
 
@@ -282,6 +326,8 @@
 
 > 库尔特·勒温 Kurt Zadek Lewin（1890.9.9—1947.2.12)，犹太人。社会心理学家，最早研究群体动力学，场论创始人。著有《拓扑心理学》。认为动机是是外部作用于个体的力场。
 
+网页导航领域：心理学；标签：社会心理学、群体动力学、场论
+
 ### 汉娜·阿伦特 · Hannah Arendt
 
 网页 ID：arendt；XMind ID：c9f81961-c154-4c0c-a56e-4a764d1abe22
@@ -293,6 +339,8 @@
 **XMind 节点原文：**
 
 > 汉娜·阿伦特 Hannah Arendt，1906.10.14-1975.12.4，美籍德裔犹太人，政治哲学家，《人的境况》（Human Condition）、《心智生活》Life of Mind。“除了哲学、政治和历史文献，她还使用传记和文学作品作为她考虑的参考来源；她逐字逐句地评析这些文本，并用她自己的方法来面对它们。”
+
+网页导航领域：哲学与宗教；标签：政治思想
 
 ### 海德格尔 · Martin Heidegger
 
@@ -306,6 +354,8 @@
 
 > 海德格尔 Martin Heidegger，1889-1976, 哲学家，《存在与时间》
 
+网页导航领域：哲学与宗教；标签：现象学、存在论
+
 ### 玛丽·麦卡锡 · Mary McCarthy
 
 网页 ID：mccarthy；XMind ID：0adaf757-e588-43e0-bfc8-25926217eb07
@@ -317,6 +367,8 @@
 **XMind 节点原文：**
 
 > 玛丽·麦卡锡 Mary Therese McCarthy, 1912-1989，美国文学家。擅长婚姻、两性关系、知识分子及女性角色进行辛辣评价。小说《她们》启发了电视剧《欲望都市》的创作。
+
+网页导航领域：文学与评论；标签：文学、评论
 
 ### 托马斯·库恩 · Thomas Kuhn
 
@@ -332,6 +384,8 @@
 
 补充资料：[斯坦福哲学百科](https://plato.stanford.edu/entries/thomas-kuhn/)
 
+网页导航领域：哲学与宗教；标签：科学哲学、科学史
+
 ### 亚里士多德 · Aristotle
 
 网页 ID：aristotle；XMind ID：15787294-b62b-4076-b1b6-3988f454a53a
@@ -346,6 +400,8 @@
 
 补充资料：[斯坦福哲学百科](https://plato.stanford.edu/entries/aristotle/)
 
+网页导航领域：哲学与宗教；标签：哲学、逻辑学、伦理学
+
 ### 苏珊·桑塔格 · Susan Sontag
 
 网页 ID：sontag；XMind ID：4841ddaa-aa0a-4587-bfb3-6d4926394e7e
@@ -357,6 +413,8 @@
 **XMind 节点原文：**
 
 > 苏珊·桑塔格 Suan Sontag, 1933.01.16 - 2004.12.28，美籍波兰裔犹太人，作家、艺术评论家、电影制作人。
+
+网页导航领域：文学与评论；标签：文学、艺术评论、电影
 
 ### 阿尔伯特·爱因斯坦 · Albert Einstein
 
@@ -372,6 +430,8 @@
 
 补充资料：[诺贝尔奖官方传记](https://www.nobelprize.org/prizes/physics/1921/einstein/biographical/)
 
+网页导航领域：数学与物理；标签：理论物理、相对论
+
 ### 皮亚杰 · Jean Piaget
 
 网页 ID：piaget；XMind ID：ed363e5b-d70b-437d-8d2f-b0d43ec4b506
@@ -383,6 +443,8 @@
 **XMind 节点原文：**
 
 > 皮亚杰 Jean Piaget (1896-1980)，瑞士心理学家，兼通数学、逻辑、物理学、生物学、心理学、社会学、科学史和哲学。著有《结构主义》，研究自家小孩。
+
+网页导航领域：心理学；标签：发展心理学、认知发展、发生认识论
 
 ### 格雷戈里·贝特森 · Gregory Bateson
 
@@ -396,6 +458,8 @@
 
 > 格雷戈里·贝特森（Gregory Bateson， 1904.5.9 - 1980.07.04），人类学、社会学、心理学、哲学、语言学、控制论、传播学。著有《心灵生态学导论》。研究自家小孩。
 
+网页导航领域：系统与控制论；标签：控制论、人类学、心灵生态
+
 ### 库尔特·考夫卡 · Kurt Koffka
 
 网页 ID：koffka；XMind ID：f0957362-06fe-4227-8a76-68d3da4f5e92
@@ -407,6 +471,8 @@
 **XMind 节点原文：**
 
 > 科特·考夫卡 Kurt Koffka （1886—1941），德国心理学家，研究视觉感知、脑损伤、声音定位、发展心理学和实验心理学，格式塔心理学(Gestalt psychology)三创始人之一。著有《the growth of the mind》,《格式塔心理学原理》。
+
+网页导航领域：心理学；标签：格式塔心理学、知觉、心理发展
 
 ### 列维-斯特劳斯 · Claude Levi-Strauss
 
@@ -420,6 +486,8 @@
 
 > Claude Lévi-Strauss 克洛德·列维-斯特劳斯 （1908-2009），法国人类学家、社会学家、哲学、语言学。著有《忧郁的热带》、《结构人类学》。
 
+网页导航领域：社会科学；标签：结构人类学、结构主义
+
 ### 让-保罗·萨特 · Jean-Paul Sartre
 
 网页 ID：sartre；XMind ID：7bea3f59-8959-4018-b756-85398d09978b
@@ -431,6 +499,8 @@
 **XMind 节点原文：**
 
 > 让保罗·萨特 Jean-Paul Sartre（1905-1980），存在主义哲学家，《存在与虚无》
+
+网页导航领域：哲学与宗教；标签：存在主义、文学
 
 ### 西蒙·马罗姆 · Shimon Marom
 
@@ -446,6 +516,8 @@
 
 补充资料：[剑桥大学出版社 · 出生年编目](https://assets.cambridge.org/97811071/01180/frontmatter/9781107101180_frontmatter.pdf)、[Samuel Neaman Institute](https://www.neaman.org.il/en/leadership/shimon-marom/)
 
+网页导航领域：神经科学；标签：神经科学、神经动力学
+
 ### 托马斯·奥格登 · Thomas H. Ogden
 
 网页 ID：ogden；XMind ID：71631768-fd8e-47dd-924b-c78423d2fd38
@@ -457,6 +529,8 @@
 **XMind 节点原文：**
 
 > 托马斯·奥格登 Thomas Ogden (1946.12.04-), 犹太人，精神分析学派主体间心理学代表人物。著有《心灵的母体》，《创造性阅读》。
+
+网页导航领域：心理治疗与人格；标签：精神分析、主体间性
 
 ### 梅兰妮·克莱因 · Melanie Klein
 
@@ -470,6 +544,8 @@
 
 > 梅兰妮·克莱因 Melanie Klein（1882.3.30－1960.9.22），犹太人，奥地利精神分析学家，克莱因学派创始人，儿童精神分析先驱。研究自家小孩（小孩自杀）。
 
+网页导航领域：心理治疗与人格；标签：精神分析、客体关系、儿童分析
+
 ### 丹尼尔·卡尼曼 · Daniel Kahneman
 
 网页 ID：kahneman；XMind ID：ec23a54f-ba07-4c8b-8352-0f6fcfb59934
@@ -481,6 +557,8 @@
 **XMind 节点原文：**
 
 > 丹尼尔·卡尔曼 Daniel Kaaheman （1934.03.27 - 2024.03.27），犹太人，认知心理学家，诺贝尔经济学奖得主。研究人类判断偏误，著有《思考，快与慢》。
+
+网页导航领域：心理学；标签：认知心理学、判断与决策
 
 ### 安妮·特雷斯曼 · Anne Treisman
 
@@ -494,6 +572,8 @@
 
 > Anne Treisman （1935.02.27 - 2018.02.09）, 英国神经科学家，注意力特征整合理论的创始人。
 
+网页导航领域：心理学；标签：认知心理学、注意与知觉
+
 ### 马图拉纳 · Humberto Maturana
 
 网页 ID：maturana；XMind ID：30e298d7-83bd-4e61-b1bc-7e2174738842
@@ -505,6 +585,8 @@
 **XMind 节点原文：**
 
 > Humberto maturana (1928.09.14 - 2021. 05. 06), 智利生物学家、哲学家、二阶控制论理论学家（Second-order cybernetics, also known as the cybernetics of cybernetics），著有《from being to doing》
+
+网页导航领域：系统与控制论；标签：二阶控制论、生物学
 
 ### 玛格丽特·米德 · Margaret Mead
 
@@ -518,6 +600,8 @@
 
 > 玛格丽特 米德 （1901.12.16-1978.11.15），美国人类学家，总统自由勋章获得者。对原始部落的性文化研究引发了“性文化运动”。发表首创文章cybernetics of cybernetics
 
+网页导航领域：社会科学；标签：文化人类学、控制论
+
 ### 海因茨·冯·福斯特 · Heinz von Foerster
 
 网页 ID：foerster；XMind ID：e3665076-d9dd-451d-8d6b-2274b7e95f77
@@ -529,6 +613,8 @@
 **XMind 节点原文：**
 
 > Heinz von Foerste（1911. 11. 13 –  2002.10.02） 美澳双籍科学家，物理学家，哲学家，发展了二阶控制论。极端建构论者。闻名于doomsday equation预测人口大爆炸。
+
+网页导航领域：系统与控制论；标签：二阶控制论、物理学
 
 ### ★ 二阶控制论 · Cybernetics of cybernetics
 
@@ -542,6 +628,8 @@
 
 > Topic: cybernetics of cybernetics —— 当观察者不再隐身，成为环境
 
+网页导航领域：系统与控制论；标签：主题、二阶控制论
+
 ### 卡尔·罗杰斯 · Carl Rogers
 
 网页 ID：rogers；XMind ID：bfe49500-9dfc-4b90-a4c3-ca276ab62da5
@@ -553,6 +641,8 @@
 **XMind 节点原文：**
 
 > 卡尔·罗杰斯（Carl Ransom Rogers，1902—1987），心理学家，人本主义的创始者之一。首创非指导性治疗，又称案主中心治疗。著有《成为一个人》（1961）。
+
+网页导航领域：心理治疗与人格；标签：人本主义心理学、来访者中心治疗
 
 ### 萨宾娜·施皮尔赖因 · Sabina Spielrein
 
@@ -568,6 +658,8 @@
 
 补充资料：[国际 Spielrein 研究协会](https://www.spielreinassociation.org/her-life-and-work)
 
+网页导航领域：心理治疗与人格；标签：精神分析、儿童心理
+
 ### 鲁道夫·施泰纳 · Rudolf Steiner
 
 网页 ID：steiner；XMind ID：8850537a-a822-4a1d-ba12-7807c104a590
@@ -579,6 +671,8 @@
 **XMind 节点原文：**
 
 > 鲁道夫·施坦纳（又译史代纳，Rudolf Steiner，1861—1925），奥地利哲学家、改革家、建筑师、教育家，也是华德福教育创始人，人智教育创始人。
+
+网页导航领域：哲学与宗教；标签：人智学、教育、艺术实践
 
 ### 约翰·沃尔夫冈·冯·歌德 · Johann Wolfgang von Goethe
 
@@ -592,6 +686,8 @@
 
 > 约翰·沃尔夫冈·冯·歌德（德語：Johann Wolfgang von Goethe；1749—1832），德意志文学家、哲学家、美学家、自然科学家、批评家与政治人物
 
+网页导航领域：文学与评论；标签：文学、自然研究
+
 ### 雅克·拉康 · Jacques Lacan
 
 网页 ID：lacan；XMind ID：761d5eda-7324-4f10-a206-f328a973bc7d
@@ -603,6 +699,8 @@
 **XMind 节点原文：**
 
 > 雅克·拉康（Jacques Lacan, 1901-1981），20世纪法国最具影响力的精神分析学家之一，被誉为“法国弗洛伊德”。他以对弗洛伊德理论的独特解读而闻名，特别强调语言、结构主义和哲学对精神分析的影响。他的思想在精神分析、哲学、文学、电影理论等领域产生了深远的影响。
+
+网页导航领域：心理治疗与人格；标签：精神分析、结构主义
 
 ### 莫里茨·冯·施温德 · Moritz von Schwind
 
@@ -616,6 +714,8 @@
 
 > 莫里兹·冯·施温德（1804-1871，Moritz von Schwind），奥地利画家，“把音乐转化为图画”。
 
+网页导航领域：艺术创作；标签：绘画
+
 ### 米切尔·费根鲍姆 · Mitchell Jay Feigenbaum
 
 网页 ID：feigenbaum；XMind ID：c549170d-d3a9-4ffb-a08b-d835b23ac5d6
@@ -627,6 +727,8 @@
 **XMind 节点原文：**
 
 > 米切尔·费根鲍姆（英语：Mitchell Jay Feigenbaum，1944年12月19日—2019年6月30日），美国数学物理学家，混沌理论的先驱，发现了费根鲍姆常数。
+
+网页导航领域：数学与物理；标签：数学物理、混沌理论
 
 ### 亚当·斯密 · Adam Smith
 
@@ -640,6 +742,8 @@
 
 > 亚当斯密，《国富论》，Adam Smith，1723年—1790年。
 
+网页导航领域：社会科学；标签：经济学、道德哲学
+
 ### 查尔斯·达尔文 · Charles Darwin
 
 网页 ID：darwin；XMind ID：45174470-5218-4416-abb2-240435f029e6
@@ -651,6 +755,8 @@
 **XMind 节点原文：**
 
 > 查尔斯·达尔文（1809年2月12日—1882年4月19日），英国博物学家，生物学家，《演化论》。
+
+网页导航领域：生物与生理；标签：演化生物学、博物学
 
 ### 托马斯·罗伯特·马尔萨斯 · Thomas Robert Malthus
 
@@ -666,6 +772,8 @@
 
 补充资料：[英国科学博物馆集团](https://collection.sciencemuseumgroup.org.uk/people/cp38785)
 
+网页导航领域：社会科学；标签：人口学、经济学
+
 ### 约翰·拉姆齐·麦卡洛克 · John Ramsay McCulloch
 
 网页 ID：mcculloch；XMind ID：49c22a91-cc56-436a-a02f-f7314efa74fa
@@ -677,6 +785,8 @@
 **XMind 节点原文：**
 
 > 马库卢,John Ramsay McCulloch (1 March 1789 – 11 November 1864)，苏格兰经济学家、作者、编辑。李家园经济学派领导人。
+
+网页导航领域：社会科学；标签：经济学
 
 ### 埃里克森 · Erik Erikson
 
@@ -692,6 +802,8 @@
 
 补充资料：[哈佛大学心理学系](https://psychology.fas.harvard.edu/people/erik-erikson)
 
+网页导航领域：心理学；标签：发展心理学、精神分析、身份认同
+
 ### 安娜·弗洛伊德 · Anna Freud
 
 网页 ID：anna；XMind ID：350c7cce-53bb-4ad8-83c4-9c055f608cbb
@@ -705,6 +817,8 @@
 > Anna Freud 安娜弗洛伊德，儿童青少年方向的心理学家
 
 补充资料：[伦敦弗洛伊德博物馆](https://www.freud.org.uk/schools/resources/anna-freud-life-and-work/)
+
+网页导航领域：心理治疗与人格；标签：精神分析、儿童分析
 
 ### 阿兰·孔涅 · Alain Connes
 
@@ -720,6 +834,8 @@
 
 补充资料：[法兰西公学院](https://www.college-de-france.fr/en/person/alain-connes)
 
+网页导航领域：数学与物理；标签：数学、非交换几何
+
 ### 让-皮埃尔·尚热 · Jean-Pierre Changeux
 
 网页 ID：changeux；XMind ID：b9956e2c-3bdd-4b7d-a42f-0140ba791181
@@ -731,6 +847,8 @@
 **XMind 节点原文：**
 
 > 让-皮埃尔·尚热（Jean-Pierre Changeux，1936.04.06 - 今），法国神经科学家，表观遗传提出者，突触稳定性研究，蛋白质研究，乙酰胆碱纯化。
+
+网页导航领域：神经科学；标签：神经科学、突触与意识
 
 ### 斯坦尼斯拉斯·迪昂 · Stanislas Dehaene
 
@@ -744,6 +862,8 @@
 
 > 斯坦尼斯拉斯·迪昂（Stanislas Dehaene，1965.05.12-），法国认知神经科学家，致力于揭示意识、语言与数学能力在大脑中的神经机制。著有《脑与数学》，《脑与阅读》，《精准学习》。
 
+网页导航领域：神经科学；标签：认知神经科学、意识、阅读与数学
+
 ### 杰拉尔德·埃德尔曼 · Gerald Edelman
 
 网页 ID：edelman；XMind ID：3515f613-b34c-4487-885e-910ff0983999
@@ -755,6 +875,8 @@
 **XMind 节点原文：**
 
 > 杰拉尔德·埃德尔曼（Gerald Edelman，1929.07.01 - 2014.05.17），美国生物学家，免疫学专家，神经科学家，“神经达尔文主义”倡导者，主张大脑通过选择性突触连接形成认知结构。1972年诺贝尔生理学奖得主。
+
+网页导航领域：神经科学；标签：神经科学、免疫学、神经达尔文主义
 
 ### 奥拉夫·斯波恩斯 · Olaf Sporns
 
@@ -768,6 +890,8 @@
 
 > 奥拉夫·斯波恩斯（Olaf Sporns，1963.09.18-），德国神经科学家，神经科学中的“脑连接组”（connectome）研究先锋，提出将大脑视为复杂网络系统，开创了网络神经科学这一领域
 
+网页导航领域：神经科学；标签：网络神经科学、连接组
+
 ### 卡尔·弗里斯顿 · Karl Friston
 
 网页 ID：friston；XMind ID：683c40be-4527-48d9-9cf5-5e51ce3245d9
@@ -779,6 +903,8 @@
 **XMind 节点原文：**
 
 > 卡尔·弗里斯顿（Karl Friston，1959.07.12-）是英国神经科学家与理论建模大师，提出“自由能原理”，试图以统一的数学框架解释大脑如何通过最小化不确定性来感知、行动与生存。
+
+网页导航领域：神经科学；标签：计算神经科学、自由能原理
 
 ### 马克·索姆斯 · Mark Solms
 
@@ -792,6 +918,8 @@
 
 > 马克·索姆斯 （Mark Solms，1961.07.17 - )，南非精神分析师，神经心理学家，神经精神分析代表人物。
 
+网页导航领域：神经科学；标签：神经心理学、精神分析、神经精神分析
+
 ### 朱利奥·托诺尼 · Giulio Tononi
 
 网页 ID：tononi；XMind ID：308efc3a-b62f-414c-af2e-f6fdc5fd2b76
@@ -803,6 +931,8 @@
 **XMind 节点原文：**
 
 > Giulio Tononi（1960-），意大利裔神经科学与神经病学家，整合信息论提出者。
+
+网页导航领域：神经科学；标签：意识研究、整合信息论
 
 ### 克里斯托夫·科赫 · Christof Koch
 
@@ -818,6 +948,8 @@
 
 补充资料：[Allen Institute](https://alleninstitute.org/person/christof-koch)
 
+网页导航领域：神经科学；标签：神经科学、意识研究
+
 ### 托马斯·默顿 · Thomas Merton
 
 网页 ID：merton；XMind ID：54daeb8a-9b39-4831-b87a-3f2ad81755e3
@@ -830,6 +962,8 @@
 
 > 托马斯 莫顿（1915-1968）， 哲学家、隐士，《七重山》，曾对话宗教领袖，包括一行禅师、铃木大拙
 
+网页导航领域：哲学与宗教；标签：宗教思想、文学、跨宗教对话
+
 ### 西蒙娜·德·波伏娃 · Simone de Beauvoir
 
 网页 ID：beauvoir；XMind ID：0e7857c7-dfc9-4872-8d1c-7002515203d8
@@ -841,6 +975,8 @@
 **XMind 节点原文：**
 
 > 西蒙娜·德·波伏娃（Simone de Beauvoir，1908年1月9日—1986年4月14日），哲学家，文学家，女权主义者，著有《第二性》《他人的血》
+
+网页导航领域：哲学与宗教；标签：存在主义、女性主义、文学
 
 ### 庄子 · Zhuangzi
 
@@ -856,6 +992,8 @@
 
 补充资料：[中国网 · 年代约数](https://www.china.org.cn/english/china_key_words/2025-06/12/content_117923490.html)
 
+网页导航领域：哲学与宗教；标签：道家、哲学
+
 ### 古斯塔夫·马勒 · Gustav Mahler
 
 网页 ID：mahler；XMind ID：0ae24c99-8181-4706-8913-1cce0d178e6b
@@ -868,6 +1006,8 @@
 
 > 古斯塔夫·马勒（Gustav Mahler；1860年7月7日—1911年5月18日），作曲家，指挥家
 
+网页导航领域：艺术创作；标签：音乐、作曲、指挥
+
 ### 安妮·莱博维茨 · Annie Leibovitz
 
 网页 ID：leibovitz；XMind ID：e78b5055-4c66-4482-b76f-bf530ba8f023
@@ -879,6 +1019,8 @@
 **XMind 节点原文：**
 
 > 安娜-露·莱博维茨（Anna-Lou Leibovitz，1949年10月2日—），美国肖像摄影师，工作于滚石。
+
+网页导航领域：艺术创作；标签：摄影、肖像摄影
 
 ### 约翰·列侬 · John Lennon
 
@@ -894,6 +1036,8 @@
 
 补充资料：[John Lennon 官方传记](https://www.johnlennon.com/about/)
 
+网页导航领域：艺术创作；标签：音乐、词曲创作
+
 ### 小野洋子 · Yoko Ono
 
 网页 ID：ono；XMind ID：dbbc630b-979c-4bbb-ad3c-4dbc3a031d43
@@ -907,6 +1051,8 @@
 > 小野洋子，艺术家
 
 补充资料：[MoMA 艺术家档案](https://www.moma.org/artists/4410-yoko-ono)
+
+网页导航领域：艺术创作；标签：观念艺术、音乐、表演
 
 ## 全部关系
 

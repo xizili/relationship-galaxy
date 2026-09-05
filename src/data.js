@@ -1,48 +1,8 @@
 import xmind from "./xmind-source.json" with { type: "json" };
 import { enrichment } from "./xmind-enrichment.js";
+import { classificationFor } from "./taxonomy.js";
+export { groups } from "./taxonomy.js";
 
-export const groups = {
-  psychoanalysis: {
-    label: "精神分析",
-    color: 0xf4b94f,
-    css: "#f4b94f"
-  },
-  analytical: {
-    label: "分析心理",
-    color: 0xe17b59,
-    css: "#e17b59"
-  },
-  humanistic: {
-    label: "人本主义",
-    color: 0x6fc88f,
-    css: "#6fc88f"
-  },
-  existential: {
-    label: "存在主义",
-    color: 0x67a7e8,
-    css: "#67a7e8"
-  },
-  systems: {
-    label: "系统论",
-    color: 0x65d3c7,
-    css: "#65d3c7"
-  },
-  neuroscience: {
-    label: "神经科学",
-    color: 0xb58cff,
-    css: "#b58cff"
-  },
-  philosophy: {
-    label: "哲学思想",
-    color: 0xde759f,
-    css: "#de759f"
-  },
-  culture: {
-    label: "文化写作",
-    color: 0x9fb9ff,
-    css: "#9fb9ff"
-  }
-};
 
 export const relationTypes = {
   influence: { label: "影响", color: 0xaec8ff },
@@ -691,6 +651,7 @@ const legacyNodes = [
 ];
 
 const metadataById = new Map(legacyNodes.map((node) => [node.id, node]));
+export const NODE_RADIUS = 10;
 const visibleTopics = xmind.topics.filter((topic) => topic.kind !== "empty");
 const keyBySourceId = new Map(visibleTopics.map((topic) => [topic.id, topic.key]));
 export const nodes = visibleTopics.map((topic) => {
@@ -698,6 +659,7 @@ export const nodes = visibleTopics.map((topic) => {
   if (!metadata.cn) throw new Error(`XMind node has no display metadata: ${topic.id}`);
   return {
     ...metadata,
+    ...classificationFor(topic.key),
     kind: topic.kind,
     sourceId: topic.id,
     sourceText: topic.title,
@@ -705,7 +667,7 @@ export const nodes = visibleTopics.map((topic) => {
     x: topic.position.x * 0.12,
     y: topic.position.y * 0.12,
     z: metadata.z ?? 0,
-    size: metadata.size ?? 9
+    size: NODE_RADIUS
   };
 });
 

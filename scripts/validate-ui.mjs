@@ -7,6 +7,7 @@ import { groups, links, nodes, relationTypes, sourceSummary } from "../src/data.
 import { portraits } from "../src/portraits.js";
 import * as layout from "../src/galaxy-layout.js";
 import { starVertices } from "../src/node-shapes.js";
+import * as tour from "../src/relation-tour.js";
 
 class Element {
   constructor() {
@@ -45,7 +46,7 @@ const context = vm.createContext({
   MapIcon: {}, Orbit: {}, RotateCcw: {}, Search: {}, Telescope: {}, X: {},
   groups, links, nodes, relationTypes, sourceSummary, portraits,
   portraitAssetUrl: (id) => portraits[id] ? `/portraits/${id}.webp` : "",
-  ...layout, starVertices, initTopology: secondaryView, initTimeline: secondaryView
+  ...layout, ...tour, starVertices, initTopology: secondaryView, initTimeline: secondaryView
 });
 let source = readFileSync(new URL("../src/main.js", import.meta.url), "utf8");
 source = source.replace(/^import[\s\S]*?;\n/gm, "");
@@ -60,7 +61,19 @@ assert.equal(api.nodeRecords.size, 73);
 assert.equal(api.linkRecords.length, 85);
 assert.equal(api.nodeRecords.get("cybernetics").mesh.geometry.type, "ExtrudeGeometry");
 assert.equal(api.nodeRecords.get("freud").mesh.geometry.type, "SphereGeometry");
+for (const record of api.nodeRecords.values()) {
+  record.mesh.geometry.computeBoundingBox();
+  const bounds = record.mesh.geometry.boundingBox.getSize(new RealThree.Vector3());
+  assert.ok(Math.abs(bounds.x - 20) < 1e-4 && Math.abs(bounds.y - 20) < 1e-4, `基础直径不一致：${record.node.id}`);
+}
 assert.equal(api.linkRecords.reduce((sum, record) => sum + record.arrows.length, 0), 100);
+assert.ok([...api.nodeRecords.values()].every((record) => record.node.size === 10));
+assert.ok([...api.nodeRecords.values()].every((record) => record.mesh.scale.x === 1));
+assert.ok([...api.nodeRecords.values()].every((record) => record.label.classList.contains("is-overview")));
+api.animate(1900);
+assert.equal(api.linkRecords.filter((record) => record.pulseMesh.visible).length, 1);
+api.animate(2500);
+assert.ok([...api.nodeRecords.values()].some((record) => record.label.classList.contains("is-storylit")));
 
 for (const node of nodes) {
   api.focusNode(node.id);
@@ -68,6 +81,9 @@ for (const node of nodes) {
   assert.equal(api.getState().detailPanelOpen, true);
   assert.ok(element("#detailPanelContent").innerHTML.includes(node.cn));
   assert.ok(element("#detailPanelContent").innerHTML.includes("XMind 节点原文"));
+  assert.ok(api.nodeRecords.get(node.id).mesh.scale.x > 1);
+  assert.ok([...api.nodeRecords.values()].filter((record) => record.node.id !== node.id).every((record) => record.mesh.scale.x === 1));
+  assert.ok(api.linkRecords.every((record) => !record.pulseMesh.visible));
 }
 api.focusNode("freud");
 element("#closeDetailPanel").fire("click");

@@ -1,6 +1,7 @@
 import { starPoints } from "./node-shapes.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
+const NODE_RADIUS = 9;
 
 function svgElement(tag, attributes = {}) {
   const element = document.createElementNS(SVG_NS, tag);
@@ -146,11 +147,6 @@ export function initTopology({
     return colorFromNumber(relationTypes[type]?.color);
   }
 
-  function nodeRadius(node) {
-    const base = clamp((node.size ?? 9) * 0.72, 6.5, 13);
-    return node.id === "freud" ? 15 : base;
-  }
-
   function compactRoleText(node) {
     return node.role.length > 11 ? `${node.role.slice(0, 10)}…` : node.role;
   }
@@ -163,7 +159,7 @@ export function initTopology({
   }
 
   function nodeLabelLayout(node, index, { includeCard = true } = {}) {
-    const radius = nodeRadius(node);
+    const radius = NODE_RADIUS;
     const roleText = compactRoleText(node);
     const labelWidth = clamp(
       Math.max(node.cn.length * 12, roleText.length * 9) + 20,
@@ -281,7 +277,7 @@ export function initTopology({
           let dx = pb.x - pa.x;
           let dy = pb.y - pa.y;
           let distance = Math.hypot(dx, dy);
-          const radiusAllowance = (nodeRadius(a) + nodeRadius(b)) * 0.24;
+          const radiusAllowance = NODE_RADIUS * 2 * 0.24;
           const minimum = width < 720 ? 48 : 68 + radiusAllowance;
           if (distance < minimum) {
             if (distance < 0.01) {

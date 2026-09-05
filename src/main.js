@@ -13,6 +13,7 @@ import {
 } from "./galaxy-layout.js";
 import { initTopology } from "./topology.js";
 import { starVertices } from "./node-shapes.js";
+import { createRelationTour, relationPulse, pulseVertexShader, pulseFragmentShader } from "./relation-tour.js";
 import { initTimeline } from "./timeline.js";
 
 createIcons({
@@ -73,6 +74,8 @@ let lastGalaxyGeometryUpdate = 0;
 let activeView = "galaxy";
 let topologyApi = null;
 let timelineApi = null;
+const relationTour = createRelationTour();
+let activeTourIndex = null;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x080908);
@@ -224,6 +227,10 @@ function renderNodeProvenance(node) {
   ).join(" · ");
   return `${citations ? `<p class="biography-sources">补充资料：${citations}</p>` : ""}
     <details class="source-transcription"><summary>XMind 节点原文</summary><p>${escapeHtml(node.sourceText)}</p></details>`;
+}
+
+function renderDomainTags(node) {
+  return `<div class="domain-tags" aria-label="研究、创作领域与流派标签">${node.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>`;
 }
 
 function renderRelationLegend() {
@@ -436,7 +443,7 @@ function renderOverviewGroups() {
 
   return `
     <div class="overview-section-heading">
-      <strong>全部流派</strong>
+      <strong>全部领域</strong>
       <span>${groupStats().length} 个</span>
     </div>
     <div class="overview-list">${groupRows}</div>
@@ -530,10 +537,10 @@ function renderOverviewPanel() {
     <div class="panel-stats">
       ${statButton("people", `${sourceSummary.people} 个人物 + ${sourceSummary.topics} 个主题`)}
       <span title="关系总数">${links.length} 条关系</span>
-      ${statButton("groups", `${groupStats().length} 个流派`)}
+      ${statButton("groups", `${groupStats().length} 个领域`)}
       ${statButton("relation-types", `${relationTypeCount} 类关系`)}
     </div>
-    <p class="source-note">星形代表主题。连线箭头与完整注释保留原图记录；领域分类和短标签为网页整理，原图记录不等同于已经逐条完成史实考证。</p>
+    <p class="source-note">星形代表主题。主分类用于导航，并非唯一身份；人物卡另保留流派及跨领域标签。连线箭头与完整注释保留原图记录，不等同于逐条完成史实考证。</p>
     ${renderOverviewSection()}
   `;
 }
@@ -584,6 +591,9 @@ function makeTopicStar(radius) {
   shape.closePath();
   const geometry = new THREE.ExtrudeGeometry(shape, { depth: radius * 0.28, bevelEnabled: true, bevelSize: 0.65, bevelThickness: 0.5, bevelSegments: 2, steps: 1 });
   geometry.center();
+  geometry.computeBoundingBox();
+  const bounds = geometry.boundingBox.getSize(new THREE.Vector3());
+  geometry.scale(radius * 2 / bounds.x, radius * 2 / bounds.y, 1);
   return geometry;
 }
 
@@ -596,7 +606,7 @@ function createNode(node) {
   const material = new THREE.MeshStandardMaterial({
     color,
     emissive: color,
-    emissiveIntensity: node.id === "freud" ? 0.42 : 0.22,
+    emissiveIntensity: 0.22,
     metalness: 0.18,
     roughness: 0.46,
     transparent: true,
@@ -607,11 +617,11 @@ function createNode(node) {
   mesh.userData = { type: "node", id: node.id };
   graphGroup.add(mesh);
 
-  const glowGeometry = node.kind === "topic" ? makeTopicStar(node.size * 1.55) : new THREE.SphereGeometry(node.size * 2.05, 32, 16);
+  const glowGeometry = node.kind === "topic" ? makeTopicStar(node.size * 2.05) : new THREE.SphereGeometry(node.size * 2.05, 32, 16);
   const glowMaterial = new THREE.MeshBasicMaterial({
     color,
     transparent: true,
-    opacity: node.id === "freud" ? 0.18 : 0.1,
+    opacity: 0.1,
     blending: THREE.AdditiveBlending,
     depthWrite: false
   });
@@ -706,6 +716,22 @@ function createLink(link, index) {
     arrows.push(arrow);
   }
 
+  // Shares geometry with the base line; only its light advances along UV.x.
+  const pulseMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      uColor: { value: new THREE.Color(relationColor(link.type)).lerp(new THREE.Color(0xffefcb), 0.32) },
+      uProgress: { value: 0 }, uGain: { value: 0 },
+      uDirected: { value: link.directed && !link.bidirectional ? 1 : 0 }
+    },
+    vertexShader: pulseVertexShader, fragmentShader: pulseFragmentShader,
+    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+    depthTest: true, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1
+  });
+  const pulseMesh = new THREE.Mesh(geometry, pulseMaterial);
+  pulseMesh.visible = false;
+  pulseMesh.renderOrder = 1;
+  graphGroup.add(pulseMesh);
+
   const linkLabel = document.createElement("div");
   linkLabel.className = "link-label";
   linkLabel.textContent = link.label.length > 28 ? `${link.label.slice(0, 27)}…` : link.label;
@@ -723,6 +749,8 @@ function createLink(link, index) {
     label: linkLabel,
     labelObject: linkLabelObject,
     material,
+    pulseMesh,
+    pulseMaterial,
     curve
   });
 }
@@ -742,6 +770,7 @@ function refreshLinkGeometry(record) {
   );
   record.mesh.geometry.dispose();
   record.mesh.geometry = nextGeometry;
+  record.pulseMesh.geometry = nextGeometry;
 
   record.arrows.forEach((arrow) => {
     const { t, direction } = arrow.userData;
@@ -874,17 +903,18 @@ function updateHighlights() {
     const active = activeSet.has(id);
     const isConnected = connected.has(id);
     const opacity = active ? 1 : 0.14;
-    const scale = selected ? 1.32 : hovered ? 1.18 : isConnected ? 1.06 : 1;
+    const scale = selected ? 1.38 : 1;
 
     record.material.opacity = opacity;
     record.material.emissiveIntensity = selected ? 0.62 : hovered ? 0.48 : isConnected ? 0.32 : 0.16;
     record.glowMaterial.opacity = active ? (selected ? 0.28 : hovered ? 0.22 : 0.1) : 0.035;
-    record.mesh.scale.lerp(new THREE.Vector3(scale, scale, scale), 0.45);
-    record.glow.scale.lerp(new THREE.Vector3(scale, scale, scale), 0.45);
+    record.mesh.scale.setScalar(scale);
+    record.glow.scale.setScalar(scale);
 
     record.label.classList.toggle("is-muted", !active);
     record.label.classList.toggle("is-selected", selected);
     record.label.classList.toggle("is-hovered", hovered);
+    record.label.classList.toggle("is-overview", overviewMode);
   });
 
   linkRecords.forEach((record) => {
@@ -894,11 +924,54 @@ function updateHighlights() {
     const selected = index === selectedLinkIndex;
     const hovered = index === hoveredLinkIndex;
     const active = endpointsActive && (depthMode === "all" || connectedToSelected || getDepthSet(selectedNodeId).has(link.source));
-    const opacity = selected ? 0.96 : hovered ? 0.82 : connectedToSelected ? 0.58 : active ? 0.28 : 0.045;
+    const opacity = selected ? 0.96 : hovered ? 0.82 : connectedToSelected ? 0.58 : active ? 0.36 : 0.045;
 
     record.material.opacity = opacity;
-    record.arrows.forEach((arrow) => { arrow.material.opacity = Math.min(0.88, opacity + 0.18); });
+    record.baseArrowOpacity = Math.min(0.88, opacity + 0.12);
+    record.arrows.forEach((arrow) => { arrow.material.opacity = record.baseArrowOpacity; });
     record.label.classList.toggle("is-visible", selected || hovered || connectedToSelected);
+  });
+  if (!overviewMode || activeView !== "galaxy") clearRelationTour();
+}
+
+function clearRelationTour() {
+  if (activeTourIndex === null) return;
+  const record = linkRecords[activeTourIndex];
+  record.pulseMesh.visible = false;
+  record.label.classList.remove("is-touring");
+  record.arrows.forEach((arrow) => { arrow.material.opacity = record.baseArrowOpacity ?? 0.48; });
+  [record.link.source, record.link.target].forEach((id) => {
+    nodeRecords.get(id).label.classList.remove("is-storylit");
+  });
+  activeTourIndex = null;
+}
+
+function updateRelationTour(timestamp) {
+  // The user's focused/hovered relation always takes precedence over ambient light.
+  const enabled = activeView === "galaxy" && overviewMode && selectedLinkIndex === null
+    && hoveredNodeId === null && hoveredLinkIndex === null && !document.hidden && !reducedMotionQuery.matches;
+  const candidates = linkRecords.filter(({ link }) => isNodeInActiveGroup(nodeById.get(link.source)) && isNodeInActiveGroup(nodeById.get(link.target))).map(({ index }) => index);
+  const pulse = relationTour.step(timestamp, candidates, enabled);
+  if (!pulse || pulse.index !== activeTourIndex) clearRelationTour();
+  if (!pulse) return;
+  activeTourIndex = pulse.index;
+  const record = linkRecords[pulse.index];
+  const sample = relationPulse(record.link, pulse.elapsedMs, pulse.durationMs);
+  record.pulseMesh.visible = true;
+  record.pulseMaterial.uniforms.uProgress.value = sample.progress;
+  record.pulseMaterial.uniforms.uGain.value = sample.gain;
+  record.label.classList.toggle("is-touring", sample.gain > 0.08);
+  record.label.style.setProperty("--tour-opacity", String(sample.gain));
+  record.arrows.forEach((arrow) => {
+    const light = sample.directed
+      ? sample.gain * Math.max(0, 1 - Math.abs(sample.progress - arrow.userData.t) / 0.18)
+      : sample.gain;
+    arrow.material.opacity = Math.max(record.baseArrowOpacity ?? 0.48, light);
+  });
+  [[record.link.source, sample.sourceGlow], [record.link.target, sample.targetGlow]].forEach(([id, gain]) => {
+    const label = nodeRecords.get(id).label;
+    label.classList.toggle("is-storylit", gain > 0.01);
+    label.style.setProperty("--story-glow", String(gain));
   });
 }
 
@@ -983,6 +1056,7 @@ function renderTopologyPopover(node) {
       </div>
     </div>
     <p class="topology-popover-summary">${escapeHtml(node.summary)}</p>
+    ${renderDomainTags(node)}
     ${renderNodeProvenance(node)}
     ${works}
     <div class="topology-popover-relations">
@@ -1077,6 +1151,7 @@ function renderDetailPanel(node) {
       </div>
     </div>
     <p class="summary">${escapeHtml(node.summary)}</p>
+    ${renderDomainTags(node)}
     ${renderNodeProvenance(node)}
     ${works}
     <div class="panel-stats">
@@ -1124,6 +1199,8 @@ function renderLinkDetail(linkIndex) {
 }
 
 function enterOverview(options = {}) {
+  clearRelationTour();
+  relationTour.reset(performance.now());
   const wasOverview = overviewMode;
   overviewMode = true;
   if (!wasOverview) overviewSection = "highlights";
@@ -1176,6 +1253,7 @@ function nodeSearchText(node) {
       groups[node.group]?.label,
       node.summary,
       node.sourceText,
+      ...(node.tags ?? []),
       ...(node.works ?? [])
     ].join(" ")
   );
@@ -1470,12 +1548,17 @@ function animate(timestamp = 0) {
   const deltaSeconds = Math.min(0.05, Math.max(0, (timestamp - previousFrameTime) / 1000));
   previousFrameTime = timestamp;
 
-  if (activeView !== "galaxy") return;
+  if (activeView !== "galaxy") {
+    clearRelationTour();
+    relationTour.reset(timestamp);
+    return;
+  }
 
   stars.rotation.y += 0.00008;
   stars.rotation.x += 0.000025;
 
   updateGalaxyLayoutFrame(timestamp);
+  updateRelationTour(timestamp);
 
   if (cameraGoal && targetGoal) {
     camera.position.lerp(cameraGoal, 0.055);
@@ -1489,6 +1572,8 @@ function animate(timestamp = 0) {
   }
 
   controls.update(deltaSeconds);
+  // Distant mobile framing must not hide the graph inside the depth fog.
+  scene.fog.density = Math.min(0.0007, 0.55 / Math.max(1, camera.position.distanceTo(controls.target)));
   nodeRecords.forEach((record) => {
     if (record.node.kind !== "topic") return;
     record.mesh.quaternion.copy(camera.quaternion);

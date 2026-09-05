@@ -1,6 +1,6 @@
 import { writeFileSync } from "node:fs";
 import source from "../src/xmind-source.json" with { type: "json" };
-import { nodes, links } from "../src/data.js";
+import { nodes, links, groups } from "../src/data.js";
 
 const nodeMap = new Map(nodes.map((node) => [node.id, node]));
 const lines = [
@@ -12,6 +12,7 @@ const lines = [
 for (const node of nodes) {
   lines.push(`### ${node.kind === "topic" ? "★ " : ""}${node.cn} · ${node.name}`, "", `网页 ID：${node.id}；XMind ID：${node.sourceId}`, "", `**年代：** ${node.years}`, "", `**简短介绍：** ${node.summary}`, "", "**XMind 节点原文：**", "", ...node.sourceText.split("\n").map((line) => `> ${line}`), "");
   if (node.biographySources?.length) lines.push("补充资料：" + node.biographySources.map((item) => `[${item.label}](${item.url})`).join("、"), "");
+  lines.push(`网页导航领域：${groups[node.group].label}；标签：${node.tags.join("、")}`, "");
 }
 lines.push("## 全部关系", "", "端点顺序保留原文件次序；← 表示箭头指向左端，↔ 表示双向，— 表示无向。未注释关系不补造文字。", "");
 links.forEach((link, index) => {

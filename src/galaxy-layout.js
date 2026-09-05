@@ -1,15 +1,7 @@
 import * as THREE from "three";
+import { groups } from "./taxonomy.js";
 
-const DOMAIN_ANCHORS = {
-  psychoanalysis: [0.66, 0.2, 0.72],
-  analytical: [0.42, 0.47, 0.78],
-  humanistic: [0.75, -0.25, 0.61],
-  existential: [0.24, -0.61, 0.75],
-  philosophy: [-0.4, -0.47, 0.79],
-  culture: [-0.72, 0.08, 0.69],
-  systems: [-0.4, 0.66, -0.63],
-  neuroscience: [0.42, 0.65, -0.63]
-};
+const DOMAIN_ANCHORS = Object.fromEntries(Object.entries(groups).map(([id, group]) => [id, group.anchor]));
 
 function clamp01(value) {
   return Math.max(0, Math.min(1, value));

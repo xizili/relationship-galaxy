@@ -495,6 +495,7 @@ button {
 }
 
 .work-list span,
+.domain-tags span,
 .cluster-pill,
 .panel-stats span,
 .overview-stat {
@@ -508,6 +509,9 @@ button {
   font-size: 12px;
   line-height: 1.35;
 }
+
+.domain-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.domain-tags span { color: inherit; background: #8881; border-color: #8884; }
 
 .cluster-pill {
   display: inline-flex;
@@ -746,6 +750,22 @@ button {
   opacity: 0.12;
 }
 
+/* At a distance, the graph leads and labels stay in the background. */
+.node-label.is-overview {
+  opacity: 0.14;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.node-label.is-overview span { display: none; }
+.node-label.is-overview.is-muted { opacity: 0.08; }
+.node-label.is-overview.is-storylit {
+  opacity: calc(0.14 + var(--story-glow, 0) * 0.86);
+  color: #fff5d9;
+  text-shadow: 0 0 12px var(--node-color);
+}
+.node-label.is-overview.is-hovered { opacity: 1; background: #080908aa; }
+
 .node-label.is-selected,
 .node-label.is-hovered {
   transform: translateY(-2px);
@@ -772,6 +792,12 @@ button {
 .link-label.is-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+.link-label.is-touring {
+  opacity: var(--tour-opacity, 0);
+  transform: translateY(0);
+  border-color: color-mix(in srgb, var(--relation-color), transparent 25%);
 }
 
 .link-toast {
@@ -1540,18 +1566,22 @@ button {
 }
 
 .topology-node:hover .topology-node-core,
-.topology-node:focus .topology-node-core,
+.topology-node:focus .topology-node-core {
+  stroke-width: 1.8;
+  stroke: #342f25;
+}
+
 .topology-node.is-selected .topology-node-core {
-  transform: scale(1.18);
+  transform: scale(1.38);
   stroke-width: 2.6;
 }
 
 .topology-node:hover .topology-node-halo,
-.topology-node:focus .topology-node-halo,
-.topology-node.is-selected .topology-node-halo {
+.topology-node:focus .topology-node-halo {
   opacity: 1;
-  transform: scale(1.26);
 }
+
+.topology-node.is-selected .topology-node-halo { opacity: 1; transform: scale(1.38); }
 
 .topology-node.is-selected .topology-node-card rect {
   fill: #fffaf0;
@@ -1559,8 +1589,9 @@ button {
 }
 
 .topology-node.is-neighbor .topology-node-core {
-  stroke-width: 2.3;
+  stroke-width: 1.8;
 }
+.topology-node-core, .topology-node-halo { stroke-linejoin: round; }
 
 .topology-node.is-dimmed {
   opacity: 0.14;

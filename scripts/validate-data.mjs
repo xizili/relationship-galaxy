@@ -13,7 +13,8 @@ for (const node of nodes) {
   if (!node.id) errors.push("发现缺少 id 的人物");
   if (nodeIds.has(node.id)) errors.push(`人物 id 重复：${node.id}`);
   nodeIds.add(node.id);
-  if (!groups[node.group]) errors.push(`${node.id} 使用了未知流派：${node.group}`);
+  if (!groups[node.group]) errors.push(`${node.id} 使用了未知领域：${node.group}`);
+  if (!node.tags?.length) errors.push(`${node.id} 缺少跨领域/流派标签`);
   if (![node.x, node.y, node.z, node.size].every(Number.isFinite)) {
     errors.push(`${node.id} 的空间坐标或节点大小无效`);
   }
