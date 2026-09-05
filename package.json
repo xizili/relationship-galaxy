@@ -12,7 +12,8 @@
     "check:ui": "node scripts/validate-ui.mjs",
     "export:xmind": "node scripts/export-xmind-markdown.mjs",
     "check:tour": "node scripts/validate-tour.mjs",
-    "check": "npm run check:data && npm run check:layout && npm run check:tour && npm run check:ui"
+    "check:map-motion": "node scripts/validate-map-motion.mjs",
+    "check": "npm run check:data && npm run check:layout && npm run check:tour && npm run check:ui && npm run check:map-motion"
   },
   "dependencies": {
     "lucide": "^0.468.0",

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="在关系拓扑、3D 银河与思想时间轴之间，探索心理学、哲学、系统论和神经科学人物的连接。"
+      content="在地图模式、3D 银河与思想时间轴之间，探索心理学、哲学、系统论和神经科学人物的连接。"
     />
     <meta name="theme-color" content="#1a1713" />
     <link rel="canonical" href="https://xizili.github.io/relationship-galaxy/" />
@@ -21,34 +21,15 @@
     <meta name="twitter:title" content="关系的银河" />
     <meta
       name="twitter:description"
-      content="在关系拓扑、3D 银河与思想时间轴之间，探索人物、思想与具体连接。"
+      content="在地图模式、3D 银河与思想时间轴之间，探索人物、思想与具体连接。"
     />
     <meta name="twitter:image" content="https://xizili.github.io/relationship-galaxy/og.png" />
     <title>关系的银河 - 人物关系知识图谱</title>
   </head>
   <body>
     <main id="app" data-active-view="galaxy">
-      <section id="topologyView" class="view-surface" aria-label="人物关系拓扑图">
+      <section id="topologyView" class="view-surface" aria-label="人物关系地图">
         <svg id="topologyGraph"></svg>
-        <aside
-          id="topologyPopover"
-          class="topology-popover"
-          role="dialog"
-          aria-label="人物简介"
-          aria-live="polite"
-          hidden
-        >
-          <button
-            id="closeTopologyPopover"
-            class="topology-popover-close"
-            type="button"
-            aria-label="关闭人物简介"
-            title="关闭"
-          >
-            <i data-lucide="x" aria-hidden="true"></i>
-          </button>
-          <div id="topologyPopoverContent"></div>
-        </aside>
         <div class="topology-caption" aria-hidden="true">
           <span>策展布局</span>
           <strong>选择人物，沿连线阅读具体关系</strong>
@@ -57,6 +38,7 @@
       </section>
 
       <section id="scene" class="view-surface is-active" aria-label="3D 人物关系银河"></section>
+      <p id="galaxyHint" class="galaxy-hint">滚动或双指缩放，拖动旋转关系星云。<br />点击人名旁的节点，探索人物与连接。</p>
 
       <section id="timelineView" class="view-surface timeline-view" aria-label="人物思想时间轴">
         <div class="timeline-shell">
@@ -83,7 +65,7 @@
         </div>
 
         <nav id="viewSwitcher" class="view-switcher" aria-label="视图切换">
-          <button type="button" data-view="topology" aria-pressed="false">关系拓扑</button>
+          <button type="button" data-view="topology" aria-pressed="false">地图模式</button>
           <button type="button" class="active" data-view="galaxy" aria-pressed="true">银河模式</button>
           <button type="button" data-view="timeline" aria-pressed="false">时间轴</button>
         </nav>
@@ -107,22 +89,23 @@
             id="overviewToggle"
             class="icon-button"
             type="button"
-            aria-label="回到银河远望并打开全览介绍"
+            aria-label="远望关系星云并打开介绍"
             aria-controls="detailPanel"
             aria-expanded="false"
-            title="回到银河远望并打开全览介绍"
+            title="远望关系星云并打开介绍"
           >
             <i data-lucide="telescope" aria-hidden="true"></i>
           </button>
           <button id="orbitToggle" class="icon-button active" type="button" aria-pressed="true" aria-label="停止自动旋转" title="停止自动旋转">
             <i data-lucide="orbit" aria-hidden="true"></i>
           </button>
-          <button id="resetView" class="icon-button" type="button" aria-label="重置视角" title="重置视角">
+          <button id="resetView" class="icon-button" type="button" aria-label="重置当前视图" title="重置当前视图" hidden>
             <i data-lucide="rotate-ccw" aria-hidden="true"></i>
           </button>
           <button id="sourceToggle" class="icon-button" type="button" aria-label="原始图谱" title="原始图谱">
             <i data-lucide="map" aria-hidden="true"></i>
           </button>
+          <button id="imageCreditsToggle" class="icon-button image-credits-toggle" type="button" aria-label="图片来源与授权" title="图片来源与授权">©</button>
         </div>
       </header>
 
@@ -142,7 +125,7 @@
         <div id="detailPanelContent"></div>
       </aside>
 
-      <div class="depth-control" aria-label="关系层级">
+      <div class="depth-control" aria-label="关系层级" hidden>
         <button type="button" data-depth="1" class="active">一度</button>
         <button type="button" data-depth="2">二度</button>
         <button type="button" data-depth="all">全部</button>
@@ -160,6 +143,12 @@
       </section>
 
       <div id="linkToast" class="link-toast" aria-live="polite"></div>
+      <dialog id="imageCredits" class="image-credits" aria-labelledby="imageCreditsTitle">
+        <form method="dialog"><button class="icon-button" aria-label="关闭图片授权">×</button></form>
+        <h2 id="imageCreditsTitle">图片来源与授权</h2>
+        <p>人物肖像的作者、来源与许可集中列于此处。</p>
+        <div id="imageCreditsContent"></div>
+      </dialog>
       <p id="viewStatus" class="sr-only" aria-live="polite"></p>
     </main>
 

@@ -68,7 +68,7 @@ export function initTopology({
 
   svg.innerHTML = "";
   svg.setAttribute("role", "application");
-  svg.setAttribute("aria-label", "人物关系拓扑图，可缩放、拖动并选择人物或关系");
+  svg.setAttribute("aria-label", "人物关系地图，可缩放、拖动并选择人物或关系");
 
   const adjacency = new Map(nodes.map((node) => [node.id, new Set()]));
   const degree = new Map(nodes.map((node) => [node.id, 0]));
@@ -139,6 +139,7 @@ export function initTopology({
   };
   let pointerAction = null;
   let lastDragAt = 0;
+  let transformAnimation = 0;
 
   const nodeRecords = new Map();
   const edgeRecords = [];
@@ -366,6 +367,7 @@ export function initTopology({
       });
       hitPath.addEventListener("click", (event) => {
         event.stopPropagation();
+        if (performance.now() - lastDragAt < 220) return;
         onFocusLink?.(index);
       });
       hitPath.addEventListener("keydown", (event) => {
@@ -505,12 +507,14 @@ export function initTopology({
   }
 
   function depthSet(startId) {
-    if (!startId || state.depthMode === "all") {
+    const focusedLink = !startId && state.selectedLinkIndex !== null ? links[state.selectedLinkIndex] : null;
+    if ((!startId && !focusedLink) || state.depthMode === "all") {
       return new Set(nodes.map((node) => node.id));
     }
-    const maxDepth = state.depthMode === "2" ? 2 : 1;
-    const visited = new Set([startId]);
-    let frontier = new Set([startId]);
+    const maxDepth = (state.depthMode === "2" ? 2 : 1) - (focusedLink ? 1 : 0);
+    const roots = focusedLink ? [focusedLink.source, focusedLink.target] : [startId];
+    const visited = new Set(roots);
+    let frontier = new Set(roots);
     for (let step = 0; step < maxDepth; step += 1) {
       const next = new Set();
       frontier.forEach((id) => {
@@ -526,15 +530,17 @@ export function initTopology({
 
   function updateVisualState() {
     const inDepth = depthSet(state.selectedNodeId);
+    const selectedLink = state.selectedLinkIndex !== null ? links[state.selectedLinkIndex] : null;
+    const focused = Boolean(state.selectedNodeId || selectedLink);
     const selectedNeighbors = state.selectedNodeId
       ? adjacency.get(state.selectedNodeId) ?? new Set()
       : new Set();
 
     nodeRecords.forEach((record, id) => {
-      const groupVisible = state.activeGroup === "all" || record.node.group === state.activeGroup || id === state.selectedNodeId;
+      const groupVisible = state.activeGroup === "all" || record.node.group === state.activeGroup || id === state.selectedNodeId || id === selectedLink?.source || id === selectedLink?.target;
       const depthVisible = inDepth.has(id);
       record.element.classList.toggle("is-hidden", !groupVisible);
-      record.element.classList.toggle("is-dimmed", Boolean(state.selectedNodeId) && !depthVisible);
+      record.element.classList.toggle("is-dimmed", focused && !depthVisible);
       record.element.classList.toggle("is-selected", id === state.selectedNodeId);
       record.element.classList.toggle("is-neighbor", selectedNeighbors.has(id));
     });
@@ -552,7 +558,7 @@ export function initTopology({
       const connected = Boolean(state.selectedNodeId) && (link.source === state.selectedNodeId || link.target === state.selectedNodeId);
       const selected = index === state.selectedLinkIndex;
       const hidden = !groupVisible;
-      const dimmed = Boolean(state.selectedNodeId) && !endpointsInDepth;
+      const dimmed = focused && !endpointsInDepth;
       record.visiblePath.classList.toggle("is-hidden", hidden);
       record.hitPath.classList.toggle("is-hidden", hidden);
       record.visiblePath.classList.toggle("is-dimmed", dimmed);
@@ -602,9 +608,11 @@ export function initTopology({
   }
 
   function animateTransform(target, duration = 360) {
+    const animation = ++transformAnimation;
     const start = { ...transform };
     const startedAt = performance.now();
     function step(now) {
+      if (animation !== transformAnimation) return;
       const progress = clamp((now - startedAt) / duration, 0, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       transform = {
@@ -648,6 +656,7 @@ export function initTopology({
     "wheel",
     (event) => {
       event.preventDefault();
+      transformAnimation += 1;
       const rect = svg.getBoundingClientRect();
       const pointerX = event.clientX - rect.left;
       const pointerY = event.clientY - rect.top;
@@ -665,8 +674,8 @@ export function initTopology({
   );
 
   svg.addEventListener("pointerdown", (event) => {
+    transformAnimation += 1;
     const nodeElement = event.target.closest?.("[data-node-id]");
-    svg.setPointerCapture?.(event.pointerId);
     if (nodeElement) {
       const nodeId = nodeElement.dataset.nodeId;
       const graphPoint = clientToGraph(event.clientX, event.clientY);
@@ -695,7 +704,12 @@ export function initTopology({
   svg.addEventListener("pointermove", (event) => {
     if (!pointerAction) return;
     const distance = Math.hypot(event.clientX - pointerAction.startX, event.clientY - pointerAction.startY);
-    if (distance > 3) pointerAction.moved = true;
+    if (!pointerAction.moved && distance > 5) {
+      pointerAction.moved = true;
+      // Capturing only an actual drag preserves native node/edge click targets.
+      svg.setPointerCapture?.(event.pointerId);
+    }
+    if (!pointerAction.moved) return;
     if (pointerAction.type === "pan") {
       transform.x = pointerAction.originX + event.clientX - pointerAction.startX;
       transform.y = pointerAction.originY + event.clientY - pointerAction.startY;
@@ -732,6 +746,7 @@ export function initTopology({
   });
 
   function resize({ preserveTransform = true } = {}) {
+    if (!preserveTransform) transformAnimation += 1;
     const previous = { ...transform };
     computeLayout();
     buildEdges();

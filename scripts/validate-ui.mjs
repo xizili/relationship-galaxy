@@ -8,6 +8,7 @@ import { portraits } from "../src/portraits.js";
 import * as layout from "../src/galaxy-layout.js";
 import { starVertices } from "../src/node-shapes.js";
 import * as tour from "../src/relation-tour.js";
+import { createZoomSpring } from "../src/nebula-motion.js";
 
 class Element {
   constructor() {
@@ -28,6 +29,8 @@ class Element {
   insertAdjacentHTML(_where, html) { this.innerHTML += html; }
   getBoundingClientRect() { return { width: 1440, height: 900, left: 0, top: 0 }; }
   focus() {} blur() {}
+  scrollTo({ top }) { this.scrollTop = top; }
+  showModal() { this.open = true; }
 }
 const elements = new Map();
 const element = (selector) => { if (!elements.has(selector)) elements.set(selector, new Element()); return elements.get(selector); };
@@ -36,7 +39,7 @@ const windowStub = new Element();
 Object.assign(windowStub, { innerWidth: 1440, innerHeight: 900, devicePixelRatio: 1, matchMedia: () => ({ matches: false }), dispatchEvent() {} });
 class Renderer { constructor() { this.domElement = new Element(); } setPixelRatio() {} setSize() {} render() {} }
 class LabelObject extends RealThree.Object3D { constructor(element) { super(); this.element = element; } }
-class Controls { constructor() { this.target = new RealThree.Vector3(); } update(delta) { this.lastDelta = delta; } }
+class Controls { constructor() { this.target = new RealThree.Vector3(); } update(delta) { this.lastDelta = delta; } addEventListener() {} }
 const secondaryView = () => ({ update() {}, resize() {}, positionPopover() {} });
 const context = vm.createContext({
   console, performance: { now: () => 0 }, document: doc, window: windowStub,
@@ -46,11 +49,11 @@ const context = vm.createContext({
   MapIcon: {}, Orbit: {}, RotateCcw: {}, Search: {}, Telescope: {}, X: {},
   groups, links, nodes, relationTypes, sourceSummary, portraits,
   portraitAssetUrl: (id) => portraits[id] ? `/portraits/${id}.webp` : "",
-  ...layout, ...tour, starVertices, initTopology: secondaryView, initTimeline: secondaryView
+  ...layout, ...tour, starVertices, createZoomSpring, initTopology: secondaryView, initTimeline: secondaryView
 });
 let source = readFileSync(new URL("../src/main.js", import.meta.url), "utf8");
 source = source.replace(/^import[\s\S]*?;\n/gm, "");
-source += `\nglobalThis.testApi = { focusNode, setActiveView, enterOverview, renderLinkDetail, renderSearchResults, animate, nodeRecords, linkRecords, controls, camera, getState: () => ({ activeView, overviewMode, detailPanelOpen, selectedNodeId, cameraGoal, targetGoal }) };`;
+source += `\nglobalThis.testApi = { focusNode, setActiveView, enterOverview, renderLinkDetail, renderSearchResults, animate, nodeRecords, linkRecords, controls, camera, getState: () => ({ activeView, overviewMode, detailPanelOpen, selectedNodeId, selectedLinkIndex, activeGroup, depthMode, cameraGoal, targetGoal }) };`;
 vm.runInContext(source, context);
 const api = context.testApi;
 assert.equal(api.getState().activeView, "galaxy");
@@ -66,7 +69,19 @@ for (const record of api.nodeRecords.values()) {
   const bounds = record.mesh.geometry.boundingBox.getSize(new RealThree.Vector3());
   assert.ok(Math.abs(bounds.x - 20) < 1e-4 && Math.abs(bounds.y - 20) < 1e-4, `基础直径不一致：${record.node.id}`);
 }
-assert.equal(api.linkRecords.reduce((sum, record) => sum + record.arrows.length, 0), 100);
+assert.equal(api.linkRecords.reduce((sum, record) => sum + record.synapses.length, 0), 100);
+for (const record of api.linkRecords) {
+  assert.equal(record.synapses.length, record.link.bidirectional ? 2 : record.link.directed ? 1 : 0);
+  for (const terminal of record.synapses) {
+    assert.equal(terminal.geometry.type, "SphereGeometry");
+    assert.equal(terminal.material.color.getHex(), 0xd9e1ec);
+    assert.ok(terminal.userData.t === 0 || terminal.userData.t === 1);
+    assert.ok(terminal.position.distanceTo(record.curve.getPoint(terminal.userData.t)) < 1e-8);
+  }
+}
+assert.equal(element(".depth-control").hidden, true);
+assert.equal(element("#resetView").hidden, true);
+assert.equal(element("#galaxyHint").hidden, false);
 assert.ok([...api.nodeRecords.values()].every((record) => record.node.size === 10));
 assert.ok([...api.nodeRecords.values()].every((record) => record.mesh.scale.x === 1));
 assert.ok([...api.nodeRecords.values()].every((record) => record.label.classList.contains("is-overview")));
@@ -84,7 +99,46 @@ for (const node of nodes) {
   assert.ok(api.nodeRecords.get(node.id).mesh.scale.x > 1);
   assert.ok([...api.nodeRecords.values()].filter((record) => record.node.id !== node.id).every((record) => record.mesh.scale.x === 1));
   assert.ok(api.linkRecords.every((record) => !record.pulseMesh.visible));
+  assert.equal(element(".depth-control").hidden, false);
+  assert.equal(element("#galaxyHint").hidden, true);
+  assert.ok(!element("#detailPanelContent").innerHTML.includes("<figcaption"));
 }
+element("#imageCreditsToggle").fire("click");
+assert.equal(element("#imageCredits").open, true);
+assert.ok(element("#imageCreditsContent").innerHTML.includes("© Peter Potrowl"));
+assert.ok(element("#imageCreditsContent").innerHTML.includes("creativecommons.org"));
+
+// Node selection uses the same sidebar in every mode, including all map nodes.
+api.setActiveView("topology");
+for (const node of nodes) {
+  api.focusNode(node.id, { camera: false });
+  assert.equal(api.getState().selectedNodeId, node.id);
+  assert.equal(api.getState().detailPanelOpen, true);
+  assert.ok(element("#detailPanelContent").innerHTML.includes(`<h2>${node.cn}</h2>`));
+}
+for (const view of ["topology", "timeline"]) {
+  api.setActiveView(view);
+  api.focusNode("freud", { camera: false });
+  element("#timelineView").scrollTop = 600;
+  element("#resetView").fire("click");
+  assert.equal(api.getState().activeView, view);
+  assert.equal(api.getState().selectedNodeId, null);
+  assert.equal(api.getState().detailPanelOpen, false);
+  assert.equal(api.getState().activeGroup, "all");
+  assert.equal(element(".depth-control").hidden, true);
+  assert.equal(element("#resetView").hidden, false);
+  if (view === "timeline") assert.equal(element("#timelineView").scrollTop, 0);
+}
+api.setActiveView("galaxy");
+for (let index = 0; index < links.length; index += 1) {
+  api.renderLinkDetail(index);
+  const activeIds = [...api.nodeRecords].filter(([, r]) => r.material.opacity === 1).map(([id]) => id).sort();
+  assert.deepEqual(activeIds, [links[index].source, links[index].target].sort());
+  assert.equal(element(".depth-control").hidden, false);
+  assert.ok(api.getState().cameraGoal && api.getState().targetGoal);
+}
+api.enterOverview();
+assert.equal(element(".depth-control").hidden, true);
 api.focusNode("freud");
 element("#closeDetailPanel").fire("click");
 assert.equal(api.getState().detailPanelOpen, false);
@@ -133,12 +187,40 @@ assert.ok(html.indexOf('id="closeDetailPanel"') < html.indexOf('id="detailPanelC
 globalThis.document = doc;
 const { initTimeline } = await import("../src/timeline.js");
 const timelineRoot = new Element();
-initTimeline({ root: timelineRoot, nodes, links, groups, onFocusNode() {} });
+const timeline = initTimeline({ root: timelineRoot, nodes, links, groups, onFocusNode() {} });
 assert.equal((timelineRoot.innerHTML.match(/data-node-id=/g) ?? []).length, 73);
 assert.ok(timelineRoot.innerHTML.includes('data-kind="topic" data-node-id="cybernetics"'));
 assert.ok(timelineRoot.innerHTML.includes("前384"));
 assert.ok(timelineRoot.innerHTML.includes("前369"));
-assert.ok(timelineRoot.innerHTML.includes("© Peter Potrowl"));
+assert.ok(!timelineRoot.innerHTML.includes("timeline-portrait-credit"));
 assert.ok(!timelineRoot.innerHTML.includes('src=""'));
+// Parse the actual emitted card attributes, then exercise the filter update.
+const cards = [...timelineRoot.innerHTML.matchAll(/<button\b([\s\S]*?)>/g)].map(([, attributes]) => {
+  const card = new Element();
+  for (const [, key, value] of attributes.matchAll(/data-(node-id|group|kind)="([^"]+)"/g)) {
+    card.dataset[key === "node-id" ? "nodeId" : key] = value;
+  }
+  return card;
+});
+const decade = (card) => Math.floor(layout.birthYear(nodes.find((n) => n.id === card.dataset.nodeId)) / 10);
+const sections = [...new Set(cards.filter((c) => c.dataset.kind !== "topic").map(decade))].map((year) => {
+  const section = new Element();
+  section.querySelectorAll = () => cards.filter((c) => c.dataset.kind !== "topic" && decade(c) === year && !c.hidden);
+  return section;
+});
+const topicSection = new Element();
+timelineRoot.querySelector = () => topicSection;
+timelineRoot.querySelectorAll = (selector) => selector === ".timeline-card" ? cards : selector === ".timeline-decade" ? sections : cards.filter((c) => c.dataset.kind === "topic" && !c.hidden);
+for (const group of ["all", ...Object.keys(groups)]) {
+  timeline.update({ activeGroup: group, selectedNodeId: "freud" });
+  const expected = nodes.filter((n) => group === "all" || n.group === group);
+  assert.deepEqual(cards.filter((c) => !c.hidden).map((c) => c.dataset.nodeId).sort(), expected.map((n) => n.id).sort());
+  assert.equal(element("#timelineVisibleCount").textContent, String(expected.filter((n) => n.kind === "person").length));
+  assert.equal(topicSection.hidden, !expected.some((n) => n.kind === "topic"));
+}
 delete globalThis.document;
-console.log("后台交互测试通过：73 节点、85 连线及双向箭头、默认银河旋转、72 人物卡与主题卡、关闭按钮、望远镜、持续旋转、跨视图聚焦与原文。");
+assert.ok(!html.includes('id="topologyPopover"'));
+assert.ok(html.includes(">地图模式</button>"));
+const css = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
+assert.match(css, /\[hidden\]\s*\{\s*display:\s*none\s*!important;/);
+console.log("后台交互测试通过：73 节点、85 连线、100 银色突触、全节点侧栏、关系双端聚焦、视图重置、深度栏与图片署名集中展示。");

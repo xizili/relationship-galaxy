@@ -1,4 +1,4 @@
-import { portraitAssetUrl, portraits } from "./portraits.js";
+import { portraitAssetUrl } from "./portraits.js";
 import { birthYear } from "./galaxy-layout.js";
 
 function escapeHtml(value) {
@@ -30,6 +30,7 @@ function decadeLabel(decade) {
 function yearLabel(year) { return year < 0 ? `前${Math.abs(year)}` : String(year); }
 
 export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
+  let updateRevision = 0;
   const visibleCount = document.querySelector("#timelineVisibleCount");
   const degreeMap = buildDegreeMap(nodes, links);
   const sortedNodes = nodes.filter((node) => node.kind === "person").sort((a, b) => birthYear(a) - birthYear(b) || a.cn.localeCompare(b.cn, "zh-CN"));
@@ -81,7 +82,6 @@ export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
                     </span>
                     <span class="timeline-card-role">${escapeHtml(node.role)}</span>
                     <span class="timeline-card-meta">${escapeHtml(node.years)} · ${degreeMap.get(node.id) ?? 0} 条关系</span>
-                    ${node.id === "connes" ? `<span class="timeline-portrait-credit">${escapeHtml(portraits[node.id].creator)} · CC BY-SA 3.0</span>` : ""}
                   </button>
                 `;
               })
@@ -105,11 +105,12 @@ export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
 
   root.addEventListener("click", (event) => {
     const card = event.target.closest("[data-node-id]");
-    if (!card) return;
+    if (!card || card.hidden) return;
     onFocusNode(card.dataset.nodeId);
   });
 
   function update(state = {}, options = {}) {
+    const revision = ++updateRevision;
     const { activeGroup = "all", selectedNodeId = null } = state;
     let count = 0;
 
@@ -132,9 +133,9 @@ export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
 
     if (options.center && selectedNodeId) {
       requestAnimationFrame(() => {
-        root
-          .querySelector(`[data-node-id="${CSS.escape(selectedNodeId)}"]`)
-          ?.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
+        if (revision !== updateRevision) return;
+        const card = root.querySelector(`[data-node-id="${CSS.escape(selectedNodeId)}"]`);
+        if (card && !card.hidden) card.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
       });
     }
   }

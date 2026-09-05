@@ -3,7 +3,7 @@
 // person belongs exclusively to one discipline.
 export const groups = {
   psychotherapy: {
-    label: "心理治疗与人格",
+    label: "精神分析",
     color: 0xf4b94f,
     css: "#f4b94f",
     anchor: [0.66, 0.2, 0.72]
@@ -21,7 +21,7 @@ export const groups = {
     anchor: [0.42, 0.65, -0.63]
   },
   life_sciences: {
-    label: "生物与生理",
+    label: "生物学",
     color: 0xb3c86a,
     css: "#b3c86a",
     anchor: [-0.02, 0.97, -0.22]
