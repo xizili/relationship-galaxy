@@ -1,4 +1,5 @@
-import { portraitAssetUrl } from "./portraits.js";
+import { portraitAssetUrl, portraits } from "./portraits.js";
+import { birthYear } from "./galaxy-layout.js";
 
 function escapeHtml(value) {
   return String(value)
@@ -7,11 +8,6 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
-}
-
-function birthYear(node) {
-  const match = String(node.years ?? "").match(/\d{4}/);
-  return match ? Number(match[0]) : Number.POSITIVE_INFINITY;
 }
 
 function decadeFor(node) {
@@ -28,13 +24,16 @@ function buildDegreeMap(nodes, links) {
 }
 
 function decadeLabel(decade) {
-  return `${decade}s`;
+  return decade < 0 ? `前${Math.abs(decade)}—前${Math.abs(decade + 9)}` : `${decade}s`;
 }
+
+function yearLabel(year) { return year < 0 ? `前${Math.abs(year)}` : String(year); }
 
 export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
   const visibleCount = document.querySelector("#timelineVisibleCount");
   const degreeMap = buildDegreeMap(nodes, links);
-  const sortedNodes = [...nodes].sort((a, b) => birthYear(a) - birthYear(b) || a.cn.localeCompare(b.cn, "zh-CN"));
+  const sortedNodes = nodes.filter((node) => node.kind === "person").sort((a, b) => birthYear(a) - birthYear(b) || a.cn.localeCompare(b.cn, "zh-CN"));
+  document.querySelector("#timelineYearRange").textContent = `${yearLabel(birthYear(sortedNodes[0]))}—${yearLabel(birthYear(sortedNodes.at(-1)))}`;
   const decades = new Map();
 
   sortedNodes.forEach((node) => {
@@ -65,16 +64,16 @@ export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
                     style="--card-color:${group.css}"
                     aria-label="查看${escapeHtml(node.cn)}，${escapeHtml(node.years)}"
                   >
-                    <span class="timeline-card-year">${birthYear(node)}</span>
+                    <span class="timeline-card-year">${yearLabel(birthYear(node))}</span>
                     <span class="timeline-card-school"><i></i>${escapeHtml(group.label)}</span>
                     <span class="timeline-card-person">
-                      <img
+                      ${portraitAssetUrl(node.id) ? `<img
                         class="timeline-card-portrait"
                         src="${escapeHtml(portraitAssetUrl(node.id))}"
                         alt=""
                         loading="lazy"
                         decoding="async"
-                      />
+                      />` : `<span class="timeline-card-portrait portrait-placeholder" aria-label="暂无授权肖像">${escapeHtml(node.name.split(" ").map((part) => part[0]).slice(0, 2).join(""))}</span>`}
                       <span class="timeline-card-identity">
                         <strong>${escapeHtml(node.cn)}</strong>
                         <em>${escapeHtml(node.name)}</em>
@@ -82,6 +81,7 @@ export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
                     </span>
                     <span class="timeline-card-role">${escapeHtml(node.role)}</span>
                     <span class="timeline-card-meta">${escapeHtml(node.years)} · ${degreeMap.get(node.id) ?? 0} 条关系</span>
+                    ${node.id === "connes" ? `<span class="timeline-portrait-credit">${escapeHtml(portraits[node.id].creator)} · CC BY-SA 3.0</span>` : ""}
                   </button>
                 `;
               })
@@ -91,6 +91,17 @@ export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
       `
     )
     .join("");
+
+  const topics = nodes.filter((node) => node.kind === "topic");
+  root.insertAdjacentHTML("beforeend", `
+    <section class="timeline-topics">
+      <h3>跨越年代的主题</h3><p>主题没有出生年，单独列在这里。</p>
+      ${topics.map((node) => `<button type="button" class="timeline-card" data-kind="topic" data-node-id="${node.id}" data-group="${node.group}" style="--card-color:${groups[node.group].css}">
+        <span class="topic-card-star" aria-hidden="true">★</span>
+        <strong>${escapeHtml(node.cn)}</strong><span>${escapeHtml(node.role)}</span>
+        <span>${degreeMap.get(node.id) ?? 0} 条主题关系</span>
+      </button>`).join("")}
+    </section>`);
 
   root.addEventListener("click", (event) => {
     const card = event.target.closest("[data-node-id]");
@@ -107,7 +118,7 @@ export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
       const selected = card.dataset.nodeId === selectedNodeId;
       card.hidden = !visible;
       card.classList.toggle("is-selected", selected);
-      if (visible) count += 1;
+      if (visible && card.dataset.kind !== "topic") count += 1;
     });
 
     root.querySelectorAll(".timeline-decade").forEach((section) => {
@@ -117,6 +128,7 @@ export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
     });
 
     if (visibleCount) visibleCount.textContent = String(count);
+    root.querySelector(".timeline-topics").hidden = root.querySelectorAll(".timeline-topics .timeline-card:not([hidden])").length === 0;
 
     if (options.center && selectedNodeId) {
       requestAnimationFrame(() => {

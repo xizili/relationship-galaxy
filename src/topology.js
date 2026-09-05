@@ -1,3 +1,5 @@
+import { starPoints } from "./node-shapes.js";
+
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 function svgElement(tag, attributes = {}) {
@@ -98,7 +100,7 @@ export function initTopology({
       refY: 0,
       markerWidth: 6,
       markerHeight: 6,
-      orient: "auto"
+      orient: "auto-start-reverse"
     });
     marker.appendChild(
       svgElement("path", {
@@ -255,12 +257,6 @@ export function initTopology({
       })
     );
 
-    const freud = positions.get("freud");
-    if (freud) {
-      freud.x = usableWidth * 0.48;
-      freud.y = startY + availableY * 0.48;
-    }
-
     const anchors = new Map(
       [...positions].map(([id, point]) => [id, { x: point.x, y: point.y }])
     );
@@ -362,14 +358,15 @@ export function initTopology({
         "data-link-index": index,
         stroke: color,
         "stroke-dasharray": link.projected ? "3 7" : link.type === "conflict" ? "7 5" : null,
-        "marker-end": link.directed ? `url(#topology-arrow-${link.type})` : null
+        "marker-end": link.directed || link.bidirectional ? `url(#topology-arrow-${link.type})` : null,
+        "marker-start": link.bidirectional ? `url(#topology-arrow-${link.type})` : null
       });
       const hitPath = svgElement("path", {
         class: "topology-edge-hit",
         "data-link-index": index,
         tabindex: 0,
         role: "button",
-        "aria-label": `${link.fullText ?? link.label}`
+        "aria-label": `${link.fullText || link.label}`
       });
       hitPath.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -433,10 +430,14 @@ export function initTopology({
         svgElement("circle", { class: "topology-node-hit", r: radius + 11 })
       );
       record.appendChild(
-        svgElement("circle", { class: "topology-node-halo", r: radius + 6 })
+        node.kind === "topic"
+          ? svgElement("polygon", { class: "topology-node-halo", points: starPoints(radius + 6) })
+          : svgElement("circle", { class: "topology-node-halo", r: radius + 6 })
       );
       record.appendChild(
-        svgElement("circle", { class: "topology-node-core", r: radius })
+        node.kind === "topic"
+          ? svgElement("polygon", { class: "topology-node-core", points: starPoints(radius) })
+          : svgElement("circle", { class: "topology-node-core", r: radius })
       );
       const accessibleTitle = svgElement("title");
       accessibleTitle.textContent = `${node.cn}：${node.role}`;

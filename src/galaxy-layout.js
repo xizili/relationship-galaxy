@@ -16,6 +16,8 @@ function clamp01(value) {
 }
 
 export function birthYear(node) {
+  if (node?.kind === "topic") return null;
+  if (Number.isFinite(node?.birthYear)) return node.birthYear;
   const match = String(node?.years ?? "").match(/\d{4}/);
   return match ? Number(match[0]) : null;
 }
@@ -55,16 +57,16 @@ export function clonePositionMap(positionMap) {
  * the center; domain anchors and relationship relaxation determine direction.
  */
 export function buildGalaxyLayout(nodes, links, scale = new THREE.Vector3(1, 1, 1)) {
-  const years = nodes.map(birthYear).filter(Number.isFinite);
-  const minYear = Math.min(...years);
-  const maxYear = Math.max(...years);
+  // Rank shells preserve chronological ordering without compressing all modern
+  // people together when BCE philosophers enter the same map.
+  const years = [...new Set(nodes.map(birthYear).filter(Number.isFinite))].sort((a, b) => a - b);
   const radii = new Map();
   const positions = new Map();
 
   nodes.forEach((node) => {
-    const year = birthYear(node) ?? minYear;
-    const progress = clamp01((year - minYear) / Math.max(1, maxYear - minYear));
-    const radius = THREE.MathUtils.lerp(54, 248, Math.pow(progress, 0.74));
+    const year = birthYear(node);
+    const progress = year === null ? 0.68 : clamp01(years.indexOf(year) / Math.max(1, years.length - 1));
+    const radius = THREE.MathUtils.lerp(54, 300, Math.pow(progress, 0.74));
     const anchor = groupAnchor(node.group);
     const jitter = seededVector(`${node.id}:galaxy`);
     const direction = anchor.multiplyScalar(0.84).add(jitter.multiplyScalar(0.34)).normalize();

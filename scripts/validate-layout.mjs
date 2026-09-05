@@ -10,7 +10,7 @@ import {
 const galaxyScale = new THREE.Vector3(1.18, 0.84, 1.03);
 const first = buildGalaxyLayout(nodes, links, galaxyScale);
 const second = buildGalaxyLayout(nodes, links, galaxyScale);
-const ordered = [...nodes].sort((a, b) => birthYear(a) - birthYear(b));
+const ordered = nodes.filter((node) => node.kind === "person").sort((a, b) => birthYear(a) - birthYear(b));
 const errors = [];
 
 function ellipsoidRadius(position) {

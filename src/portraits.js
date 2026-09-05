@@ -1,3 +1,5 @@
+import xmindPortraits from "./xmind-portraits.json" with { type: "json" };
+
 const portraitRows = [
   ["freud", "https://commons.wikimedia.org/wiki/File:Sigmund_Freud,_by_Max_Halberstadt_(cropped).jpg", "Max Halberstadt", "Public domain"],
   ["jung", "https://commons.wikimedia.org/wiki/File:ETH-BIB-Jung,_Carl_Gustav_(1875-1961)-Portrait-Portr_14163_(cropped).tif", "未知作者 · ETH-Bibliothek", "Public Domain Mark"],
@@ -47,7 +49,7 @@ const portraitRows = [
 ];
 
 export const portraits = Object.freeze(
-  Object.fromEntries(
+  { ...Object.fromEntries(
     portraitRows.map(([id, sourcePageUrl, creator, license, licenseUrl = "", sourceLabel = "Wikimedia Commons"]) => [
       id,
       Object.freeze({
@@ -59,10 +61,10 @@ export const portraits = Object.freeze(
         sourceLabel
       })
     ])
-  )
+  ), ...Object.fromEntries(xmindPortraits.map(({ id, ...portrait }) => [id, Object.freeze(portrait)])) }
 );
 
 export function portraitAssetUrl(id) {
   const portrait = portraits[id];
-  return portrait ? `${import.meta.env.BASE_URL}${portrait.file}` : "";
+  return portrait ? `${import.meta.env?.BASE_URL ?? "/"}${portrait.file}` : "";
 }

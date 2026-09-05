@@ -8,7 +8,10 @@
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
     "check:data": "node scripts/validate-data.mjs",
-    "check:layout": "node scripts/validate-layout.mjs"
+    "check:layout": "node scripts/validate-layout.mjs",
+    "check:ui": "node scripts/validate-ui.mjs",
+    "export:xmind": "node scripts/export-xmind-markdown.mjs",
+    "check": "npm run check:data && npm run check:layout && npm run check:ui"
   },
   "dependencies": {
     "lucide": "^0.468.0",

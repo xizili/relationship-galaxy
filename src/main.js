@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { CSS2DObject, CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import { createIcons, Map as MapIcon, Orbit, RotateCcw, Search, Telescope, X } from "lucide";
-import { groups, links, nodes, relationTypes } from "./data.js";
+import { groups, links, nodes, relationTypes, sourceSummary } from "./data.js";
 import { portraitAssetUrl, portraits } from "./portraits.js";
 import {
   buildFocusLayout,
@@ -12,6 +12,7 @@ import {
   focusRadiusForCount
 } from "./galaxy-layout.js";
 import { initTopology } from "./topology.js";
+import { starVertices } from "./node-shapes.js";
 import { initTimeline } from "./timeline.js";
 
 createIcons({
@@ -27,6 +28,7 @@ createIcons({
 
 const sceneEl = document.querySelector("#scene");
 const detailPanel = document.querySelector("#detailPanel");
+const detailPanelContent = document.querySelector("#detailPanelContent");
 const searchInput = document.querySelector("#searchInput");
 const searchResults = document.querySelector("#searchResults");
 const groupFilters = document.querySelector("#groupFilters");
@@ -65,8 +67,10 @@ let hoveredNodeId = null;
 let hoveredLinkIndex = null;
 let cameraGoal = null;
 let targetGoal = null;
+let cameraTransitionDeadline = 0;
+let previousFrameTime = 0;
 let lastGalaxyGeometryUpdate = 0;
-let activeView = "topology";
+let activeView = "galaxy";
 let topologyApi = null;
 let timelineApi = null;
 
@@ -96,6 +100,7 @@ controls.dampingFactor = 0.07;
 controls.minDistance = 140;
 controls.maxDistance = 5200;
 controls.autoRotateSpeed = 0.55;
+controls.autoRotate = true;
 
 const graphGroup = new THREE.Group();
 scene.add(graphGroup);
@@ -128,8 +133,9 @@ function escapeHtml(value) {
 }
 
 function renderPersonPortrait(node, variant = "") {
+  if (node.kind === "topic") return `<span class="topic-card-star" aria-label="主题节点">★</span>`;
   const portrait = portraits[node.id];
-  if (!portrait) return "";
+  if (!portrait) return `<figure class="person-portrait ${escapeHtml(variant)}"><span class="portrait-placeholder" aria-label="暂无授权肖像">${escapeHtml(node.name.split(" ").map((part) => part[0]).slice(0, 2).join(""))}</span><figcaption>暂未找到可确认授权的肖像</figcaption></figure>`;
 
   const license = portrait.licenseUrl
     ? `<a href="${escapeHtml(portrait.licenseUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(portrait.license)}</a>`
@@ -152,8 +158,11 @@ function renderPersonPortrait(node, variant = "") {
         />
       </a>
       <figcaption title="${escapeHtml(`${portrait.creator} · ${portrait.license}`)}">
+        ${portrait.imageNote ? `<span>${escapeHtml(portrait.imageNote)} · </span>` : ""}
         <a href="${escapeHtml(portrait.sourcePageUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(portrait.sourceLabel)}</a>
         <span>· ${escapeHtml(portrait.creator)} · </span>${license}
+        ${portrait.modifications ? `<span> · ${escapeHtml(portrait.modifications)}</span>` : ""}
+        ${portrait.rightsNote ? `<span title="${escapeHtml(portrait.rightsNote)}"> · 来源页含地区权利提示</span>` : ""}
       </figcaption>
     </figure>
   `;
@@ -197,12 +206,24 @@ function relationLabel(type) {
 }
 
 function relationFullText(link) {
-  return link.fullText?.trim() || link.note?.trim() || link.label;
+  return link.sourceAnnotated === false ? "原图有此连线，未标注关系文字。" : link.fullText;
 }
 
 function relationDirectionMark(link, nodeId) {
-  if (!link.directed) return "↔";
+  if (!link.directed) return link.bidirectional ? "↔" : "—";
   return link.source === nodeId ? "→" : "←";
+}
+
+function originalRelationOrder(link) {
+  return `${nodeById.get(link.originalSource).cn} ${link.originalDirection} ${nodeById.get(link.originalTarget).cn}`;
+}
+
+function renderNodeProvenance(node) {
+  const citations = (node.biographySources ?? []).map((source) =>
+    `<a href="${escapeHtml(source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.label)}</a>`
+  ).join(" · ");
+  return `${citations ? `<p class="biography-sources">补充资料：${citations}</p>` : ""}
+    <details class="source-transcription"><summary>XMind 节点原文</summary><p>${escapeHtml(node.sourceText)}</p></details>`;
 }
 
 function renderRelationLegend() {
@@ -259,6 +280,7 @@ function setActiveView(view, options = {}) {
     hideTopologyPopover();
     if (selectedNodeId) {
       focusGalaxyLayout(selectedNodeId);
+      focusCameraOnNode(selectedNodeId);
     } else {
       restoreGalaxyLayout();
     }
@@ -288,9 +310,9 @@ function updateOverviewButton() {
   if (!button) return;
 
   const overviewPanelOpen = overviewMode && detailPanelOpen;
-  const label = overviewPanelOpen ? "关闭全览视角侧页" : "打开全览视角";
-  button.classList.toggle("active", overviewPanelOpen);
-  button.setAttribute("aria-pressed", String(overviewPanelOpen));
+  const label = "回到银河远望并打开全览介绍";
+  button.classList.remove("active");
+  button.removeAttribute("aria-pressed");
   button.setAttribute("aria-expanded", String(overviewPanelOpen));
   button.setAttribute("aria-label", label);
   button.setAttribute("title", label);
@@ -344,6 +366,7 @@ function moveCameraToOverview(options = {}) {
 
   cameraGoal = placement.position;
   targetGoal = placement.target;
+  cameraTransitionDeadline = performance.now() + 1100;
 }
 
 function groupStats() {
@@ -352,7 +375,9 @@ function groupStats() {
       key,
       label: groups[key].label,
       color: groups[key].css,
-      count: nodes.filter((node) => node.group === key).length
+      count: nodes.filter((node) => node.group === key).length,
+      people: nodes.filter((node) => node.group === key && node.kind === "person").length,
+      topics: nodes.filter((node) => node.group === key && node.kind === "topic").length
     }))
     .filter((group) => group.count > 0);
 }
@@ -374,7 +399,7 @@ function renderOverviewPeople() {
   return `
     <div class="overview-section-heading">
       <strong>全部人物</strong>
-      <span>${nodes.length} 位</span>
+      <span>${sourceSummary.people} 位 + ${sourceSummary.topics} 个主题</span>
     </div>
     <div class="relation-list overview-list">
       ${nodes
@@ -383,7 +408,7 @@ function renderOverviewPeople() {
             <button type="button" class="relation-row" data-focus-node="${node.id}">
               <span class="relation-dot" style="--relation-color:${groups[node.group].css}"></span>
               <span>
-                <strong>${escapeHtml(node.cn)}</strong>
+                <strong>${node.kind === "topic" ? "★ " : ""}${escapeHtml(node.cn)}</strong>
                 <small>${escapeHtml(node.name)} · ${escapeHtml(groups[node.group].label)} · ${escapeHtml(node.role)}</small>
               </span>
             </button>
@@ -402,7 +427,7 @@ function renderOverviewGroups() {
           <span class="relation-dot" style="--relation-color:${group.color}"></span>
           <span>
             <strong>${escapeHtml(group.label)}</strong>
-            <small>${group.count} 位人物</small>
+            <small>${group.people} 位人物${group.topics ? ` + ${group.topics} 个主题` : ""}</small>
           </span>
         </div>
       `
@@ -495,19 +520,20 @@ function renderOverviewPanel() {
     >${label}</button>
   `;
 
-  detailPanel.innerHTML = `
+  detailPanelContent.innerHTML = `
     <div class="panel-kicker" style="--node-color:#f4b94f">
       <span></span>全局视角
     </div>
     <h2>全览视角</h2>
     <p class="latin-name">${nodes.length} nodes · ${links.length} relations</p>
-    <p class="role">从精神分析核心延展到存在主义、系统论与当代神经科学。</p>
+    <p class="role">${sourceSummary.people} 位人物与 ${sourceSummary.topics} 个主题，包含独立的小网络。由 XMind 节点与显式关系直接整理。</p>
     <div class="panel-stats">
-      ${statButton("people", `${nodes.length} 个人物`)}
+      ${statButton("people", `${sourceSummary.people} 个人物 + ${sourceSummary.topics} 个主题`)}
       <span title="关系总数">${links.length} 条关系</span>
       ${statButton("groups", `${groupStats().length} 个流派`)}
       ${statButton("relation-types", `${relationTypeCount} 类关系`)}
     </div>
+    <p class="source-note">星形代表主题。连线箭头与完整注释保留原图记录；领域分类和短标签为网页整理，原图记录不等同于已经逐条完成史实考证。</p>
     ${renderOverviewSection()}
   `;
 }
@@ -552,12 +578,21 @@ function makeStarField() {
 
 const stars = makeStarField();
 
+function makeTopicStar(radius) {
+  const shape = new THREE.Shape();
+  starVertices(radius).forEach(([x, y], index) => index ? shape.lineTo(x, y) : shape.moveTo(x, y));
+  shape.closePath();
+  const geometry = new THREE.ExtrudeGeometry(shape, { depth: radius * 0.28, bevelEnabled: true, bevelSize: 0.65, bevelThickness: 0.5, bevelSegments: 2, steps: 1 });
+  geometry.center();
+  return geometry;
+}
+
 function createNode(node) {
   const group = groups[node.group];
   const color = group?.color ?? 0xffffff;
   const position = getNodePosition(node);
 
-  const geometry = new THREE.SphereGeometry(node.size, 32, 16);
+  const geometry = node.kind === "topic" ? makeTopicStar(node.size) : new THREE.SphereGeometry(node.size, 32, 16);
   const material = new THREE.MeshStandardMaterial({
     color,
     emissive: color,
@@ -572,7 +607,7 @@ function createNode(node) {
   mesh.userData = { type: "node", id: node.id };
   graphGroup.add(mesh);
 
-  const glowGeometry = new THREE.SphereGeometry(node.size * 2.05, 32, 16);
+  const glowGeometry = node.kind === "topic" ? makeTopicStar(node.size * 1.55) : new THREE.SphereGeometry(node.size * 2.05, 32, 16);
   const glowMaterial = new THREE.MeshBasicMaterial({
     color,
     transparent: true,
@@ -654,22 +689,21 @@ function createLink(link, index) {
   mesh.userData = { type: "link", index };
   graphGroup.add(mesh);
 
-  let arrow = null;
-  if (link.directed) {
-    const arrowGeometry = new THREE.ConeGeometry(3.6 + (link.weight ?? 1), 11, 18);
-    const arrowMaterial = new THREE.MeshBasicMaterial({
-      color: relationColor(link.type),
-      transparent: true,
-      opacity: 0.75,
-      depthWrite: false
-    });
-    arrow = new THREE.Mesh(arrowGeometry, arrowMaterial);
-    const point = curve.getPoint(0.68);
-    const tangent = curve.getTangent(0.68).normalize();
-    arrow.position.copy(point);
-    arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent);
-    arrow.userData = { type: "link", index };
+  const arrows = [];
+  const arrowDirections = link.bidirectional ? [1, -1] : link.directed ? [1] : [];
+  for (const direction of arrowDirections) {
+    const arrow = new THREE.Mesh(
+      new THREE.ConeGeometry(3.6 + (link.weight ?? 1), 11, 18),
+      new THREE.MeshBasicMaterial({
+        color: relationColor(link.type), transparent: true, opacity: 0.75, depthWrite: false
+      })
+    );
+    const t = direction === 1 ? 0.78 : 0.22;
+    arrow.position.copy(curve.getPoint(t));
+    arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), curve.getTangent(t).normalize().multiplyScalar(direction));
+    arrow.userData = { type: "link", index, direction, t };
     graphGroup.add(arrow);
+    arrows.push(arrow);
   }
 
   const linkLabel = document.createElement("div");
@@ -685,11 +719,10 @@ function createLink(link, index) {
     link,
     index,
     mesh,
-    arrow,
+    arrows,
     label: linkLabel,
     labelObject: linkLabelObject,
     material,
-    arrowMaterial: arrow?.material,
     curve
   });
 }
@@ -710,12 +743,11 @@ function refreshLinkGeometry(record) {
   record.mesh.geometry.dispose();
   record.mesh.geometry = nextGeometry;
 
-  if (record.arrow) {
-    const point = curve.getPoint(0.68);
-    const tangent = curve.getTangent(0.68).normalize();
-    record.arrow.position.copy(point);
-    record.arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent);
-  }
+  record.arrows.forEach((arrow) => {
+    const { t, direction } = arrow.userData;
+    arrow.position.copy(curve.getPoint(t));
+    arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), curve.getTangent(t).normalize().multiplyScalar(direction));
+  });
 
   record.labelObject.position.copy(curve.getPoint(0.5));
   record.curve = curve;
@@ -865,9 +897,7 @@ function updateHighlights() {
     const opacity = selected ? 0.96 : hovered ? 0.82 : connectedToSelected ? 0.58 : active ? 0.28 : 0.045;
 
     record.material.opacity = opacity;
-    if (record.arrowMaterial) {
-      record.arrowMaterial.opacity = Math.min(0.88, opacity + 0.18);
-    }
+    record.arrows.forEach((arrow) => { arrow.material.opacity = Math.min(0.88, opacity + 0.18); });
     record.label.classList.toggle("is-visible", selected || hovered || connectedToSelected);
   });
 }
@@ -901,6 +931,7 @@ function focusCameraOnNode(nodeId) {
 
   cameraGoal = cameraPosition;
   targetGoal = position;
+  cameraTransitionDeadline = performance.now() + 1100;
 }
 
 function hideTopologyPopover() {
@@ -924,6 +955,7 @@ function renderTopologyPopover(node) {
       return `
         <li>
           <strong>${relationDirectionMark(link, node.id)} ${escapeHtml(otherNode.cn)}${escapeHtml(qualifier)}</strong>
+          <span class="original-endpoints">原图：${escapeHtml(originalRelationOrder(link))}</span>
           <span>${escapeHtml(relationFullText(link))}</span>
         </li>
       `;
@@ -951,6 +983,7 @@ function renderTopologyPopover(node) {
       </div>
     </div>
     <p class="topology-popover-summary">${escapeHtml(node.summary)}</p>
+    ${renderNodeProvenance(node)}
     ${works}
     <div class="topology-popover-relations">
       <p class="topology-popover-count">原图关系注释 · ${relations.length} 条</p>
@@ -998,7 +1031,7 @@ function renderRelationList(nodeId) {
   const relations = adjacentLinks(nodeId);
 
   if (!relations.length) {
-    return `<p class="empty-state">暂无关系数据</p>`;
+    return `<p class="empty-state">XMind 原图中的独立节点，未绘制连线。</p>`;
   }
 
   return `
@@ -1013,6 +1046,7 @@ function renderRelationList(nodeId) {
               <span class="relation-dot" style="--relation-color:${color}"></span>
               <span>
                 <strong>${relationDirectionMark(link, nodeId)} ${escapeHtml(otherNode.cn)}${link.projected ? " · 经主题节点" : ""}</strong>
+                <small class="original-endpoints">原图：${escapeHtml(originalRelationOrder(link))}</small>
                 <small>${escapeHtml(relationFullText(link))}</small>
               </span>
             </button>
@@ -1030,7 +1064,7 @@ function renderDetailPanel(node) {
     ? `<div class="work-list">${node.works.map((work) => `<span>${escapeHtml(work)}</span>`).join("")}</div>`
     : "";
 
-  detailPanel.innerHTML = `
+  detailPanelContent.innerHTML = `
     <div class="person-card-header">
       ${renderPersonPortrait(node, "is-detail")}
       <div class="person-card-copy">
@@ -1043,6 +1077,7 @@ function renderDetailPanel(node) {
       </div>
     </div>
     <p class="summary">${escapeHtml(node.summary)}</p>
+    ${renderNodeProvenance(node)}
     ${works}
     <div class="panel-stats">
       <span>${relations.length} 条关系</span>
@@ -1065,18 +1100,19 @@ function renderLinkDetail(linkIndex) {
   hideTopologyPopover();
   setDetailPanelOpen(true);
 
-  detailPanel.innerHTML = `
+  detailPanelContent.innerHTML = `
     <div class="panel-kicker" style="--node-color:${cssColor(relationColor(link.type))}">
       <span></span>${escapeHtml(relationLabel(link.type))}
     </div>
-    <h2>${escapeHtml(source.cn)} ${link.directed ? "→" : "↔"} ${escapeHtml(target.cn)}</h2>
+    <h2>${escapeHtml(source.cn)} ${link.directed ? "→" : link.bidirectional ? "↔" : "—"} ${escapeHtml(target.cn)}</h2>
     <p class="latin-name">${escapeHtml(source.name)} / ${escapeHtml(target.name)}</p>
     <p class="role">${escapeHtml(link.label)}</p>
+    <p class="original-endpoints">原图端点顺序：${escapeHtml(originalRelationOrder(link))}</p>
     <p class="summary">${escapeHtml(relationFullText(link))}</p>
     <div class="evidence-status">
       <span>${escapeHtml(relationLabel(link.type))}</span>
-      <span>${link.directed ? "有方向关系" : "双向／对称关系"}</span>
-      <span>${link.projected ? "经原图主题节点投影" : link.sourceAnnotated === false ? "原图直连，未写关系文字" : "原图逐字校正"}</span>
+      <span>${link.directed ? "单向箭头" : link.bidirectional ? "双向箭头" : "无向连线"}</span>
+      <span>${link.sourceAnnotated === false ? "原图直连，未写关系文字" : "XMind 完整原文"}</span>
     </div>
     <div class="relation-actions">
       <button type="button" data-focus-node="${source.id}">${escapeHtml(source.cn)}</button>
@@ -1098,8 +1134,6 @@ function enterOverview(options = {}) {
   hoveredNodeId = null;
   hoveredLinkIndex = null;
   hideTopologyPopover();
-  controls.autoRotate = false;
-  document.querySelector("#orbitToggle").classList.remove("active");
   searchResults.classList.remove("is-open");
   searchInput.value = "";
   restoreGalaxyLayout();
@@ -1119,8 +1153,6 @@ function resetView() {
   selectedLinkIndex = null;
   activeGroup = "all";
   depthMode = "1";
-  controls.autoRotate = false;
-  document.querySelector("#orbitToggle").classList.remove("active");
   updateDepthButtons();
   updateOverviewButton();
   renderFilters();
@@ -1143,6 +1175,7 @@ function nodeSearchText(node) {
       node.role,
       groups[node.group]?.label,
       node.summary,
+      node.sourceText,
       ...(node.works ?? [])
     ].join(" ")
   );
@@ -1207,7 +1240,7 @@ function renderSearchResults(query) {
       const target = nodeById.get(link.target);
       return `
         <button type="button" data-search-link="${index}">
-          <strong>${escapeHtml(source.cn)} → ${escapeHtml(target.cn)}</strong>
+          <strong>${escapeHtml(source.cn)} ${link.directed ? "→" : link.bidirectional ? "↔" : "—"} ${escapeHtml(target.cn)}</strong>
           <span>${escapeHtml(link.label)}</span>
         </button>
       `;
@@ -1235,7 +1268,7 @@ function hitTest(event) {
     return nodeHits[0].object.userData;
   }
 
-  const linkMeshes = linkRecords.flatMap((record) => (record.arrow ? [record.mesh, record.arrow] : [record.mesh]));
+  const linkMeshes = linkRecords.flatMap((record) => [record.mesh, ...record.arrows]);
   const linkHits = raycaster.intersectObjects(linkMeshes, false);
   if (linkHits.length) {
     return linkHits[0].object.userData;
@@ -1250,7 +1283,7 @@ function showLinkToast(event, index) {
   const source = nodeById.get(record.link.source);
   const target = nodeById.get(record.link.target);
   linkToast.innerHTML = `
-    <strong>${escapeHtml(source.cn)} ${record.link.directed ? "→" : "↔"} ${escapeHtml(target.cn)}</strong>
+    <strong>${escapeHtml(source.cn)} ${record.link.directed ? "→" : record.link.bidirectional ? "↔" : "—"} ${escapeHtml(target.cn)}</strong>
     <span>${escapeHtml(record.link.label)}</span>
   `;
   linkToast.style.left = `${Math.min(event.clientX + 16, window.innerWidth - 300)}px`;
@@ -1383,15 +1416,20 @@ searchResults.addEventListener("click", (event) => {
 document.querySelector("#orbitToggle").addEventListener("click", (event) => {
   controls.autoRotate = !controls.autoRotate;
   event.currentTarget.classList.toggle("active", controls.autoRotate);
+  event.currentTarget.setAttribute("aria-pressed", String(controls.autoRotate));
+  const label = controls.autoRotate ? "停止自动旋转" : "开启自动旋转";
+  event.currentTarget.setAttribute("aria-label", label);
+  event.currentTarget.title = label;
 });
 
 document.querySelector("#overviewToggle").addEventListener("click", () => {
-  if (overviewMode && detailPanelOpen) {
-    setDetailPanelOpen(false);
-    return;
-  }
-
+  setActiveView("galaxy");
   enterOverview();
+});
+
+document.querySelector("#closeDetailPanel").addEventListener("click", () => {
+  setDetailPanelOpen(false);
+  document.querySelector("#overviewToggle").focus({ preventScroll: true });
 });
 
 document.querySelector("#resetView").addEventListener("click", resetView);
@@ -1429,6 +1467,8 @@ window.addEventListener("resize", resize);
 
 function animate(timestamp = 0) {
   requestAnimationFrame(animate);
+  const deltaSeconds = Math.min(0.05, Math.max(0, (timestamp - previousFrameTime) / 1000));
+  previousFrameTime = timestamp;
 
   if (activeView !== "galaxy") return;
 
@@ -1440,13 +1480,20 @@ function animate(timestamp = 0) {
   if (cameraGoal && targetGoal) {
     camera.position.lerp(cameraGoal, 0.055);
     controls.target.lerp(targetGoal, 0.065);
-    if (camera.position.distanceTo(cameraGoal) < 1.2 && controls.target.distanceTo(targetGoal) < 0.8) {
+    if (timestamp >= cameraTransitionDeadline || (camera.position.distanceTo(cameraGoal) < 1.2 && controls.target.distanceTo(targetGoal) < 0.8)) {
+      camera.position.copy(cameraGoal);
+      controls.target.copy(targetGoal);
       cameraGoal = null;
       targetGoal = null;
     }
   }
 
-  controls.update();
+  controls.update(deltaSeconds);
+  nodeRecords.forEach((record) => {
+    if (record.node.kind !== "topic") return;
+    record.mesh.quaternion.copy(camera.quaternion);
+    record.glow.quaternion.copy(camera.quaternion);
+  });
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 }
@@ -1469,7 +1516,7 @@ timelineApi = initTimeline({
   groups,
   onFocusNode: (nodeId) => focusNode(nodeId, { camera: false })
 });
-setActiveView("topology", { announce: false });
+setActiveView("galaxy", { announce: false });
 resize();
 enterOverview({ immediate: true, panelOpen: false });
 animate();

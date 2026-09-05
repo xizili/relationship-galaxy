@@ -327,6 +327,55 @@ button {
   pointer-events: none;
 }
 
+.detail-panel-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  position: sticky;
+  top: -18px;
+  z-index: 5;
+  margin: -8px -6px 6px 0;
+  pointer-events: none;
+}
+
+.detail-panel-close {
+  pointer-events: auto;
+  background: #24241f;
+  color: #f6f1e6;
+  box-shadow: 0 2px 12px #0003;
+}
+
+.source-transcription,
+.biography-sources,
+.source-note,
+.original-endpoints {
+  font-size: 12px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.source-transcription {
+  margin: 14px 0;
+  padding: 9px 11px;
+  border: 1px solid #8884;
+  border-radius: 7px;
+}
+.source-transcription summary { cursor: pointer; }
+.source-transcription p { white-space: pre-wrap; margin-bottom: 0; }
+.biography-sources a, .source-map-download a { color: inherit; text-underline-offset: 3px; }
+.source-note, .original-endpoints { opacity: 0.72; }
+.source-map-download { margin: 8px 16px; font-size: 12px; }
+.topic-card-star { color: #65d3c7; font-size: 76px; line-height: 1; text-shadow: 0 0 22px #65d3c744; }
+.portrait-placeholder { display: grid; place-items: center; min-height: 100px; border-radius: 9px; background: #8882; color: inherit; font: 30px Georgia, serif; }
+.timeline-card-portrait.portrait-placeholder { min-height: 0; font-size: 20px; }
+.timeline-topics { margin: 40px 0; padding-top: 22px; border-top: 1px solid #8884; }
+.timeline-topics h3 { font-size: 18px; }
+.timeline-topics p { font-size: 13px; opacity: 0.7; }
+.timeline-topics .timeline-card { max-width: 420px; }
+.timeline-portrait-credit { font-size: 10px; line-height: 1.5; opacity: 0.7; }
+.relation-list:not(.overview-list) .relation-row small { white-space: pre-wrap; }
+#app[data-active-view="topology"] .detail-panel-close,
+#app[data-active-view="timeline"] .detail-panel-close { background: #eee7db; color: #29231c; }
+
 .person-card-header,
 .topology-person-header {
   display: grid;
@@ -371,6 +420,8 @@ button {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
+
+.person-portrait figcaption { display: block; overflow: visible; }
 
 .person-portrait figcaption a {
   color: rgba(244, 215, 154, 0.72);

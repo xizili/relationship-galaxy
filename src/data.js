@@ -1,3 +1,6 @@
+import xmind from "./xmind-source.json" with { type: "json" };
+import { enrichment } from "./xmind-enrichment.js";
+
 export const groups = {
   psychoanalysis: {
     label: "精神分析",
@@ -47,13 +50,14 @@ export const relationTypes = {
   conflict: { label: "分歧", color: 0xff8a70 },
   family: { label: "亲属", color: 0xffb6d5 },
   collaboration: { label: "合作", color: 0x7ce6cf },
-  peer: { label: "同流派", color: 0xb9f189 },
+  peer: { label: "交往", color: 0xb9f189 },
   spouse: { label: "伴侣", color: 0xffa6a6 },
   dialogue: { label: "对话", color: 0xd2b6ff },
-  school: { label: "学派", color: 0xcfd8dc }
+  school: { label: "同流派", color: 0xcfd8dc },
+  topic: { label: "主题关联", color: 0x65d3c7 }
 };
 
-export const nodes = [
+const legacyNodes = [
   {
     id: "freud",
     name: "Sigmund Freud",
@@ -686,312 +690,79 @@ export const nodes = [
   }
 ];
 
-function makeLink(source, target, type, label, fullText, options = {}) {
+const metadataById = new Map(legacyNodes.map((node) => [node.id, node]));
+const visibleTopics = xmind.topics.filter((topic) => topic.kind !== "empty");
+const keyBySourceId = new Map(visibleTopics.map((topic) => [topic.id, topic.key]));
+export const nodes = visibleTopics.map((topic) => {
+  const metadata = { ...metadataById.get(topic.key), ...enrichment[topic.key] };
+  if (!metadata.cn) throw new Error(`XMind node has no display metadata: ${topic.id}`);
   return {
-    source,
-    target,
-    type,
-    label,
-    fullText,
-    ...options
+    ...metadata,
+    kind: topic.kind,
+    sourceId: topic.id,
+    sourceText: topic.title,
+    birthYear: topic.kind === "topic" ? null : metadata.birthYear ?? Number(metadata.years.slice(0, 4)),
+    x: topic.position.x * 0.12,
+    y: topic.position.y * 0.12,
+    z: metadata.z ?? 0,
+    size: metadata.size ?? 9
   };
+});
+
+const shortLabels = {
+  "a9c35e20-03c8-4157-9c15-978ba8957c3b": "精神导师；人本主义精神分析", "319cd388-cca9-4407-b549-725c33ee8d22": "启发与批评；文化与女性视角", "862c9381-fad7-489c-84f3-a9838af3a0ba": "同行；互相启发",
+  "c6bda13d-a518-48ea-a054-75a0352d793c": "合著《禅宗与精神分析》", "c1106fe5-6d71-4951-90ba-275cda318488": "摘抄克尔凯郭尔的句子", "6dd37027-182b-4379-9155-1d738be414c4": "讨论；启发进入心理学",
+  "cd2a5e47-bb89-4104-ae63-876e07052343": "神话是公开的梦", "3a728ff1-ddac-45c5-a2df-dba82486e954": "偶像；后来决裂", "f1a70e19-d66d-4703-9b35-d13355efdf48": "童年见面握手；母亲评价",
+  "f78b974a-fefb-48d3-a07e-fef236050625": "《不合时宜的克尔凯郭尔》", "5931894a-80d0-4269-a717-cc05aef520e8": "存在主义课程", "a11152dd-8145-46d8-942a-9057e317bd61": "法兰克福学派影响",
+  "ca9923ef-c5f8-41d3-9f1e-44389adf7ca0": "好友；书信《朋友之间》", "c4b5309d-cfd6-49c4-a66b-d4a665bc0987": "导师与恋情", "22ce4b3b-8ac7-4cfb-ba1f-a4a41ebdb174": "启发《必要的张力》",
+  "3580408f-afe4-4000-8258-af09312e32ae": "相信斯宾诺莎的上帝", "4362a095-cd99-44d8-9103-9748f735f7dd": "指导硕士论文", "8ee02d00-6878-4ef5-8d4f-f4d0585ec08c": "夫妻；第三任丈夫",
+  "b361bdf5-c347-4d42-8136-10c49c0df51c": "发展二阶控制论", "0740d1ee-2fb8-4a51-ab06-137206d27719": "开创人本主义心理学运动", "d6254f7d-f5d9-4193-a961-48765a29465e": "导师、同僚、咨询及亲密关系",
+  "1803ea31-3e08-4947-853d-6f1f2b6cc9e1": "影响", "aeb24e66-f031-4e00-8271-edfead2bfd59": "人口理论影响演化思想", "b6f9098f-124a-459e-a47a-4cf38da91a99": "对谈心智；出版对话集",
+  "b52f7a5c-943c-4e54-9f93-e25059539f30": "合作提出全局工作空间理论", "ec8c5136-7105-4d5f-a4f8-6172954bb852": "神经达尔文主义：提出与发展",
+  "7c9f26d6-c92e-4fa5-b408-d5f1b2e3e837": "精神同道；同台发言", "233df72a-368a-4b16-8574-694e62dbdb97": "自由能原理与神经精神分析", "75891187-ea05-4584-9c74-aae6d039563d": "1960s 见面交流",
+  "4b50189f-7913-4fad-b0d6-f58d75c09af9": "情侣；智识同频", "a92553b5-f961-4033-b99f-75fc2beca68c": "宴会相遇传闻（真假未明）", "ac39882e-c04a-40f2-9255-a89cfa42812b": "工作时听马勒",
+  "0cadbd98-043a-493a-a4c3-31732041b214": "滚石封面摄影"
+};
+
+function relationshipType(text) {
+  if (!text) return "topic";
+  if (/夫妻|配偶|恋情|情侣|亲密关系/.test(text)) return "spouse";
+  if (/父女/.test(text)) return "family";
+  if (/师徒|师生|导师|指导|supervise|mentor/.test(text)) return "mentor";
+  if (/决裂/.test(text)) return "conflict";
+  if (/同流派/.test(text)) return "school";
+  if (/好友|朋友|同行|伙伴|同道|欣赏|重叠/.test(text)) return "peer";
+  if (/合著|合作|合作者|co-work|共事|开创|拍摄/.test(text)) return "collaboration";
+  if (/对谈|见面|讨论|交流|讨论|咨询|握手|相遇/.test(text)) return "dialogue";
+  return "influence";
 }
 
-export const links = [
-  makeLink("freud", "jung", "conflict", "偶像；后来决裂", "偶像，后来决裂", {
-    directed: true,
-    weight: 2.2
-  }),
-  makeLink("freud", "adler", "mentor", "师徒", "师徒", {
-    directed: true,
-    weight: 1.7
-  }),
-  makeLink("freud", "klein", "school", "同流派", "同流派", {
-    weight: 1.2
-  }),
-  makeLink(
-    "freud",
-    "fromm",
-    "influence",
-    "精神导师；启发人本主义精神分析",
-    "Fromm的两位精神导师之一，关注社会性对人的塑造，启发其开创“人本主义精神分析”",
-    { directed: true, weight: 1.6 }
-  ),
-  makeLink(
-    "freud",
-    "horney",
-    "conflict",
-    "受启发，也尖锐反对",
-    "受启发于，但也尖锐反对弗洛伊德的一些观点，称应当考虑社会文化对人的心理塑造，亦提出女性主义精神分析视角",
-    { directed: true, weight: 1.5 }
-  ),
-  makeLink("freud", "emma", "collaboration", "共事", "共事", {
-    weight: 1.1
-  }),
-  makeLink(
-    "freud",
-    "drucker",
-    "dialogue",
-    "童年见过并握手",
-    "小时候见过，握过手，其母亲尽管不赞成弗洛伊德观点，但评价其为“对欧洲影响最大的人之一”",
-    { directed: true, weight: 1.4 }
-  ),
-  makeLink("freud", "yalom", "influence", "启发", "启发", {
-    directed: true,
-    weight: 1.1
-  }),
-  makeLink("freud", "erikson", "mentor", "师徒", "师徒", {
-    directed: true,
-    weight: 1.4
-  }),
-  makeLink("freud", "kandel", "influence", "启发", "启发", {
-    directed: true,
-    weight: 1.1
-  }),
-  makeLink("freud", "sabina", "peer", "朋友", "朋友", {
-    weight: 1.1
-  }),
-  makeLink("freud", "sartre", "influence", "影响", "影响", {
-    directed: true,
-    weight: 1.2
-  }),
-  makeLink(
-    "freud",
-    "campbell",
-    "influence",
-    "启发其理解梦与神话",
-    "启发Campbell领悟“神话是公开的梦，梦是私人的神话”",
-    { directed: true, weight: 1.4 }
-  ),
-  makeLink("jung", "emma", "spouse", "配偶", "配偶", {
-    weight: 1.2
-  }),
-  makeLink(
-    "jung",
-    "sabina",
-    "mentor",
-    "导师、同僚、咨询师；亲密关系",
-    "卡尔是萨宾娜的博士导师、同僚、咨询师，有过亲密关系",
-    { directed: true, weight: 1.5 }
-  ),
-  makeLink("jung", "campbell", "influence", "启发", "启发", {
-    directed: true,
-    weight: 1.1
-  }),
-  makeLink("anna", "erikson", "collaboration", "训练伙伴", "训练伙伴", {
-    weight: 1.1
-  }),
-  makeLink(
-    "kierkegaard",
-    "kafka",
-    "influence",
-    "摘抄其句子",
-    "Kafka摘抄了克尔凯郭尔的句子：“没有人既能有真正的精神生活，又能同时保持身心绝对健康”",
-    { directed: true, weight: 1.2 }
-  ),
-  makeLink(
-    "kierkegaard",
-    "yalom",
-    "influence",
-    "课程包含其思想",
-    "Yalom上过存在主义的课，包含克尔凯郭尔内容。",
-    { directed: true, weight: 1.2 }
-  ),
-  makeLink(
-    "kierkegaard",
-    "drucker",
-    "influence",
-    "启发其写作",
-    "启发peter写下《“不合时宜”的克尔凯郭尔》",
-    { directed: true, weight: 1.2 }
-  ),
-  makeLink("marx", "fromm", "influence", "精神导师之一", "Fromm的两位精神导师之一", {
-    directed: true,
-    weight: 1.2
-  }),
-  makeLink(
-    "fromm",
-    "suzuki",
-    "collaboration",
-    "合著／对谈",
-    "合著作品《禅宗与精神分析》（亦有对谈版作品《禅与心理分析》）",
-    { weight: 1.4 }
-  ),
-  makeLink("suzuki", "horney", "influence", "结识并启发", "结识并启发", {
-    directed: true,
-    weight: 1.1
-  }),
-  makeLink("fromm", "horney", "spouse", "情侣", "情侣", {
-    weight: 1.2
-  }),
-  makeLink(
-    "adler",
-    "rollo",
-    "influence",
-    "见面讨论；启发进入心理学",
-    "见过+讨论过，启发May进入心理学领域",
-    { directed: true, weight: 1.2 }
-  ),
-  makeLink("yalom", "rollo", "dialogue", "同行；互相启发", "同行，互相启发", {
-    weight: 1.1
-  }),
-  makeLink("horney", "maslow", "mentor", "导师", "mentor", {
-    directed: true,
-    weight: 1.2
-  }),
-  makeLink("adler", "maslow", "mentor", "良师益友", "良师益友", {
-    directed: true,
-    weight: 1.2
-  }),
-  makeLink("goldstein", "maslow", "influence", "影响", "influence", {
-    directed: true,
-    weight: 1.3
-  }),
-  makeLink("benedict", "maslow", "mentor", "督导", "supervise", {
-    directed: true,
-    weight: 1.3
-  }),
-  makeLink("wertheimer", "maslow", "mentor", "督导", "supervise", {
-    directed: true,
-    weight: 1.3
-  }),
-  makeLink(
-    "bertalanffy",
-    "maslow",
-    "school",
-    "直接关联（未标文字）",
-    "原图在两人之间画有直接连线，但未标注关系文字。",
-    { sourceAnnotated: false, weight: 1 }
-  ),
-  makeLink(
-    "maslow",
-    "rogers",
-    "collaboration",
-    "共创人本主义运动",
-    "开创人本主义心理学的运动",
-    { directed: true, weight: 1.3 }
-  ),
-  makeLink("sabina", "piaget", "dialogue", "为其做咨询", "为皮亚杰做咨询", {
-    directed: true,
-    weight: 1.1
-  }),
-  makeLink("heidegger", "arendt", "mentor", "导师；恋人", "导师+恋人", {
-    directed: true,
-    weight: 1.3
-  }),
-  makeLink("sartre", "lacan", "influence", "影响", "影响", {
-    directed: true,
-    weight: 1.2
-  }),
-  makeLink("bertalanffy", "lewin", "school", "场论处有重叠", "场论处有重叠", {
-    weight: 1.1
-  }),
-  makeLink(
-    "wertheimer",
-    "lewin",
-    "collaboration",
-    "合作并影响",
-    "co-work and influence",
-    { directed: true, weight: 1.3 }
-  ),
-  makeLink("wertheimer", "piaget", "influence", "启发", "启发", {
-    directed: true,
-    weight: 1.1
-  }),
-  makeLink("lewin", "piaget", "influence", "启发", "启发", {
-    directed: true,
-    weight: 1.1
-  }),
-  makeLink("piaget", "levi", "influence", "启发", "启发", {
-    directed: true,
-    weight: 1.2
-  }),
-  makeLink("erikson", "benedict", "peer", "朋友", "朋友", {
-    weight: 1.1
-  }),
-  makeLink("erikson", "bateson", "peer", "朋友", "朋友", {
-    weight: 1.1
-  }),
-  makeLink(
-    "benedict",
-    "mead",
-    "mentor",
-    "朋友；硕士论文指导",
-    "朋友；指导后者硕士论文",
-    { directed: true, weight: 1.3 }
-  ),
-  makeLink(
-    "mead",
-    "bateson",
-    "spouse",
-    "夫妻",
-    "夫妻。玛格丽特的第三任丈夫",
-    { weight: 1.3 }
-  ),
-  makeLink(
-    "mead",
-    "foerster",
-    "influence",
-    "发展二阶控制论",
-    "后者发展了前者的二阶控制论",
-    { directed: true, weight: 1.3 }
-  ),
-  makeLink(
-    "bateson",
-    "maturana",
-    "dialogue",
-    "经二阶控制论主题关联",
-    "二者在原图中共同连接主题节点：“Topic: cybernetics of cybernetics —— 当观察者不再隐身，成为环境。”原图没有画成直接人物关系。",
-    { projected: true, weight: 1 }
-  ),
-  makeLink(
-    "maturana",
-    "foerster",
-    "dialogue",
-    "经二阶控制论主题关联",
-    "二者在原图中共同连接主题节点：“Topic: cybernetics of cybernetics —— 当观察者不再隐身，成为环境。”原图没有画成直接人物关系。",
-    { projected: true, weight: 1 }
-  ),
-  makeLink("edelman", "sporns", "mentor", "师生", "师生", {
-    directed: true,
-    weight: 1.3
-  }),
-  makeLink("edelman", "tononi", "collaboration", "合著《意识的宇宙》", "合著《意识的宇宙》", {
-    weight: 1.3
-  }),
-  makeLink("koch", "tononi", "collaboration", "合作者", "合作者", {
-    weight: 1.2
-  }),
-  makeLink(
-    "changeux",
-    "dehaene",
-    "collaboration",
-    "全局工作空间理论",
-    "合作提出全局工作空间理论（Global Workspace Theory, GWT）",
-    { weight: 1.4 }
-  ),
-  makeLink(
-    "edelman",
-    "changeux",
-    "influence",
-    "神经达尔文主义：提出与发展",
-    "前者是“神经达尔文主义”提出者，后者是进一步发展该理论的人。",
-    { directed: true, weight: 1.4 }
-  ),
-  makeLink(
-    "friston",
-    "changeux",
-    "dialogue",
-    "精神同道；同台发言",
-    "精神同道，曾在多个重要会议上同台发言；一些综述文章把他们放在一起讨论",
-    { weight: 1.2 }
-  ),
-  makeLink(
-    "solms",
-    "friston",
-    "dialogue",
-    "自由能原理与神经精神分析",
-    "Mark在其新书《The Hidden Spring》中明确强调，“Friston的自由能原理提供了我们整合弗洛伊德理论与当代表征神经科学的方式。”Karl在一次访谈中说：“我对精神分析的重新崛起很感兴趣，尤其是在试图理解我们为什么要有欲望和自我调节机制方面。”",
-    { weight: 1.5 }
-  )
-];
+export const links = xmind.relationships.map((relation) => {
+  const originalSource = keyBySourceId.get(relation.end1Id);
+  const originalTarget = keyBySourceId.get(relation.end2Id);
+  if (!originalSource || !originalTarget) throw new Error(`Unresolved XMind relationship: ${relation.id}`);
+  const startArrow = !relation.arrowStart.endsWith(".none");
+  const endArrow = !relation.arrowEnd.endsWith(".none");
+  const reversed = startArrow && !endArrow;
+  return {
+    id: relation.id,
+    source: reversed ? originalTarget : originalSource,
+    target: reversed ? originalSource : originalTarget,
+    originalSource, originalTarget,
+    originalDirection: startArrow && endArrow ? "↔" : startArrow ? "←" : endArrow ? "→" : "—",
+    directed: startArrow !== endArrow,
+    bidirectional: startArrow && endArrow,
+    type: relationshipType(relation.title),
+    label: shortLabels[relation.id] ?? (relation.title || "主题关联（原图未注释）"),
+    fullText: relation.title,
+    sourceAnnotated: Boolean(relation.title),
+    weight: 1
+  };
+});
+
+export const sourceSummary = {
+  people: nodes.filter((node) => node.kind === "person").length,
+  topics: nodes.filter((node) => node.kind === "topic").length,
+  relationships: links.length,
+  omittedEmptyNodes: xmind.topics.filter((topic) => topic.kind === "empty").length
+};

@@ -32,7 +32,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build site
-        run: pnpm build
+        run: |
+          pnpm check
+          pnpm export:xmind
+          pnpm build
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload Pages artifact

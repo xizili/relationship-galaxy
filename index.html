@@ -27,8 +27,8 @@
     <title>关系的银河 - 人物关系知识图谱</title>
   </head>
   <body>
-    <main id="app" data-active-view="topology">
-      <section id="topologyView" class="view-surface is-active" aria-label="人物关系拓扑图">
+    <main id="app" data-active-view="galaxy">
+      <section id="topologyView" class="view-surface" aria-label="人物关系拓扑图">
         <svg id="topologyGraph"></svg>
         <aside
           id="topologyPopover"
@@ -56,7 +56,7 @@
         <div id="relationLegend" class="relation-legend" aria-label="关系类型图例"></div>
       </section>
 
-      <section id="scene" class="view-surface" aria-label="3D 人物关系银河"></section>
+      <section id="scene" class="view-surface is-active" aria-label="3D 人物关系银河"></section>
 
       <section id="timelineView" class="view-surface timeline-view" aria-label="人物思想时间轴">
         <div class="timeline-shell">
@@ -65,8 +65,8 @@
             <h2>思想关系的时间剖面</h2>
             <p>按出生年代观察人物如何跨越流派与代际。选择任一人物，可在右侧继续阅读其具体关系。</p>
             <div class="timeline-summary" aria-label="时间轴数据概览">
-              <strong id="timelineVisibleCount">45</strong><span>位人物</span>
-              <strong>1813—1965</strong><span>出生年份跨度</span>
+              <strong id="timelineVisibleCount">72</strong><span>位人物</span>
+              <strong id="timelineYearRange">前384—1965</strong><span>出生年份跨度</span>
             </div>
           </div>
           <div id="timelineContent" class="timeline-content"></div>
@@ -83,8 +83,8 @@
         </div>
 
         <nav id="viewSwitcher" class="view-switcher" aria-label="视图切换">
-          <button type="button" class="active" data-view="topology" aria-pressed="true">关系拓扑</button>
-          <button type="button" data-view="galaxy" aria-pressed="false">银河模式</button>
+          <button type="button" data-view="topology" aria-pressed="false">关系拓扑</button>
+          <button type="button" class="active" data-view="galaxy" aria-pressed="true">银河模式</button>
           <button type="button" data-view="timeline" aria-pressed="false">时间轴</button>
         </nav>
 
@@ -107,15 +107,14 @@
             id="overviewToggle"
             class="icon-button"
             type="button"
-            aria-label="打开全览视角"
+            aria-label="回到银河远望并打开全览介绍"
             aria-controls="detailPanel"
-            aria-pressed="false"
             aria-expanded="false"
-            title="打开全览视角"
+            title="回到银河远望并打开全览介绍"
           >
             <i data-lucide="telescope" aria-hidden="true"></i>
           </button>
-          <button id="orbitToggle" class="icon-button" type="button" aria-label="自动旋转" title="自动旋转">
+          <button id="orbitToggle" class="icon-button active" type="button" aria-pressed="true" aria-label="停止自动旋转" title="停止自动旋转">
             <i data-lucide="orbit" aria-hidden="true"></i>
           </button>
           <button id="resetView" class="icon-button" type="button" aria-label="重置视角" title="重置视角">
@@ -134,7 +133,14 @@
         aria-label="人物与关系详情"
         aria-hidden="true"
         inert
-      ></aside>
+      >
+        <div class="detail-panel-toolbar">
+          <button id="closeDetailPanel" class="detail-panel-close icon-button" type="button" aria-label="关闭侧边栏" title="关闭侧边栏">
+            <i data-lucide="x" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div id="detailPanelContent"></div>
+      </aside>
 
       <div class="depth-control" aria-label="关系层级">
         <button type="button" data-depth="1" class="active">一度</button>
@@ -144,12 +150,13 @@
 
       <section id="sourceMap" class="source-map" aria-label="原始图谱预览">
         <div class="source-map-head">
-          <span>本轮校正依据 · 原始 XMind 图谱</span>
+          <span>旧版图片预览 · 当前版以 XMind 文字为准</span>
           <button id="closeSourceMap" class="icon-button" type="button" aria-label="关闭原始图谱" title="关闭">
             <i data-lucide="x" aria-hidden="true"></i>
           </button>
         </div>
-        <img src="/assets/freud-map-preview.webp" alt="本轮关系校正所依据的弗洛伊德人物关系原始脑图" />
+        <p class="source-map-download"><a href="%BASE_URL%xmind-map.md" target="_blank" rel="noopener">阅读完整 XMind 节点与关系文字（Markdown）</a></p>
+        <img src="/assets/freud-map-preview.webp" alt="早期提供的关系图图片；完整新节点与关系请阅读上方 XMind 文字对照" />
       </section>
 
       <div id="linkToast" class="link-toast" aria-live="polite"></div>

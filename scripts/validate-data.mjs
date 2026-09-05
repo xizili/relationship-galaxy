@@ -1,4 +1,5 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import assert from "node:assert/strict";
 import { resolve } from "node:path";
 import { groups, links, nodes, relationTypes } from "../src/data.js";
 import { portraits } from "../src/portraits.js";
@@ -16,13 +17,13 @@ for (const node of nodes) {
   if (![node.x, node.y, node.z, node.size].every(Number.isFinite)) {
     errors.push(`${node.id} 的空间坐标或节点大小无效`);
   }
-  if (!/^\d{4}-(?:\d{4})?$/.test(node.years)) {
+  if (node.kind === "person" && !Number.isFinite(node.birthYear)) {
     warnings.push(`${node.id} 的年份格式需人工核查：${node.years}`);
   }
 
   const portrait = portraits[node.id];
   if (!portrait) {
-    errors.push(`${node.id} 缺少人物头像资料`);
+    if (node.kind === "person" && !node.portraitUnavailableReason) errors.push(`${node.id} 缺少人物头像资料或明确的占位原因`);
   } else {
     if (!existsSync(resolve("public", portrait.file))) {
       errors.push(`${node.id} 的人物头像文件不存在：${portrait.file}`);
@@ -48,7 +49,7 @@ for (const [index, link] of links.entries()) {
   if (!nodeIds.has(link.target)) errors.push(`关系 ${index} 的终点不存在：${link.target}`);
   if (!relationTypes[link.type]) errors.push(`关系 ${index} 使用了未知类型：${link.type}`);
   if (!link.label?.trim()) errors.push(`关系 ${index} 缺少连线文字`);
-  if (!link.fullText?.trim()) errors.push(`关系 ${index} 缺少人物卡片中的完整原图文字`);
+  if (link.sourceAnnotated && !link.fullText?.trim()) errors.push(`关系 ${index} 缺少人物卡片中的完整原图文字`);
   if (link.source === link.target) warnings.push(`关系 ${index} 是自连接：${link.source}`);
 
   const endpoints = link.directed ? `${link.source}>${link.target}` : [link.source, link.target].sort().join("~");
@@ -60,10 +61,50 @@ for (const [index, link] of links.entries()) {
   degrees.set(link.target, (degrees.get(link.target) ?? 0) + 1);
 }
 
-const isolated = [...degrees.entries()].filter(([, degree]) => degree === 0).map(([id]) => id);
-if (isolated.length) warnings.push(`尚无连线的人物：${isolated.join("、")}`);
+const source = JSON.parse(readFileSync(new URL("../src/xmind-source.json", import.meta.url), "utf8"));
+const visibleSourceTopics = source.topics.filter((topic) => topic.kind !== "empty");
+assert.equal(nodes.length, visibleSourceTopics.length, "所有有效 XMind 节点均须展示");
+assert.equal(links.length, source.relationships.length, "不能漏掉或增造 XMind 关系");
+const sourceKeys = new Map(source.topics.map((topic) => [topic.id, topic.key]));
+const exportedNodes = new Map(nodes.map((node) => [node.sourceId, node]));
+const exportedLinks = new Map(links.map((link) => [link.id, link]));
+for (const topic of visibleSourceTopics) {
+  assert.equal(exportedNodes.get(topic.id)?.sourceText, topic.title, `节点原文变更：${topic.id}`);
+}
+for (const relation of source.relationships) {
+  const link = exportedLinks.get(relation.id);
+  assert.equal(link.fullText, relation.title, `关系原文变更：${relation.id}`);
+  assert.equal(link.originalSource, sourceKeys.get(relation.end1Id));
+  assert.equal(link.originalTarget, sourceKeys.get(relation.end2Id));
+  const start = !relation.arrowStart.endsWith(".none");
+  const end = !relation.arrowEnd.endsWith(".none");
+  assert.equal(link.bidirectional, start && end);
+  assert.equal(link.directed, start !== end);
+  assert.equal(link.source, sourceKeys.get(start && !end ? relation.end2Id : relation.end1Id));
+  assert.equal(link.target, sourceKeys.get(start && !end ? relation.end1Id : relation.end2Id));
+}
+assert.equal(nodes.filter((node) => node.kind === "person").length, 72);
+assert.equal(nodes.filter((node) => node.kind === "topic").length, 1);
+assert.equal(links.length, 85);
+const isolated = [...degrees.entries()].filter(([, degree]) => degree === 0).map(([id]) => id).sort();
+assert.deepEqual(isolated, ["mcculloch", "smith"], "保留源图孤立人物");
+assert.equal(links.filter((link) => link.source === "cybernetics" || link.target === "cybernetics").length, 4);
+const pending = new Set(nodes.map((node) => node.id));
+const componentSizes = [];
+while (pending.size) {
+  const stack = [pending.values().next().value];
+  let size = 0;
+  while (stack.length) {
+    const id = stack.pop();
+    if (!pending.delete(id)) continue;
+    size++;
+    links.forEach((link) => { if (link.source === id) stack.push(link.target); if (link.target === id) stack.push(link.source); });
+  }
+  componentSizes.push(size);
+}
+assert.deepEqual(componentSizes.sort((a, b) => b - a), [46, 9, 7, 5, 2, 2, 1, 1]);
 
-console.log(`数据概览：${nodes.length} 位人物，${links.length} 条关系，${Object.keys(groups).length} 个流派，${Object.keys(relationTypes).length} 类关系。`);
+console.log(`数据概览：72 位人物、1 个主题，${links.length} 条关系、${componentSizes.length} 个独立网络（含孤点）。`);
 warnings.forEach((warning) => console.warn(`提醒：${warning}`));
 
 if (errors.length) {

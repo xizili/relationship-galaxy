@@ -1,0 +1,1433 @@
+{
+  "topics": [
+    {
+      "id": "5d7a4ebfa3c9c53b1d802bdec5",
+      "title": "弗洛伊德 Sigmund Freud（1856-1939），犹太人，精神分析创始人",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "key": "freud",
+      "kind": "person"
+    },
+    {
+      "id": "7e8453b9-b2b4-435b-82e3-f67aecc0c251",
+      "title": "罗洛·梅 Rollo May（1909-1994）《存在》",
+      "position": {
+        "x": 934.3809266553585,
+        "y": -288.8461646941478
+      },
+      "key": "rollo",
+      "kind": "person"
+    },
+    {
+      "id": "da15f0ba-e4d2-4dfd-afb2-d49e1b5e4ea2",
+      "title": "埃里希·弗洛姆 Erich Fromm（1900-1980），犹太人，《在幻想锁链的彼岸》，《爱的艺术》",
+      "position": {
+        "x": -472.8817427531394,
+        "y": -246.39569554865216
+      },
+      "key": "fromm",
+      "kind": "person"
+    },
+    {
+      "id": "a9590c4d-4545-405c-875c-44083b77994f",
+      "title": "卡伦·霍妮 Karen Horney （1885-1952）《我们时代的神经症人格》",
+      "position": {
+        "x": 43,
+        "y": -372
+      },
+      "key": "horney",
+      "kind": "person"
+    },
+    {
+      "id": "7bcab8de02594300bfd02a031b",
+      "title": "欧文·亚隆 Irvin D. Yalom（1931-今）《成为我自己》",
+      "position": {
+        "x": 521.2486067548816,
+        "y": -181.4058848785332
+      },
+      "key": "yalom",
+      "kind": "person"
+    },
+    {
+      "id": "1f1e0bae-8e35-4a0b-a58a-d11c9f4f1f83",
+      "title": "铃木大拙 D. T. Suzuki（1870-1966），日本哲学家，属于禅宗，禅风西渐的先锋人物，《禅与心理分析》",
+      "position": {
+        "x": -36.21894163838806,
+        "y": -674.7282033450315
+      },
+      "key": "suzuki",
+      "kind": "person"
+    },
+    {
+      "id": "9d7a901d-eef1-4a31-a8b8-f61afacca51a",
+      "title": "索伦·奥贝·克尔凯郭尔 Søren Aabye Kierkegaard （1813-1855），丹麦哲学家 《恐惧与战栗》",
+      "position": {
+        "x": -897.6338748180929,
+        "y": -725.7403528869879
+      },
+      "key": "kierkegaard",
+      "kind": "person"
+    },
+    {
+      "id": "b12da2c8-31ab-4db5-bbcd-d30b1c261937",
+      "title": "弗朗茨·卡夫卡 Franz Kafka （1883-1924）《变形记》",
+      "position": {
+        "x": -1570.9599625393753,
+        "y": -414.6858396431412
+      },
+      "key": "kafka",
+      "kind": "person"
+    },
+    {
+      "id": "78640423-0ae9-4566-b55d-46943a963ec4",
+      "title": "卡尔·马克思 Karl Marx (1818-1883)， 《资本论》",
+      "position": {
+        "x": -843.5870161054268,
+        "y": -1119.1018866092586
+      },
+      "key": "marx",
+      "kind": "person"
+    },
+    {
+      "id": "38cb98d7ec8a2efc8b238a04d5",
+      "title": "阿德勒 Alfred Adler （1870-1937）《自卑与超越》",
+      "position": {
+        "x": 278.950508049526,
+        "y": 309.19224671786924
+      },
+      "key": "adler",
+      "kind": "person"
+    },
+    {
+      "id": "9b60abcf-75fc-42ab-85f0-297acac9452d",
+      "title": "约瑟夫·坎贝尔 Joseph Campbell (1904-1987)，文学及比较神话学者，《千面英雄》（好莱坞编剧必读）",
+      "position": {
+        "x": -902.9267423292031,
+        "y": 514.4623715285725
+      },
+      "key": "campbell",
+      "kind": "person"
+    },
+    {
+      "id": "db9eb3fa-baa8-4333-ab39-254fe61710cd",
+      "title": "卡尔·古斯塔夫·荣格 Carl Gustav Jung (1875－1961)，分析心理学鼻祖",
+      "position": {
+        "x": -523.0399172385614,
+        "y": 196.8776483212091
+      },
+      "key": "jung",
+      "kind": "person"
+    },
+    {
+      "id": "cd7af980-c9c0-4e92-98ff-c68039b4175e",
+      "title": "艾玛·荣格 Emma Jung (1882 - 1955)，分析心理学家，传记《Love and Sacrifice: The Life of Emma Jung》 by Imelda Gaudissart",
+      "position": {
+        "x": -1123.1496654279756,
+        "y": 161.57382384160678
+      },
+      "key": "emma",
+      "kind": "person"
+    },
+    {
+      "id": "3fb8cafccff854f05ea2c813bd",
+      "title": "埃里克·坎德尔 Eric R. Kandel （1929-今），犹太人，诺贝尔生理学奖得主，神经科学家，《追寻记忆的痕迹》",
+      "position": {
+        "x": -94.7239767070414,
+        "y": 691.0948540405188
+      },
+      "key": "kandel",
+      "kind": "person"
+    },
+    {
+      "id": "74c89f9c9fab2d0f488608cb32",
+      "title": "彼得·德鲁克 Peter F. Drucker（1909-2005），犹太人，社会生态学家，管理学创始人，《旁观者》，《生态愿景》",
+      "position": {
+        "x": -874.8417633953658,
+        "y": -20.581379854294255
+      },
+      "key": "drucker",
+      "kind": "person"
+    },
+    {
+      "id": "8e9c59e5-182d-40aa-910b-69474efa3883",
+      "title": "亚伯拉罕·马斯洛 Abraham Harold Maslow （1908-1970），犹太人，马斯洛需求金字塔",
+      "position": {
+        "x": 384.9436993142049,
+        "y": 639.2103457660546
+      },
+      "key": "maslow",
+      "kind": "person"
+    },
+    {
+      "id": "dd5b9280-85ee-42fd-855b-6cb4eec933bc",
+      "title": "马科斯·韦特墨 Max Wertheimer (1880–1943)，犹太人，格式塔心理学(Gestalt psychology)三创始人之一。Gestalt一言以蔽之: “the whole is more than the sum of its parts.”",
+      "position": {
+        "x": 1049.4852894631026,
+        "y": 695.7175556028114
+      },
+      "key": "wertheimer",
+      "kind": "person"
+    },
+    {
+      "id": "59577aab-2c67-422e-8c5e-fa1cffae1677",
+      "title": "斯宾诺莎 Spinoza (1632-1677)，半葡萄牙半犹太血统，哲学家",
+      "position": {
+        "x": 810.909328794507,
+        "y": 1370.1189870888595
+      },
+      "key": "spinoza",
+      "kind": "person"
+    },
+    {
+      "id": "337f87be-69a8-4fd3-aa87-2d7d779917db",
+      "title": "露丝·本尼迪克特 Ruth Benedict （1887—1948），人类学家与民俗学家，《菊与刀》 ",
+      "position": {
+        "x": 1505.1981592662405,
+        "y": 149.94175099224117
+      },
+      "key": "benedict",
+      "kind": "person"
+    },
+    {
+      "id": "382f1c4b-f890-4c50-8ac1-f19fea44dea9",
+      "title": "Kurt Goldstein (1878.11.6 - 1965), neurologist and psychiatrist，the holistic theory of the organism.",
+      "position": {
+        "x": 692.5479923536295,
+        "y": 335.0414404491461
+      },
+      "key": "goldstein",
+      "kind": "person"
+    },
+    {
+      "id": "f5b1248f-a8cf-4022-9194-6ad9bb9bb50d",
+      "title": "Walter Cannon（1871-1945），心理学家和生理学家，Fight-or-flight response, 战逃反应， 提出重要的概念 homeostasis",
+      "position": {
+        "x": 2806.349397537358,
+        "y": 847.126629630666
+      },
+      "key": "cannon",
+      "kind": "person"
+    },
+    {
+      "id": "fd3495f6-e3b9-4a00-8bc4-afc20e99d2e3",
+      "title": "Ludwig von Betarlanffy (1901.8.19 - 1972)， GST一般系统理论创始人，生物学家",
+      "position": {
+        "x": 1442.1934206048422,
+        "y": 468.56255236984225
+      },
+      "key": "bertalanffy",
+      "kind": "person"
+    },
+    {
+      "id": "4e6ba6c2-2e4a-43b1-903b-4065032929fe",
+      "title": "库尔特·勒温 Kurt Zadek Lewin（1890.9.9—1947.2.12)，犹太人。社会心理学家，最早研究群体动力学，场论创始人。著有《拓扑心理学》。认为动机是是外部作用于个体的力场。",
+      "position": {
+        "x": 2119.1864525274386,
+        "y": 495.0993241595927
+      },
+      "key": "lewin",
+      "kind": "person"
+    },
+    {
+      "id": "c9f81961-c154-4c0c-a56e-4a764d1abe22",
+      "title": "汉娜·阿伦特 Hannah Arendt，1906.10.14-1975.12.4，美籍德裔犹太人，政治哲学家，《人的境况》（Human Condition）、《心智生活》Life of Mind。“除了哲学、政治和历史文献，她还使用传记和文学作品作为她考虑的参考来源；她逐字逐句地评析这些文本，并用她自己的方法来面对它们。”",
+      "position": {
+        "x": -1317.145454022087,
+        "y": 1095.9642541556698
+      },
+      "key": "arendt",
+      "kind": "person"
+    },
+    {
+      "id": "856c41cf-c39f-4f9b-8db7-a0709899ba3c",
+      "title": "海德格尔 Martin Heidegger，1889-1976, 哲学家，《存在与时间》",
+      "position": {
+        "x": -592.8673807126797,
+        "y": 1012.1755265834042
+      },
+      "key": "heidegger",
+      "kind": "person"
+    },
+    {
+      "id": "0adaf757-e588-43e0-bfc8-25926217eb07",
+      "title": "玛丽·麦卡锡 Mary Therese McCarthy, 1912-1989，美国文学家。擅长婚姻、两性关系、知识分子及女性角色进行辛辣评价。小说《她们》启发了电视剧《欲望都市》的创作。",
+      "position": {
+        "x": -1695.2539459623868,
+        "y": 609.8156075963395
+      },
+      "key": "mccarthy",
+      "kind": "person"
+    },
+    {
+      "id": "a630fa11-3837-48f8-a2a1-003920a23280",
+      "title": "托马斯·库恩 Thomas Kuhn，《必要的张力》",
+      "position": {
+        "x": -86.76848057109169,
+        "y": 1087.3260536522555
+      },
+      "key": "kuhn",
+      "kind": "person"
+    },
+    {
+      "id": "15787294-b62b-4076-b1b6-3988f454a53a",
+      "title": "亚里士多德Aristotle ",
+      "position": {
+        "x": -599.1335652482912,
+        "y": 1263.594322689267
+      },
+      "key": "aristotle",
+      "kind": "person"
+    },
+    {
+      "id": "4841ddaa-aa0a-4587-bfb3-6d4926394e7e",
+      "title": "苏珊·桑塔格 Suan Sontag, 1933.01.16 - 2004.12.28，美籍波兰裔犹太人，作家、艺术评论家、电影制作人。",
+      "position": {
+        "x": -2014.7265039026033,
+        "y": 238.85372162867043
+      },
+      "key": "sontag",
+      "kind": "person"
+    },
+    {
+      "id": "344357ee-e23c-4dd7-b152-e51a2f71f900",
+      "title": "爱因斯坦 Albert Einstein ",
+      "position": {
+        "x": 129.9118587906014,
+        "y": 1671.6201657391568
+      },
+      "key": "einstein",
+      "kind": "person"
+    },
+    {
+      "id": "ed363e5b-d70b-437d-8d2f-b0d43ec4b506",
+      "title": "皮亚杰 Jean Piaget (1896-1980)，瑞士心理学家，兼通数学、逻辑、物理学、生物学、心理学、社会学、科学史和哲学。著有《结构主义》，研究自家小孩。",
+      "position": {
+        "x": 1718.484425854063,
+        "y": 1133.0372642484556
+      },
+      "key": "piaget",
+      "kind": "person"
+    },
+    {
+      "id": "26206e27-19a6-4d3b-a6f3-6c53318a008c",
+      "title": "格雷戈里·贝特森（Gregory Bateson， 1904.5.9 - 1980.07.04），人类学、社会学、心理学、哲学、语言学、控制论、传播学。著有《心灵生态学导论》。研究自家小孩。",
+      "position": {
+        "x": 3120.6656975462174,
+        "y": -79.90404420220307
+      },
+      "key": "bateson",
+      "kind": "person"
+    },
+    {
+      "id": "f0957362-06fe-4227-8a76-68d3da4f5e92",
+      "title": "科特·考夫卡 Kurt Koffka （1886—1941），德国心理学家，研究视觉感知、脑损伤、声音定位、发展心理学和实验心理学，格式塔心理学(Gestalt psychology)三创始人之一。著有《the growth of the mind》,《格式塔心理学原理》。",
+      "position": {
+        "x": 1130.0602917754586,
+        "y": 1138.1298705665333
+      },
+      "key": "koffka",
+      "kind": "person"
+    },
+    {
+      "id": "aebb9522-b5d0-4524-8257-0d7ac83ee7e9",
+      "title": "Claude Lévi-Strauss 克洛德·列维-斯特劳斯 （1908-2009），法国人类学家、社会学家、哲学、语言学。著有《忧郁的热带》、《结构人类学》。",
+      "position": {
+        "x": 2403.1989456071597,
+        "y": 1349.8495634225949
+      },
+      "key": "levi",
+      "kind": "person"
+    },
+    {
+      "id": "7bea3f59-8959-4018-b756-85398d09978b",
+      "title": "让保罗·萨特 Jean-Paul Sartre（1905-1980），存在主义哲学家，《存在与虚无》",
+      "position": {
+        "x": 195.79340151025917,
+        "y": 1338.2114366658798
+      },
+      "key": "sartre",
+      "kind": "person"
+    },
+    {
+      "id": "14123409-c7eb-4991-930c-4ab519ee0a3a",
+      "title": "Shimon Marom，犹太人，神经科学教授。著有《Science, Psychoanalysis and Brain: space for dialogue》.",
+      "position": {
+        "x": 1685.162197414329,
+        "y": -777.4332667998269
+      },
+      "key": "marom",
+      "kind": "person"
+    },
+    {
+      "id": "71631768-fd8e-47dd-924b-c78423d2fd38",
+      "title": "托马斯·奥格登 Thomas Ogden (1946.12.04-), 犹太人，精神分析学派主体间心理学代表人物。著有《心灵的母体》，《创造性阅读》。",
+      "position": {
+        "x": 1284.781936145238,
+        "y": -452.56984357073225
+      },
+      "key": "ogden",
+      "kind": "person"
+    },
+    {
+      "id": "4567d645-e45a-4f10-b354-035dfc172eaf",
+      "title": "梅兰妮·克莱因 Melanie Klein（1882.3.30－1960.9.22），犹太人，奥地利精神分析学家，克莱因学派创始人，儿童精神分析先驱。研究自家小孩（小孩自杀）。",
+      "position": {
+        "x": 672.8903575824711,
+        "y": -663.5129687601807
+      },
+      "key": "klein",
+      "kind": "person"
+    },
+    {
+      "id": "ec23a54f-ba07-4c8b-8352-0f6fcfb59934",
+      "title": "丹尼尔·卡尔曼 Daniel Kaaheman （1934.03.27 - 2024.03.27），犹太人，认知心理学家，诺贝尔经济学奖得主。研究人类判断偏误，著有《思考，快与慢》。",
+      "position": {
+        "x": 2647.7610932712987,
+        "y": 505.999920166023
+      },
+      "key": "kahneman",
+      "kind": "person"
+    },
+    {
+      "id": "1f929ca8-3ee5-49e3-bc02-726e2211eaf8",
+      "title": "Anne Treisman （1935.02.27 - 2018.02.09）, 英国神经科学家，注意力特征整合理论的创始人。",
+      "position": {
+        "x": 2952.0795773853124,
+        "y": 254.6740272927875
+      },
+      "key": "treisman",
+      "kind": "person"
+    },
+    {
+      "id": "30e298d7-83bd-4e61-b1bc-7e2174738842",
+      "title": "Humberto maturana (1928.09.14 - 2021. 05. 06), 智利生物学家、哲学家、二阶控制论理论学家（Second-order cybernetics, also known as the cybernetics of cybernetics），著有《from being to doing》",
+      "position": {
+        "x": 1485.434663036956,
+        "y": -1156.5498344230136
+      },
+      "key": "maturana",
+      "kind": "person"
+    },
+    {
+      "id": "72be76b3-7b70-443b-ad37-ebc084af03c8",
+      "title": "玛格丽特 米德 （1901.12.16-1978.11.15），美国人类学家，总统自由勋章获得者。对原始部落的性文化研究引发了“性文化运动”。发表首创文章cybernetics of cybernetics",
+      "position": {
+        "x": 3083.021540540219,
+        "y": -1201.2197329162177
+      },
+      "key": "mead",
+      "kind": "person"
+    },
+    {
+      "id": "e3665076-d9dd-451d-8d6b-2274b7e95f77",
+      "title": "Heinz von Foerste（1911. 11. 13 –  2002.10.02） 美澳双籍科学家，物理学家，哲学家，发展了二阶控制论。极端建构论者。闻名于doomsday equation预测人口大爆炸。",
+      "position": {
+        "x": 2265.364954849131,
+        "y": -1353.6220676832518
+      },
+      "key": "foerster",
+      "kind": "person"
+    },
+    {
+      "id": "4b1c8318-6652-488f-836d-33824d07951d",
+      "title": "Topic: cybernetics of cybernetics —— 当观察者不再隐身，成为环境",
+      "position": {
+        "x": 1969.7363299362464,
+        "y": -1061.5359121717963
+      },
+      "key": "cybernetics",
+      "kind": "topic"
+    },
+    {
+      "id": "bfe49500-9dfc-4b90-a4c3-ca276ab62da5",
+      "title": "卡尔·罗杰斯（Carl Ransom Rogers，1902—1987），心理学家，人本主义的创始者之一。首创非指导性治疗，又称案主中心治疗。著有《成为一个人》（1961）。",
+      "position": {
+        "x": 663.8604342394597,
+        "y": 921.0503619792114
+      },
+      "key": "rogers",
+      "kind": "person"
+    },
+    {
+      "id": "c4aab8d2-d373-456f-be57-c566c9d40e80",
+      "title": "萨宾娜·斯宾尔埃 Sabina Spielrein，犹太人，儿童心理学家与教育学专家，最早的女性精神分析师之一 ",
+      "position": {
+        "x": -680.7042295605156,
+        "y": 799.185037040729
+      },
+      "key": "sabina",
+      "kind": "person"
+    },
+    {
+      "id": "8850537a-a822-4a1d-ba12-7807c104a590",
+      "title": "鲁道夫·施坦纳（又译史代纳，Rudolf Steiner，1861—1925），奥地利哲学家、改革家、建筑师、教育家，也是华德福教育创始人，人智教育创始人。",
+      "position": {
+        "x": 438.8031177067046,
+        "y": -1073.4664327883065
+      },
+      "key": "steiner",
+      "kind": "person"
+    },
+    {
+      "id": "e6187016-458d-49cb-ab06-d17e8477bfd6",
+      "title": "约翰·沃尔夫冈·冯·歌德（德語：Johann Wolfgang von Goethe；1749—1832），德意志文学家、哲学家、美学家、自然科学家、批评家与政治人物",
+      "position": {
+        "x": -278.75978749318483,
+        "y": -1702.8442578158492
+      },
+      "key": "goethe",
+      "kind": "person"
+    },
+    {
+      "id": "761d5eda-7324-4f10-a206-f328a973bc7d",
+      "title": "雅克·拉康（Jacques Lacan, 1901-1981），20世纪法国最具影响力的精神分析学家之一，被誉为“法国弗洛伊德”。他以对弗洛伊德理论的独特解读而闻名，特别强调语言、结构主义和哲学对精神分析的影响。他的思想在精神分析、哲学、文学、电影理论等领域产生了深远的影响。",
+      "position": {
+        "x": -848.5342250832996,
+        "y": 1589.811741512897
+      },
+      "key": "lacan",
+      "kind": "person"
+    },
+    {
+      "id": "3f9ed0fe-8c59-4123-874b-4bd3b603e0dd",
+      "title": "莫里兹·冯·施温德（1804-1871，Moritz von Schwind），奥地利画家，“把音乐转化为图画”。",
+      "position": {
+        "x": 1057.9966873320227,
+        "y": -1518.2607248173204
+      },
+      "key": "schwind",
+      "kind": "person"
+    },
+    {
+      "id": "c549170d-d3a9-4ffb-a08b-d835b23ac5d6",
+      "title": "米切尔·费根鲍姆（英语：Mitchell Jay Feigenbaum，1944年12月19日—2019年6月30日），美国数学物理学家，混沌理论的先驱，发现了费根鲍姆常数。",
+      "position": {
+        "x": 986.5550462409028,
+        "y": -1237.856398670441
+      },
+      "key": "feigenbaum",
+      "kind": "person"
+    },
+    {
+      "id": "8e4be146-261c-466f-a1c2-09f6aafd428b",
+      "title": "亚当斯密，《国富论》，Adam Smith，1723年—1790年。",
+      "position": {
+        "x": 1467.410002416881,
+        "y": -1949.4814494043333
+      },
+      "key": "smith",
+      "kind": "person"
+    },
+    {
+      "id": "45174470-5218-4416-abb2-240435f029e6",
+      "title": "查尔斯·达尔文（1809年2月12日—1882年4月19日），英国博物学家，生物学家，《演化论》。",
+      "position": {
+        "x": 2407.428158124915,
+        "y": -1732.9426556834485
+      },
+      "key": "darwin",
+      "kind": "person"
+    },
+    {
+      "id": "3cd62821-b226-4a0e-a9cb-f65593bbfb86",
+      "title": "马尔萨斯，《人口学原理》",
+      "position": {
+        "x": 1529.615844624449,
+        "y": -1728.8115000629011
+      },
+      "key": "malthus",
+      "kind": "person"
+    },
+    {
+      "id": "49c22a91-cc56-436a-a02f-f7314efa74fa",
+      "title": "马库卢,John Ramsay McCulloch (1 March 1789 – 11 November 1864)，苏格兰经济学家、作者、编辑。李家园经济学派领导人。",
+      "position": {
+        "x": 940.0823757340968,
+        "y": -1785.3020888108504
+      },
+      "key": "mcculloch",
+      "kind": "person"
+    },
+    {
+      "id": "8d5b5352-39e7-4329-8a9d-8ce508426712",
+      "title": "Eric Erikson 埃里克森，精神分析师",
+      "position": {
+        "x": 1070.5994910410618,
+        "y": -79.85251028999278
+      },
+      "key": "erikson",
+      "kind": "person"
+    },
+    {
+      "id": "350c7cce-53bb-4ad8-83c4-9c055f608cbb",
+      "title": "Anna Freud 安娜弗洛伊德，儿童青少年方向的心理学家",
+      "position": {
+        "x": 955.1039038808412,
+        "y": 192.27623163756334
+      },
+      "key": "anna",
+      "kind": "person"
+    },
+    {
+      "id": "0bbe4595-5da5-4a83-92ee-5d1e4a874ab3",
+      "title": "孔涅（Alain Connes），法国数学家，非交换几何，对时间的表征。此处或许是与symmtry breaking的交界点。",
+      "position": {
+        "x": 2248.438548183096,
+        "y": 2167.028856364618
+      },
+      "key": "connes",
+      "kind": "person"
+    },
+    {
+      "id": "b9956e2c-3bdd-4b7d-a42f-0140ba791181",
+      "title": "让-皮埃尔·尚热（Jean-Pierre Changeux，1936.04.06 - 今），法国神经科学家，表观遗传提出者，突触稳定性研究，蛋白质研究，乙酰胆碱纯化。",
+      "position": {
+        "x": 3041.9152815408215,
+        "y": 1524.7841140371509
+      },
+      "key": "changeux",
+      "kind": "person"
+    },
+    {
+      "id": "e68cff32-b039-4e00-aa59-b9e8dfc47c3e",
+      "title": "",
+      "position": {
+        "x": 2700.7884992410663,
+        "y": 1221.174885280738
+      },
+      "key": "_blank",
+      "kind": "empty"
+    },
+    {
+      "id": "af399857-d1c3-4160-90ed-e180d3c2f821",
+      "title": "斯坦尼斯拉斯·迪昂（Stanislas Dehaene，1965.05.12-），法国认知神经科学家，致力于揭示意识、语言与数学能力在大脑中的神经机制。著有《脑与数学》，《脑与阅读》，《精准学习》。",
+      "position": {
+        "x": 3372.3447383650782,
+        "y": 520.1408413665042
+      },
+      "key": "dehaene",
+      "kind": "person"
+    },
+    {
+      "id": "3515f613-b34c-4487-885e-910ff0983999",
+      "title": "杰拉尔德·埃德尔曼（Gerald Edelman，1929.07.01 - 2014.05.17），美国生物学家，免疫学专家，神经科学家，“神经达尔文主义”倡导者，主张大脑通过选择性突触连接形成认知结构。1972年诺贝尔生理学奖得主。",
+      "position": {
+        "x": 3973.4532009802206,
+        "y": 101.87588445859046
+      },
+      "key": "edelman",
+      "kind": "person"
+    },
+    {
+      "id": "cab7feb7-40b5-41c1-b546-0f211c93c103",
+      "title": "奥拉夫·斯波恩斯（Olaf Sporns，1963.09.18-），德国神经科学家，神经科学中的“脑连接组”（connectome）研究先锋，提出将大脑视为复杂网络系统，开创了网络神经科学这一领域",
+      "position": {
+        "x": 4042.0737547790427,
+        "y": -673.4370900150993
+      },
+      "key": "sporns",
+      "kind": "person"
+    },
+    {
+      "id": "683c40be-4527-48d9-9cf5-5e51ce3245d9",
+      "title": "卡尔·弗里斯顿（Karl Friston，1959.07.12-）是英国神经科学家与理论建模大师，提出“自由能原理”，试图以统一的数学框架解释大脑如何通过最小化不确定性来感知、行动与生存。",
+      "position": {
+        "x": 1925.339492067987,
+        "y": 1696.482124467297
+      },
+      "key": "friston",
+      "kind": "person"
+    },
+    {
+      "id": "8fb0847e-1d73-47b5-837b-856a3316c182",
+      "title": "马克·索姆斯 （Mark Solms，1961.07.17 - )，南非精神分析师，神经心理学家，神经精神分析代表人物。",
+      "position": {
+        "x": -149.7830911046815,
+        "y": 2116.053754336645
+      },
+      "key": "solms",
+      "kind": "person"
+    },
+    {
+      "id": "308efc3a-b62f-414c-af2e-f6fdc5fd2b76",
+      "title": "Giulio Tononi（1960-），意大利裔神经科学与神经病学家，整合信息论提出者。",
+      "position": {
+        "x": 4607.169617369216,
+        "y": -296.2100734641717
+      },
+      "key": "tononi",
+      "kind": "person"
+    },
+    {
+      "id": "2689588d-c8e0-4631-ba14-f9d490bb4970",
+      "title": "Christof Koch，意识研究领军人物。",
+      "position": {
+        "x": 4514.666694291003,
+        "y": 400.0493228564144
+      },
+      "key": "koch",
+      "kind": "person"
+    },
+    {
+      "id": "54daeb8a-9b39-4831-b87a-3f2ad81755e3",
+      "title": "托马斯 莫顿（1915-1968）， 哲学家、隐士，《七重山》，曾对话宗教领袖，包括一行禅师、铃木大拙",
+      "position": {
+        "x": -391.4838334576177,
+        "y": -1275.1209382340494
+      },
+      "key": "merton",
+      "kind": "person"
+    },
+    {
+      "id": "0e7857c7-dfc9-4872-8d1c-7002515203d8",
+      "title": "西蒙娜·德·波伏娃（Simone de Beauvoir，1908年1月9日—1986年4月14日），哲学家，文学家，女权主义者，著有《第二性》《他人的血》",
+      "position": {
+        "x": -367.01978679123954,
+        "y": 1794.7277263720541
+      },
+      "key": "beauvoir",
+      "kind": "person"
+    },
+    {
+      "id": "62368954-12bf-4854-aa45-7bbd2868e447",
+      "title": "庄子 ",
+      "position": {
+        "x": -727.6159206095958,
+        "y": -1539.3451187616681
+      },
+      "key": "zhuangzi",
+      "kind": "person"
+    },
+    {
+      "id": "0ae24c99-8181-4706-8913-1cce0d178e6b",
+      "title": "古斯塔夫·马勒（Gustav Mahler；1860年7月7日—1911年5月18日），作曲家，指挥家",
+      "position": {
+        "x": 318.4644112374176,
+        "y": -2027.102998986435
+      },
+      "key": "mahler",
+      "kind": "person"
+    },
+    {
+      "id": "e78b5055-4c66-4482-b76f-bf530ba8f023",
+      "title": "安娜-露·莱博维茨（Anna-Lou Leibovitz，1949年10月2日—），美国肖像摄影师，工作于滚石。",
+      "position": {
+        "x": -2344.3585516349917,
+        "y": 571.8911302307483
+      },
+      "key": "leibovitz",
+      "kind": "person"
+    },
+    {
+      "id": "08a679b2-3e58-4978-8719-a238b547173e",
+      "title": "约翰列侬，音乐家",
+      "position": {
+        "x": -2008.0088652970999,
+        "y": 1005.2568980904302
+      },
+      "key": "lennon",
+      "kind": "person"
+    },
+    {
+      "id": "dbbc630b-979c-4bbb-ad3c-4dbc3a031d43",
+      "title": "小野洋子，艺术家",
+      "position": {
+        "x": -2287.3249440971626,
+        "y": 1221.0348598661549
+      },
+      "key": "ono",
+      "kind": "person"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "a9c35e20-03c8-4157-9c15-978ba8957c3b",
+      "end1Id": "da15f0ba-e4d2-4dfd-afb2-d49e1b5e4ea2",
+      "end2Id": "5d7a4ebfa3c9c53b1d802bdec5",
+      "title": "Fromm的两位精神导师之一，关注社会性对人的塑造，启发其开创“人本主义精神分析”",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.none"
+    },
+    {
+      "id": "319cd388-cca9-4407-b549-725c33ee8d22",
+      "end1Id": "a9590c4d-4545-405c-875c-44083b77994f",
+      "end2Id": "5d7a4ebfa3c9c53b1d802bdec5",
+      "title": "受启发于，但也尖锐反对弗洛伊德的一些观点，称应当考虑社会文化对人的心理塑造，亦提出女性主义精神分析视角",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.none"
+    },
+    {
+      "id": "6a705025-7bb2-4567-8548-50cfaf160541",
+      "end1Id": "da15f0ba-e4d2-4dfd-afb2-d49e1b5e4ea2",
+      "end2Id": "a9590c4d-4545-405c-875c-44083b77994f",
+      "title": "情侣",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "48bd52da-a30a-41e4-bff9-c8c292057fc7",
+      "end1Id": "7bcab8de02594300bfd02a031b",
+      "end2Id": "5d7a4ebfa3c9c53b1d802bdec5",
+      "title": "启发",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.none"
+    },
+    {
+      "id": "862c9381-fad7-489c-84f3-a9838af3a0ba",
+      "end1Id": "7bcab8de02594300bfd02a031b",
+      "end2Id": "7e8453b9-b2b4-435b-82e3-f67aecc0c251",
+      "title": "同行，互相启发",
+      "arrowStart": "org.xmind.arrowShape.spearhead",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "c6bda13d-a518-48ea-a054-75a0352d793c",
+      "end1Id": "1f1e0bae-8e35-4a0b-a58a-d11c9f4f1f83",
+      "end2Id": "da15f0ba-e4d2-4dfd-afb2-d49e1b5e4ea2",
+      "title": "合著作品《禅宗与精神分析》（亦有对谈版作品《禅与心理分析》）",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "a9b3727e-f3ad-4a13-b7ea-1e0fd83e01f1",
+      "end1Id": "1f1e0bae-8e35-4a0b-a58a-d11c9f4f1f83",
+      "end2Id": "a9590c4d-4545-405c-875c-44083b77994f",
+      "title": "结识并启发",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "c1106fe5-6d71-4951-90ba-275cda318488",
+      "end1Id": "9d7a901d-eef1-4a31-a8b8-f61afacca51a",
+      "end2Id": "b12da2c8-31ab-4db5-bbcd-d30b1c261937",
+      "title": "Kafka摘抄了克尔凯郭尔的句子：“没有人既能有真正的精神生活，又能同时保持身心绝对健康”",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "83191006-078e-4227-9f85-2d3d03b0ef97",
+      "end1Id": "78640423-0ae9-4566-b55d-46943a963ec4",
+      "end2Id": "da15f0ba-e4d2-4dfd-afb2-d49e1b5e4ea2",
+      "title": "Fromm的两位精神导师之一",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "79b49920-cc6a-4c6e-952d-be3da0a83826",
+      "end1Id": "38cb98d7ec8a2efc8b238a04d5",
+      "end2Id": "5d7a4ebfa3c9c53b1d802bdec5",
+      "title": "师徒",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.none"
+    },
+    {
+      "id": "6dd37027-182b-4379-9155-1d738be414c4",
+      "end1Id": "7e8453b9-b2b4-435b-82e3-f67aecc0c251",
+      "end2Id": "38cb98d7ec8a2efc8b238a04d5",
+      "title": "见过+讨论过，启发May进入心理学领域",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.none"
+    },
+    {
+      "id": "cd2a5e47-bb89-4104-ae63-876e07052343",
+      "end1Id": "5d7a4ebfa3c9c53b1d802bdec5",
+      "end2Id": "9b60abcf-75fc-42ab-85f0-297acac9452d",
+      "title": "启发Campbell领悟“神话是公开的梦，梦是私人的神话”",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "3a728ff1-ddac-45c5-a2df-dba82486e954",
+      "end1Id": "db9eb3fa-baa8-4333-ab39-254fe61710cd",
+      "end2Id": "5d7a4ebfa3c9c53b1d802bdec5",
+      "title": "偶像，后来决裂",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.none"
+    },
+    {
+      "id": "696f35b6-1afc-4a5c-913b-159926c9bd7d",
+      "end1Id": "db9eb3fa-baa8-4333-ab39-254fe61710cd",
+      "end2Id": "9b60abcf-75fc-42ab-85f0-297acac9452d",
+      "title": "启发",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "115605fd-e11d-4c64-827d-fc2555990298",
+      "end1Id": "5d7a4ebfa3c9c53b1d802bdec5",
+      "end2Id": "cd7af980-c9c0-4e92-98ff-c68039b4175e",
+      "title": "共事",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "66e07f29-5fca-46c3-99e4-d9ab822d37a6",
+      "end1Id": "cd7af980-c9c0-4e92-98ff-c68039b4175e",
+      "end2Id": "db9eb3fa-baa8-4333-ab39-254fe61710cd",
+      "title": "配偶",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "64b2b517-9201-440c-bff8-299ed6d83b21",
+      "end1Id": "3fb8cafccff854f05ea2c813bd",
+      "end2Id": "5d7a4ebfa3c9c53b1d802bdec5",
+      "title": "启发",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.none"
+    },
+    {
+      "id": "f1a70e19-d66d-4703-9b35-d13355efdf48",
+      "end1Id": "74c89f9c9fab2d0f488608cb32",
+      "end2Id": "5d7a4ebfa3c9c53b1d802bdec5",
+      "title": "小时候见过，握过手，其母亲尽管不赞成弗洛伊德观点，但评价其为”对欧洲影响最大的人之一”",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.none"
+    },
+    {
+      "id": "f78b974a-fefb-48d3-a07e-fef236050625",
+      "end1Id": "9d7a901d-eef1-4a31-a8b8-f61afacca51a",
+      "end2Id": "74c89f9c9fab2d0f488608cb32",
+      "title": "启发peter写下《“不合时宜”的克尔凯郭尔》",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "5931894a-80d0-4269-a717-cc05aef520e8",
+      "end1Id": "9d7a901d-eef1-4a31-a8b8-f61afacca51a",
+      "end2Id": "7bcab8de02594300bfd02a031b",
+      "title": "Yalom上过存在主义的课，包含克尔凯郭尔内容。",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "6cff4458-48bf-41d3-94e8-33004ee09914",
+      "end1Id": "dd5b9280-85ee-42fd-855b-6cb4eec933bc",
+      "end2Id": "8e9c59e5-182d-40aa-910b-69474efa3883",
+      "title": "supervise",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "332d7fe4-11c6-46c5-a614-82d97d6d0551",
+      "end1Id": "59577aab-2c67-422e-8c5e-fa1cffae1677",
+      "end2Id": "dd5b9280-85ee-42fd-855b-6cb4eec933bc",
+      "title": "influence",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "2d3a2fda-8772-4c2c-8080-b7e9de582178",
+      "end1Id": "337f87be-69a8-4fd3-aa87-2d7d779917db",
+      "end2Id": "8e9c59e5-182d-40aa-910b-69474efa3883",
+      "title": "supervise",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "80c8b069-18a5-4393-9025-0aca4758e10a",
+      "end1Id": "38cb98d7ec8a2efc8b238a04d5",
+      "end2Id": "8e9c59e5-182d-40aa-910b-69474efa3883",
+      "title": "良师益友",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "db074127-0319-4778-86d8-6d283ae634e1",
+      "end1Id": "382f1c4b-f890-4c50-8ac1-f19fea44dea9",
+      "end2Id": "8e9c59e5-182d-40aa-910b-69474efa3883",
+      "title": "influence",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "017c803a-13dc-4d45-b3e5-5a29066f9afb",
+      "end1Id": "fd3495f6-e3b9-4a00-8bc4-afc20e99d2e3",
+      "end2Id": "8e9c59e5-182d-40aa-910b-69474efa3883",
+      "title": "欣赏",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "63125a10-9132-4ef5-bcef-e8d9f36da44c",
+      "end1Id": "fd3495f6-e3b9-4a00-8bc4-afc20e99d2e3",
+      "end2Id": "4e6ba6c2-2e4a-43b1-903b-4065032929fe",
+      "title": "场论处有重叠",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "7bb7cdd2-74e3-4837-b46b-c50b5f75ad1a",
+      "end1Id": "dd5b9280-85ee-42fd-855b-6cb4eec933bc",
+      "end2Id": "4e6ba6c2-2e4a-43b1-903b-4065032929fe",
+      "title": "co-work and influence",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "a11152dd-8145-46d8-942a-9057e317bd61",
+      "end1Id": "4e6ba6c2-2e4a-43b1-903b-4065032929fe",
+      "end2Id": "78640423-0ae9-4566-b55d-46943a963ec4",
+      "title": "法兰克福学派影响Kurt",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.none"
+    },
+    {
+      "id": "ca9923ef-c5f8-41d3-9f1e-44389adf7ca0",
+      "end1Id": "0adaf757-e588-43e0-bfc8-25926217eb07",
+      "end2Id": "c9f81961-c154-4c0c-a56e-4a764d1abe22",
+      "title": "好友，通信多年，二人书信集为《朋友之间》；玛丽麦卡锡在汉娜阿伦特的葬礼上致悼词",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "c4b5309d-cfd6-49c4-a66b-d4a665bc0987",
+      "end1Id": "856c41cf-c39f-4f9b-8db7-a0709899ba3c",
+      "end2Id": "c9f81961-c154-4c0c-a56e-4a764d1abe22",
+      "title": "海德格尔是阿伦特的导师，以及后来二人之间产生恋情",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "22ce4b3b-8ac7-4cfb-ba1f-a4a41ebdb174",
+      "end1Id": "15787294-b62b-4076-b1b6-3988f454a53a",
+      "end2Id": "a630fa11-3837-48f8-a2a1-003920a23280",
+      "title": "启发，见《必要的张力》",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "3580408f-afe4-4000-8258-af09312e32ae",
+      "end1Id": "59577aab-2c67-422e-8c5e-fa1cffae1677",
+      "end2Id": "344357ee-e23c-4dd7-b152-e51a2f71f900",
+      "title": "爱因斯坦说：我相信斯宾诺莎的上帝",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "8513114b-d89e-4721-80e2-d104bacd772c",
+      "end1Id": "dd5b9280-85ee-42fd-855b-6cb4eec933bc",
+      "end2Id": "ed363e5b-d70b-437d-8d2f-b0d43ec4b506",
+      "title": "启发",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "872d1980-1a93-4e80-9cd7-00942316d030",
+      "end1Id": "4e6ba6c2-2e4a-43b1-903b-4065032929fe",
+      "end2Id": "ed363e5b-d70b-437d-8d2f-b0d43ec4b506",
+      "title": "启发",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "f96492c9-5af5-406a-8ccf-283532e6dce6",
+      "end1Id": "dd5b9280-85ee-42fd-855b-6cb4eec933bc",
+      "end2Id": "f0957362-06fe-4227-8a76-68d3da4f5e92",
+      "title": "co-work",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "f925134c-6163-4b5a-91c9-9d9e827046b6",
+      "end1Id": "aebb9522-b5d0-4524-8257-0d7ac83ee7e9",
+      "end2Id": "ed363e5b-d70b-437d-8d2f-b0d43ec4b506",
+      "title": "启发",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "0d92ab71-d97a-4cb9-8b40-e82a4ae71d43",
+      "end1Id": "5d7a4ebfa3c9c53b1d802bdec5",
+      "end2Id": "7bea3f59-8959-4018-b756-85398d09978b",
+      "title": "影响",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "d2fa8217-11de-4a0e-bd5b-8b21f4c71773",
+      "end1Id": "f5b1248f-a8cf-4022-9194-6ad9bb9bb50d",
+      "end2Id": "ed363e5b-d70b-437d-8d2f-b0d43ec4b506",
+      "title": "启发",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "7b084ec8-560b-420b-92e0-7fb1d788dc2e",
+      "end1Id": "14123409-c7eb-4991-930c-4ab519ee0a3a",
+      "end2Id": "71631768-fd8e-47dd-924b-c78423d2fd38",
+      "title": "启发",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.none"
+    },
+    {
+      "id": "5ccbf463-720e-4614-a14e-308bd3e52242",
+      "end1Id": "5d7a4ebfa3c9c53b1d802bdec5",
+      "end2Id": "4567d645-e45a-4f10-b354-035dfc172eaf",
+      "title": "同流派",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "074166b9-2209-41dc-9fc0-f8f26a7eb714",
+      "end1Id": "5d7a4ebfa3c9c53b1d802bdec5",
+      "end2Id": "71631768-fd8e-47dd-924b-c78423d2fd38",
+      "title": "同流派",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "478969aa-e70e-4fe2-a2b5-e4e01eac7a5c",
+      "end1Id": "4e6ba6c2-2e4a-43b1-903b-4065032929fe",
+      "end2Id": "ec23a54f-ba07-4c8b-8352-0f6fcfb59934",
+      "title": "作品启发",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "4c33daa9-c3cb-48b9-aa14-39e74c5ffe0d",
+      "end1Id": "ec23a54f-ba07-4c8b-8352-0f6fcfb59934",
+      "end2Id": "1f929ca8-3ee5-49e3-bc02-726e2211eaf8",
+      "title": "夫妻",
+      "arrowStart": "org.xmind.arrowShape.spearhead",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "3a4cff3a-ed55-4979-9819-7c69905df287",
+      "end1Id": "a9590c4d-4545-405c-875c-44083b77994f",
+      "end2Id": "8e9c59e5-182d-40aa-910b-69474efa3883",
+      "title": "mentor",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "4362a095-cd99-44d8-9103-9748f735f7dd",
+      "end1Id": "337f87be-69a8-4fd3-aa87-2d7d779917db",
+      "end2Id": "72be76b3-7b70-443b-ad37-ebc084af03c8",
+      "title": "指导后者硕士论文",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "8ee02d00-6878-4ef5-8d4f-f4d0585ec08c",
+      "end1Id": "72be76b3-7b70-443b-ad37-ebc084af03c8",
+      "end2Id": "26206e27-19a6-4d3b-a6f3-6c53318a008c",
+      "title": "夫妻。玛格丽特的第三任丈夫",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "b361bdf5-c347-4d42-8136-10c49c0df51c",
+      "end1Id": "72be76b3-7b70-443b-ad37-ebc084af03c8",
+      "end2Id": "e3665076-d9dd-451d-8d6b-2274b7e95f77",
+      "title": "后者发展了前者的二阶控制论",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "f7e7698c-8c65-4306-ad42-4930123343da",
+      "end1Id": "4b1c8318-6652-488f-836d-33824d07951d",
+      "end2Id": "e3665076-d9dd-451d-8d6b-2274b7e95f77",
+      "title": "",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "12788fd8-9161-429e-968b-75f4a4dc402b",
+      "end1Id": "4b1c8318-6652-488f-836d-33824d07951d",
+      "end2Id": "30e298d7-83bd-4e61-b1bc-7e2174738842",
+      "title": "",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "c40d47c3-48df-4240-bcbe-30be2885734f",
+      "end1Id": "4b1c8318-6652-488f-836d-33824d07951d",
+      "end2Id": "72be76b3-7b70-443b-ad37-ebc084af03c8",
+      "title": "",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "3410760a-f898-4cf0-8484-7acce4df223a",
+      "end1Id": "4b1c8318-6652-488f-836d-33824d07951d",
+      "end2Id": "26206e27-19a6-4d3b-a6f3-6c53318a008c",
+      "title": "",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "0740d1ee-2fb8-4a51-ab06-137206d27719",
+      "end1Id": "bfe49500-9dfc-4b90-a4c3-ca276ab62da5",
+      "end2Id": "8e9c59e5-182d-40aa-910b-69474efa3883",
+      "title": "开创人本主义心理学的运动",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "d6254f7d-f5d9-4193-a961-48765a29465e",
+      "end1Id": "db9eb3fa-baa8-4333-ab39-254fe61710cd",
+      "end2Id": "c4aab8d2-d373-456f-be57-c566c9d40e80",
+      "title": "卡尔是萨宾娜的博士导师、同僚、咨询师，有过亲密关系",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "c260d169-beab-4dfa-b3d4-18cbd2197591",
+      "end1Id": "c4aab8d2-d373-456f-be57-c566c9d40e80",
+      "end2Id": "ed363e5b-d70b-437d-8d2f-b0d43ec4b506",
+      "title": "为皮亚杰做咨询",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "8697f64f-613f-4276-ac1d-872839f18653",
+      "end1Id": "5d7a4ebfa3c9c53b1d802bdec5",
+      "end2Id": "c4aab8d2-d373-456f-be57-c566c9d40e80",
+      "title": "朋友",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "1803ea31-3e08-4947-853d-6f1f2b6cc9e1",
+      "end1Id": "7bea3f59-8959-4018-b756-85398d09978b",
+      "end2Id": "761d5eda-7324-4f10-a206-f328a973bc7d",
+      "title": "影响",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "50594096-e499-4e3d-bf0c-dd9bc963309d",
+      "end1Id": "e6187016-458d-49cb-ab06-d17e8477bfd6",
+      "end2Id": "8850537a-a822-4a1d-ba12-7807c104a590",
+      "title": "影响",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "9015d347-c2df-4bc3-9c2f-8496b3a99e0a",
+      "end1Id": "e6187016-458d-49cb-ab06-d17e8477bfd6",
+      "end2Id": "c549170d-d3a9-4ffb-a08b-d835b23ac5d6",
+      "title": "影响",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "e0653007-d64a-4cc8-a05a-4ad88b2ce343",
+      "end1Id": "8850537a-a822-4a1d-ba12-7807c104a590",
+      "end2Id": "c549170d-d3a9-4ffb-a08b-d835b23ac5d6",
+      "title": "影响",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "910ba39c-14dc-48a4-b032-cc261e40fad1",
+      "end1Id": "3f9ed0fe-8c59-4123-874b-4bd3b603e0dd",
+      "end2Id": "c549170d-d3a9-4ffb-a08b-d835b23ac5d6",
+      "title": "影响",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "aeb24e66-f031-4e00-8271-edfead2bfd59",
+      "end1Id": "3cd62821-b226-4a0e-a9cb-f65593bbfb86",
+      "end2Id": "45174470-5218-4416-abb2-240435f029e6",
+      "title": "影响；达尔文说自己“把马尔萨斯的教诲用在整个动物王国。”",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "0193313d-3d66-470c-8be1-f9a8080d27f1",
+      "end1Id": "5d7a4ebfa3c9c53b1d802bdec5",
+      "end2Id": "8d5b5352-39e7-4329-8a9d-8ce508426712",
+      "title": "师徒",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "e70d80d0-7812-46f7-8a32-6c0dddf2251a",
+      "end1Id": "350c7cce-53bb-4ad8-83c4-9c055f608cbb",
+      "end2Id": "8d5b5352-39e7-4329-8a9d-8ce508426712",
+      "title": "学术训练伙伴",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "84d8e032-5499-4e86-94c2-38900c5a56fc",
+      "end1Id": "8d5b5352-39e7-4329-8a9d-8ce508426712",
+      "end2Id": "337f87be-69a8-4fd3-aa87-2d7d779917db",
+      "title": "朋友",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "e4acb985-fe5a-48e0-96be-70122dc2ab9e",
+      "end1Id": "8d5b5352-39e7-4329-8a9d-8ce508426712",
+      "end2Id": "72be76b3-7b70-443b-ad37-ebc084af03c8",
+      "title": "朋友",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "6ccc9896-1ba2-4114-bb54-c30285364b67",
+      "end1Id": "8d5b5352-39e7-4329-8a9d-8ce508426712",
+      "end2Id": "26206e27-19a6-4d3b-a6f3-6c53318a008c",
+      "title": "朋友",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "b6f9098f-124a-459e-a47a-4cf38da91a99",
+      "end1Id": "0bbe4595-5da5-4a83-92ee-5d1e4a874ab3",
+      "end2Id": "b9956e2c-3bdd-4b7d-a42f-0140ba791181",
+      "title": "对谈心智话题。出版《对话：科学、脑与哲学》（Conversations on Mind, Matter, and Mathematics）于1990年。",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "b52f7a5c-943c-4e54-9f93-e25059539f30",
+      "end1Id": "b9956e2c-3bdd-4b7d-a42f-0140ba791181",
+      "end2Id": "af399857-d1c3-4160-90ed-e180d3c2f821",
+      "title": "合作提出全局工作空间理论（Global Workspace Theory, GWT）",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "ec8c5136-7105-4d5f-a4f8-6172954bb852",
+      "end1Id": "b9956e2c-3bdd-4b7d-a42f-0140ba791181",
+      "end2Id": "3515f613-b34c-4487-885e-910ff0983999",
+      "title": "前者是“神经达尔文主义”提出者，后者是进一步发展该理论的人。",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "71b32aa5-2534-4a73-ba8b-07eec81e9045",
+      "end1Id": "3515f613-b34c-4487-885e-910ff0983999",
+      "end2Id": "cab7feb7-40b5-41c1-b546-0f211c93c103",
+      "title": "师生",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "7c9f26d6-c92e-4fa5-b408-d5f1b2e3e837",
+      "end1Id": "b9956e2c-3bdd-4b7d-a42f-0140ba791181",
+      "end2Id": "683c40be-4527-48d9-9cf5-5e51ce3245d9",
+      "title": "精神同道，曾在多个重要会议上同台发言；一些综述文章把他们放在一起讨论",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "233df72a-368a-4b16-8574-694e62dbdb97",
+      "end1Id": "8fb0847e-1d73-47b5-837b-856a3316c182",
+      "end2Id": "683c40be-4527-48d9-9cf5-5e51ce3245d9",
+      "title": "Mark在其新书《The Hidden Spring》中明确强调，“Friston 的自由能原理提供了我们整合弗洛伊德理论与当代表征神经科学的方式。” Karl 在一次访谈中说：“我对精神分析的重新崛起很感兴趣，尤其是在试图理解我们为什么要有欲望和自我调节机制方面。”",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "b5012a1b-4b52-4158-8e8b-436bc951ca26",
+      "end1Id": "3515f613-b34c-4487-885e-910ff0983999",
+      "end2Id": "308efc3a-b62f-414c-af2e-f6fdc5fd2b76",
+      "title": "合著《意识的宇宙》",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "f3a6bc92-04e9-4866-ac6a-3d90f86b5a18",
+      "end1Id": "2689588d-c8e0-4631-ba14-f9d490bb4970",
+      "end2Id": "308efc3a-b62f-414c-af2e-f6fdc5fd2b76",
+      "title": "合作者",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "75891187-ea05-4584-9c74-aae6d039563d",
+      "end1Id": "1f1e0bae-8e35-4a0b-a58a-d11c9f4f1f83",
+      "end2Id": "54daeb8a-9b39-4831-b87a-3f2ad81755e3",
+      "title": "1960s曾见面交流",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "87e4bfb3-de5a-43c0-bcc9-77a5e679f367",
+      "end1Id": "308efc3a-b62f-414c-af2e-f6fdc5fd2b76",
+      "end2Id": "cab7feb7-40b5-41c1-b546-0f211c93c103",
+      "title": "合作论文",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "4b50189f-7913-4fad-b0d6-f58d75c09af9",
+      "end1Id": "0e7857c7-dfc9-4872-8d1c-7002515203d8",
+      "end2Id": "7bea3f59-8959-4018-b756-85398d09978b",
+      "title": "情侣，智识同频",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "a92553b5-f961-4033-b99f-75fc2beca68c",
+      "end1Id": "4841ddaa-aa0a-4587-bfb3-6d4926394e7e",
+      "end2Id": "0adaf757-e588-43e0-bfc8-25926217eb07",
+      "title": "《犀利》中有一个真假不明的小故事：二人曾在宴会上相遇。有说法称，桑塔格是年轻版的麦卡锡。",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.none"
+    },
+    {
+      "id": "ad984d72-c8c0-4bed-aaae-6f0fbd0b7baf",
+      "end1Id": "5d7a4ebfa3c9c53b1d802bdec5",
+      "end2Id": "350c7cce-53bb-4ad8-83c4-9c055f608cbb",
+      "title": "父女",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "a914b2f5-9611-4845-a639-d2a0a989a074",
+      "end1Id": "62368954-12bf-4854-aa45-7bbd2868e447",
+      "end2Id": "54daeb8a-9b39-4831-b87a-3f2ad81755e3",
+      "title": "影响",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "ac39882e-c04a-40f2-9255-a89cfa42812b",
+      "end1Id": "0ae24c99-8181-4706-8913-1cce0d178e6b",
+      "end2Id": "c549170d-d3a9-4ffb-a08b-d835b23ac5d6",
+      "title": "费根鲍姆工作时候喜欢听马勒的音乐",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "904947cd-8a72-4daf-bdbc-03ca4fc9692c",
+      "end1Id": "e78b5055-4c66-4482-b76f-bf530ba8f023",
+      "end2Id": "4841ddaa-aa0a-4587-bfb3-6d4926394e7e",
+      "title": "恋情",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "0e123118-71ec-4333-918a-773e792a0fd7",
+      "end1Id": "08a679b2-3e58-4978-8719-a238b547173e",
+      "end2Id": "dbbc630b-979c-4bbb-ad3c-4dbc3a031d43",
+      "title": "夫妻",
+      "arrowStart": "org.xmind.arrowShape.triangle",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    },
+    {
+      "id": "0cadbd98-043a-493a-a4c3-31732041b214",
+      "end1Id": "08a679b2-3e58-4978-8719-a238b547173e",
+      "end2Id": "e78b5055-4c66-4482-b76f-bf530ba8f023",
+      "title": "为列侬和小野拍摄滚石封面照",
+      "arrowStart": "org.xmind.arrowShape.none",
+      "arrowEnd": "org.xmind.arrowShape.triangle"
+    }
+  ],
+  "provenance": {
+    "title": "弗洛伊德copy",
+    "format": "XMind content.json",
+    "importedAt": "2026-09-05",
+    "policy": "节点及关系原文逐字保留；无标题孤立占位节点不展示。分类与短标签为网站整理，非原图注释。"
+  }
+}
+
