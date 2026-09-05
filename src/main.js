@@ -16,7 +16,7 @@ import { starVertices } from "./node-shapes.js";
 import { createRelationTour, relationPulse, placeRelationLabel, pulseVertexShader, pulseFragmentShader } from "./relation-tour.js";
 import { initTimeline } from "./timeline.js";
 import { createZoomSpring } from "./nebula-motion.js";
-import { initSoundtrack } from "./soundtrack.js";
+import { initSoundtrack, soundtrack } from "./soundtrack.js";
 
 createIcons({
   icons: {
@@ -165,6 +165,11 @@ function renderPersonPortrait(node, variant = "") {
 }
 
 function renderImageCredits() {
+  document.querySelector("#musicCreditsContent").innerHTML = `<article><h3>${escapeHtml(soundtrack.title)}</h3>
+    <p>作曲：${escapeHtml(soundtrack.composer)}；编曲与演奏：${escapeHtml(soundtrack.artist)}。</p>
+    <p><a href="${soundtrack.sourceUrl}" target="_blank" rel="noopener noreferrer">录音来源</a> ·
+    <a href="${soundtrack.licenseUrl}" target="_blank" rel="noopener noreferrer">${soundtrack.license}</a> · ${escapeHtml(soundtrack.quality)}</p>
+    <p>原始完整录音，未剪辑或改编；网站循环播放，音量默认 30%。按上述许可署名使用，不代表演奏者为本站背书。</p></article>`;
   document.querySelector("#imageCreditsContent").innerHTML = nodes.filter((node) => portraits[node.id]).map((node) => {
     const p = portraits[node.id];
     const license = p.licenseUrl ? `<a href="${escapeHtml(p.licenseUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(p.license)}</a>` : escapeHtml(p.license);
@@ -237,15 +242,7 @@ function renderDomainTags(node) {
 }
 
 function renderRelationLegend() {
-  relationLegend.innerHTML = Object.entries(relationTypes)
-    .map(
-      ([key, meta]) => `
-        <span style="--legend-color:${cssColor(meta.color)}" data-relation-type="${key}">
-          <i></i>${escapeHtml(meta.label)}
-        </span>
-      `
-    )
-    .join("");
+  relationLegend.innerHTML = `<span>节点颜色 · 人物领域</span><span>箭头 · 关系方向</span><span>点击连线 · 阅读关系</span>`;
 }
 
 function syncSecondaryViews(options = {}) {

@@ -10,11 +10,13 @@
 
 图上关系短标签全部为中文，原始英文与其他注释仍原样保存在人物卡及文字对照中。巡游文字时序为“起点姓名 → 关系文字 → 终点姓名”；无向和双向先点亮两端，再显示文字。文字优先避让两端姓名及工具栏，无安全位置时暂不显示该次巡游文字。银河引导淡显，进入网站 30 秒后关闭，不因重新全览而重现。
 
-## 配乐与待确认素材
+## 配乐、肖像与来源
 
-左下角 ♪ 提供 Oskar Schuster《Damascus》的官方视频播放器，访客再次点击加载后才连接 YouTube，默认不自动播放，关闭面板停止播放；官方 Bandcamp 与视频链接提供备用入口。该曲[官方页面](https://oskarschuster.bandcamp.com/track/damascus)标注保留全部权利，本站没有复制、上传或声称获得该音频的独立配乐授权。[许可联系](https://www.oskarschuster.com/contact.html)。当前环境未验证外部平台的实际播放，网络或平台限制可能影响可用性。
+配乐改为 Erik Satie《Gymnopédie No. 1》，编曲与演奏：Kevin MacLeod（incompetech.com），按 [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) 署名使用。[录音来源](https://commons.wikimedia.org/wiki/File:Gymnopedie_No._1_(ISRC_USUAN1100787).mp3)。完整未修改 MP3 随站托管，320 kbps、44.1 kHz、立体声、3:07，SHA-1 `a875a337f165f8dbfe3600ba3076b9d186f3c523`。默认音量 30%，循环播放；进入时尝试自动播放，浏览器拦截时需点击左下角“开启音乐”。可随时关闭；不通过无关点击偷偷重启，不依赖第三方播放器。作曲作品与演奏录音的权利分开核实。
 
-用户提供的 Marom（Technion）和 Ogden（Haaretz）肖像尚未确认公开转载许可；定向检索未找到可确认开放授权、身份匹配的替代素材。本次不上传这两张图片，仍保留占位，待用户确认授权后替换。不能把来源公开可见当作 CC 或公版证明。
+按用户明确要求加入其提供的 Marom（[Technion 医学院](https://md.technion.ac.il/about/deans/)）和 Ogden（[Haaretz 人物报道](https://www.haaretz.com/life/books/2017-03-29/ty-article-magazine/.premium/how-psychoanalyst-thomas-ogden-found-his-true-self-in-fiction/0000017f-e36a-d75c-a7ff-ffefeafa0000)）原始图片文件，72 位人物均有头像。这两张图未核实开放转载许可，不标为 CC 或公版；非商业用途和来源署名本身不代表取得授权，版权归原权利人。来源与这一说明集中在 ©「来源与授权」页面。
+
+地图采用确定性的图距离排布与独立网络分区；淡灰关系线保留方向，节点颜色表示领域。姓名为轻量地图标注，完整介绍留在侧栏。小屏减少常驻标签，但保留全部节点；打开侧栏不压缩地图。只有被聚焦的核心节点放大，关闭侧栏不改写任何关系。全站共用 12/14/24px 阅读层级、44px 主控件和统一留白。
 
 ## 运行
 
@@ -44,9 +46,10 @@ https://xizili.github.io/relationship-galaxy/
 - `src/taxonomy.js`：10 个主要领域与全部人物的流派、专业及跨域标签。主分类用于导航，不代表唯一身份。
 - `src/relation-tour.js`：随机关系巡游调度、方向与姓名亮起时序、线条光效。
 - `src/nebula-motion.js`：帧率无关、有距离边界的惯性缩放弹簧。
-- `src/soundtrack.js`：按需加载官方播放器、关闭时销毁播放器；不包含音频文件。
+- `src/soundtrack.js`、`public/audio/`：已署名录音、自动播放降级、手动开关及状态同步。
+- `src/map-layout.js`：独立网络的确定性排布、留白与节点碰撞修正。
 - `src/data.js`：旧人物展示资料与新 XMind 数据的合并、关系短标签和分类。关系 ID 与 XMind 保持一致。
-- `src/xmind-portraits.json`、`src/portraits.js`：头像来源、许可、署名。Marom 与 Ogden 因尚未确认许可使用字母占位。
+- `src/xmind-portraits.json`、`src/portraits.js`：72 位人物头像的来源、许可及未核实授权声明。
 - `public/xmind-map.md`：可阅读、核对的全部节点与关系原文，由 `pnpm export:xmind` 生成。
 - `src/main.js`：3D 场景、交互、搜索和人物卡逻辑。
 - `src/styles.css`：桌面与移动端界面样式。

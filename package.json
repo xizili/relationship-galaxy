@@ -13,7 +13,9 @@
     "export:xmind": "node scripts/export-xmind-markdown.mjs",
     "check:tour": "node scripts/validate-tour.mjs",
     "check:map-motion": "node scripts/validate-map-motion.mjs",
-    "check": "npm run check:data && npm run check:layout && npm run check:tour && npm run check:ui && npm run check:map-motion"
+    "check:map-layout": "node scripts/validate-map-layout.mjs",
+    "check:soundtrack": "node scripts/validate-soundtrack.mjs",
+    "check": "npm run check:data && npm run check:layout && npm run check:tour && npm run check:ui && npm run check:map-motion && npm run check:map-layout && npm run check:soundtrack"
   },
   "dependencies": {
     "lucide": "^0.468.0",

@@ -61,7 +61,26 @@ export const portraits = Object.freeze(
         sourceLabel
       })
     ])
-  ), ...Object.fromEntries(xmindPortraits.map(({ id, ...portrait }) => [id, Object.freeze(portrait)])) }
+  ), ...Object.fromEntries(xmindPortraits.map(({ id, ...portrait }) => [id, Object.freeze(portrait)])),
+    marom: Object.freeze({
+      file: "portraits/marom.jpg",
+      sourcePageUrl: "https://md.technion.ac.il/about/deans/",
+      sourceLabel: "Technion 医学院 · 历任院长",
+      creator: "摄影者未注明；来源为 Technion 医学院",
+      license: "未核实开放转载许可",
+      modifications: "用户提供的原始文件，未修改；网页以缩略图显示",
+      rightsNote: "按网站作者要求用于非商业人物介绍。非商业用途不等于获得授权；版权仍归原权利人，本站不授予转载许可。"
+    }),
+    ogden: Object.freeze({
+      file: "portraits/ogden.webp",
+      sourcePageUrl: "https://www.haaretz.com/life/books/2017-03-29/ty-article-magazine/.premium/how-psychoanalyst-thomas-ogden-found-his-true-self-in-fiction/0000017f-e36a-d75c-a7ff-ffefeafa0000",
+      sourceLabel: "Haaretz · 2017 年 3 月 29 日人物报道",
+      creator: "摄影者待核实；来源为 Haaretz",
+      license: "未核实开放转载许可",
+      modifications: "用户提供的原始文件，未修改；网页以缩略图显示",
+      rightsNote: "按网站作者要求用于非商业人物介绍。非商业用途不等于获得授权；版权仍归原权利人，本站不授予转载许可。"
+    })
+  }
 );
 
 export function portraitAssetUrl(id) {

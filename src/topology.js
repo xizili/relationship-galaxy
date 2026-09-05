@@ -1,4 +1,5 @@
 import { starPoints } from "./node-shapes.js";
+import { createMapLayout } from "./map-layout.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const NODE_RADIUS = 9;
@@ -93,7 +94,7 @@ export function initTopology({
   });
 
   const defs = svgElement("defs");
-  Object.entries(relationTypes).forEach(([type, meta]) => {
+  Object.entries({ neutral: "#999891", active: "#65574b" }).forEach(([type, color]) => {
     const marker = svgElement("marker", {
       id: `topology-arrow-${type}`,
       viewBox: "0 -4 8 8",
@@ -106,7 +107,7 @@ export function initTopology({
     marker.appendChild(
       svgElement("path", {
         d: "M0,-4L8,0L0,4Z",
-        fill: colorFromNumber(meta.color)
+        fill: color
       })
     );
     defs.appendChild(marker);
@@ -143,6 +144,7 @@ export function initTopology({
 
   const nodeRecords = new Map();
   const edgeRecords = [];
+  const layoutIslands = createMapLayout(nodes, links);
 
   function relationColor(type) {
     return colorFromNumber(relationTypes[type]?.color);
@@ -154,6 +156,7 @@ export function initTopology({
 
   function shouldPersistLabel(node, width) {
     const nodeDegree = degree.get(node.id) ?? 0;
+    if (width <= 440) return nodeDegree > 8;
     if (width <= 760) return nodeDegree > 4;
     if (width <= 1240) return nodeDegree > 3;
     return true;
@@ -163,13 +166,11 @@ export function initTopology({
     const radius = NODE_RADIUS;
     const roleText = compactRoleText(node);
     const labelWidth = clamp(
-      Math.max(node.cn.length * 12, roleText.length * 9) + 20,
-      68,
-      132
+      node.cn.length * 13 + 12,
+      52,
+      144
     );
-    const rawX = Number(node.x) || 0;
-    const labelSide = rawX < -12 || (Math.abs(rawX) <= 12 && index % 2 === 1) ? -1 : 1;
-    const cardX = labelSide > 0 ? radius + 8 : -radius - 8 - labelWidth;
+    const cardX = -labelWidth / 2;
     const markerFootprint = {
       left: -radius - 4,
       right: radius + 4,
@@ -181,14 +182,14 @@ export function initTopology({
       radius,
       labelWidth,
       cardX,
-      textX: cardX + 10,
+      textX: 0,
       roleText,
       footprint: includeCard
         ? {
             left: Math.min(markerFootprint.left, cardX - 4),
             right: Math.max(markerFootprint.right, cardX + labelWidth + 4),
-            top: -20,
-            bottom: 20
+            top: -14,
+            bottom: 34
           }
         : markerFootprint
     };
@@ -225,38 +226,6 @@ export function initTopology({
     dimensions = { width, height, usableWidth, topInset, bottomInset };
     svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 
-    const xs = nodes.map((node) => Number(node.x) || 0);
-    const ys = nodes.map((node) => Number(node.y) || 0);
-    const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
-    const minY = Math.min(...ys);
-    const maxY = Math.max(...ys);
-    const spanX = Math.max(1, maxX - minX);
-    const spanY = Math.max(1, maxY - minY);
-    const padX = width < 720 ? 42 : 76;
-    const startY = topInset + 24;
-    const endY = Math.max(startY + 96, height - bottomInset - 24);
-    const availableX = Math.max(120, usableWidth - padX * 2);
-    const availableY = Math.max(80, endY - startY);
-
-    positions = new Map(
-      nodes.map((node, index) => {
-        const fallbackAngle = (index / Math.max(1, nodes.length)) * Math.PI * 2;
-        const rawX = Number.isFinite(Number(node.x)) ? Number(node.x) : Math.cos(fallbackAngle) * 200;
-        const rawY = Number.isFinite(Number(node.y)) ? Number(node.y) : Math.sin(fallbackAngle) * 200;
-        return [
-          node.id,
-          {
-            x: padX + ((rawX - minX) / spanX) * availableX,
-            y: startY + ((rawY - minY) / spanY) * availableY
-          }
-        ];
-      })
-    );
-
-    const anchors = new Map(
-      [...positions].map(([id, point]) => [id, { x: point.x, y: point.y }])
-    );
     nodeLayouts = new Map(
       nodes.map((node, index) => [
         node.id,
@@ -264,78 +233,14 @@ export function initTopology({
       ])
     );
 
-    // Deterministic collision pass keeps the curated map recognizable while
-    // giving both node markers and name cards room to read as a loose constellation.
-    for (let iteration = 0; iteration < 150; iteration += 1) {
-      for (let i = 0; i < nodes.length; i += 1) {
-        const a = nodes[i];
-        const pa = positions.get(a.id);
-        const boxA = nodeLayouts.get(a.id).footprint;
-        for (let j = i + 1; j < nodes.length; j += 1) {
-          const b = nodes[j];
-          const pb = positions.get(b.id);
-          const boxB = nodeLayouts.get(b.id).footprint;
-          let dx = pb.x - pa.x;
-          let dy = pb.y - pa.y;
-          let distance = Math.hypot(dx, dy);
-          const radiusAllowance = NODE_RADIUS * 2 * 0.24;
-          const minimum = width < 720 ? 48 : 68 + radiusAllowance;
-          if (distance < minimum) {
-            if (distance < 0.01) {
-              dx = ((i + j) % 2 ? 1 : -1) * 0.1;
-              dy = ((i * 3 + j) % 2 ? 1 : -1) * 0.1;
-              distance = Math.hypot(dx, dy);
-            }
-            const shift = (minimum - distance) * 0.52;
-            const nx = dx / distance;
-            const ny = dy / distance;
-            pa.x -= nx * shift;
-            pa.y -= ny * shift;
-            pb.x += nx * shift;
-            pb.y += ny * shift;
-          }
-
-          const overlapX =
-            Math.min(pa.x + boxA.right, pb.x + boxB.right) -
-            Math.max(pa.x + boxA.left, pb.x + boxB.left);
-          const overlapY =
-            Math.min(pa.y + boxA.bottom, pb.y + boxB.bottom) -
-            Math.max(pa.y + boxA.top, pb.y + boxB.top);
-
-          if (overlapX > 0 && overlapY > 0) {
-            const separationPadding = 9;
-            if (overlapX < overlapY * 1.45) {
-              const direction = pb.x >= pa.x ? 1 : -1;
-              const boxShift = (overlapX + separationPadding) * 0.52;
-              pa.x -= direction * boxShift;
-              pb.x += direction * boxShift;
-            } else {
-              const direction = pb.y >= pa.y ? 1 : -1;
-              const boxShift = (overlapY + separationPadding) * 0.52;
-              pa.y -= direction * boxShift;
-              pb.y += direction * boxShift;
-            }
-          }
-        }
-      }
-
-      positions.forEach((point, id) => {
-        const anchor = anchors.get(id);
-        const footprint = nodeLayouts.get(id).footprint;
-        point.x += (anchor.x - point.x) * 0.0025;
-        point.y += (anchor.y - point.y) * 0.0025;
-        point.x = clampRange(
-          point.x,
-          18 - footprint.left,
-          usableWidth - 18 - footprint.right
-        );
-        point.y = clampRange(
-          point.y,
-          topInset + 12 - footprint.top,
-          height - bottomInset - 12 - footprint.bottom
-        );
-      });
-    }
+    positions = layoutIslands({
+      x: 24, y: topInset + 12,
+      // Keep the world stable when a sidebar opens. Only the camera's visible
+      // area changes; do not squash 73 people into the remaining phone strip.
+      width: width - 70,
+      height: Math.max(260, height - 78 - topInset - 24),
+      footprints: new Map([...nodeLayouts].map(([id, layout]) => [id, layout.footprint]))
+    }).positions;
   }
 
   function buildEdges() {
@@ -345,7 +250,7 @@ export function initTopology({
 
     linkEntries.forEach((entry) => {
       const { link, index, bundleCount, bundleIndex } = entry;
-      const color = relationColor(link.type);
+      const color = "#999891";
       const bundleOffset = (bundleIndex - (bundleCount - 1) / 2) * 19;
       const seededBend = ((index * 17) % 5 - 2) * 3.5;
       const bend = bundleOffset + seededBend;
@@ -355,8 +260,8 @@ export function initTopology({
         "data-link-index": index,
         stroke: color,
         "stroke-dasharray": link.projected ? "3 7" : link.type === "conflict" ? "7 5" : null,
-        "marker-end": link.directed || link.bidirectional ? `url(#topology-arrow-${link.type})` : null,
-        "marker-start": link.bidirectional ? `url(#topology-arrow-${link.type})` : null
+        "marker-end": link.directed || link.bidirectional ? "url(#topology-arrow-neutral)" : null,
+        "marker-start": link.bidirectional ? "url(#topology-arrow-neutral)" : null
       });
       const hitPath = svgElement("path", {
         class: "topology-edge-hit",
@@ -445,25 +350,20 @@ export function initTopology({
       card.appendChild(
         svgElement("rect", {
           x: cardX,
-          y: -16,
+          y: 13,
           width: labelWidth,
-          height: 32,
+          height: 22,
           rx: 6
         })
       );
       const name = svgElement("text", {
         class: "topology-node-name",
         x: textX,
-        y: -2
+        y: 27,
+        "text-anchor": "middle"
       });
       name.textContent = node.cn;
-      const role = svgElement("text", {
-        class: "topology-node-role",
-        x: textX,
-        y: 12
-      });
-      role.textContent = roleText;
-      card.append(name, role);
+      card.append(name);
       record.appendChild(card);
 
       record.addEventListener("click", (event) => {
@@ -486,7 +386,14 @@ export function initTopology({
   function geometryForRecord(record) {
     const source = positions.get(record.entry.link.source);
     const target = positions.get(record.entry.link.target);
-    return linkPath(source, target, record.bend);
+    const dx = target.x - source.x, dy = target.y - source.y;
+    const length = Math.max(1, Math.hypot(dx, dy));
+    const trim = Math.min(NODE_RADIUS + 4, length * 0.2);
+    return linkPath(
+      { x: source.x + dx / length * trim, y: source.y + dy / length * trim },
+      { x: target.x - dx / length * trim, y: target.y - dy / length * trim },
+      record.bend
+    );
   }
 
   function renderGeometry() {
@@ -564,6 +471,9 @@ export function initTopology({
       record.visiblePath.classList.toggle("is-dimmed", dimmed);
       record.visiblePath.classList.toggle("is-highlighted", connected || selected);
       record.visiblePath.classList.toggle("is-selected", selected);
+      const marker = `url(#topology-arrow-${connected || selected ? "active" : "neutral"})`;
+      if (link.directed || link.bidirectional) record.visiblePath.setAttribute("marker-end", marker);
+      if (link.bidirectional) record.visiblePath.setAttribute("marker-start", marker);
       record.labelGroup.classList.toggle("is-visible", connected || selected);
       record.labelGroup.classList.toggle("is-hidden", hidden);
     });
@@ -639,8 +549,15 @@ export function initTopology({
     const point = positions.get(nodeId);
     if (!point) return;
     const targetScale = Math.max(1.08, transform.k);
-    const targetX = dimensions.usableWidth * 0.47 - point.x * targetScale;
-    const targetY = dimensions.height * 0.48 - point.y * targetScale;
+    const panel = document.querySelector("#detailPanel");
+    const panelRect = panel?.getBoundingClientRect();
+    const open = panel && !panel.classList.contains("is-collapsed");
+    const bottomSheet = open && panelRect?.width >= dimensions.width * 0.72;
+    const visibleWidth = open && !bottomSheet ? Math.max(240, dimensions.width - panelRect.width - 40) : dimensions.width;
+    const visibleBottom = bottomSheet ? dimensions.height - panelRect.height - 90 : dimensions.height - 78;
+    const centerY = (dimensions.topInset + Math.max(dimensions.topInset + 40, visibleBottom)) / 2;
+    const targetX = visibleWidth * 0.5 - point.x * targetScale;
+    const targetY = centerY - point.y * targetScale;
     animateTransform({ x: targetX, y: targetY, k: targetScale }, 420);
   }
 
