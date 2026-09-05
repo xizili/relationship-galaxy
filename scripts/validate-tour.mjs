@@ -24,16 +24,11 @@ const single = links.find((link) => link.directed);
 const pair = links.find((link) => link.bidirectional);
 const plain = links.find((link) => !link.directed && !link.bidirectional);
 const beginning = relationPulse(single, 500);
-assert.equal(beginning.labelGlow, 0, "先点亮起点姓名，不抢先显示关系文字");
-assert.ok(relationPulse(single, 1500).labelGlow > 0.95);
 const end = relationPulse(single, 2650);
 assert.ok(beginning.sourceGlow > 0.9 && beginning.targetGlow === 0);
 assert.ok(end.targetGlow > 0.9 && end.sourceGlow === 0);
-assert.equal(end.labelGlow, 0, "终点点亮时让姓名优先");
 assert.ok(beginning.progress < end.progress);
 for (const link of [pair, plain]) {
-  assert.equal(relationPulse(link, 500).labelGlow, 0);
-  assert.ok(relationPulse(link, 1500).labelGlow > 0.95, "双端先亮，关系文字后出现");
   for (let elapsed = 0; elapsed <= 3200; elapsed += 100) {
     const pulse = relationPulse(link, elapsed);
     assert.equal(pulse.directed, false);
@@ -43,7 +38,8 @@ for (const link of [pair, plain]) {
 for (const link of links) {
   for (let elapsed = 0; elapsed <= 3200; elapsed += 80) {
     const pulse = relationPulse(link, elapsed);
-    for (const key of ["sourceGlow", "targetGlow", "labelGlow", "progress", "gain"]) assert.ok(pulse[key] >= 0 && pulse[key] <= 1);
+    assert.equal(Object.hasOwn(pulse, "labelGlow"), false, "随机巡游只控制光效，不再显示关系文字");
+    for (const key of ["sourceGlow", "targetGlow", "progress", "gain"]) assert.ok(pulse[key] >= 0 && pulse[key] <= 1);
   }
   assert.equal(relationPulse(link, 0).gain, 0);
   assert.equal(relationPulse(link, 3200).gain, 0);

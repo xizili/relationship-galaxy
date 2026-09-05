@@ -841,7 +841,7 @@ button {
 }
 
 .link-label {
-  translate: var(--avoid-x, 0px) var(--avoid-y, 0px);
+  translate: 0 -18px;
   padding: 3px 6px;
   border: 1px solid color-mix(in srgb, var(--relation-color), transparent 52%);
   border-radius: 6px;
@@ -859,15 +859,6 @@ button {
 .link-label.is-visible {
   opacity: 1;
   transform: translateY(0);
-}
-
-.link-label.is-touring {
-  max-width: 220px;
-  font-size: 12px;
-  line-height: 1.6;
-  opacity: var(--tour-opacity, 0);
-  transform: translateY(0);
-  border-color: color-mix(in srgb, var(--relation-color), transparent 25%);
 }
 
 .link-toast {
@@ -1680,9 +1671,11 @@ button {
 #topologyGraph .topology-node.is-label-hidden:hover .topology-node-card,
 #topologyGraph .topology-node.is-label-hidden:focus .topology-node-card,
 #topologyGraph .topology-node.is-label-hidden.is-selected .topology-node-card,
+#topologyGraph .topology-node.is-label-hidden.is-link-endpoint .topology-node-card,
 #topologyGraph.is-far .topology-node.is-minor:hover .topology-node-card,
 #topologyGraph.is-far .topology-node.is-minor:focus .topology-node-card,
-#topologyGraph.is-far .topology-node.is-minor.is-selected .topology-node-card {
+#topologyGraph.is-far .topology-node.is-minor.is-selected .topology-node-card,
+#topologyGraph.is-far .topology-node.is-minor.is-link-endpoint .topology-node-card {
   opacity: 1;
 }
 

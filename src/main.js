@@ -13,7 +13,7 @@ import {
 } from "./galaxy-layout.js";
 import { initTopology } from "./topology.js";
 import { starVertices } from "./node-shapes.js";
-import { createRelationTour, relationPulse, placeRelationLabel, relationLabelBox, pulseVertexShader, pulseFragmentShader } from "./relation-tour.js";
+import { createRelationTour, relationPulse, pulseVertexShader, pulseFragmentShader } from "./relation-tour.js";
 import { initTimeline } from "./timeline.js";
 import { createZoomSpring } from "./nebula-motion.js";
 import { initSoundtrack, soundtrack } from "./soundtrack.js";
@@ -66,6 +66,7 @@ let overviewSection = "highlights";
 let selectedNodeId = null;
 let selectedLinkIndex = null;
 let mapContextNodeId = null;
+let mapContextLinkIndex = null;
 let hoveredNodeId = null;
 let hoveredLinkIndex = null;
 let cameraGoal = null;
@@ -247,6 +248,11 @@ function renderRelationLegend() {
   relationLegend.innerHTML = `<span>节点颜色 · 人物领域</span><span>箭头 · 关系方向</span><span>点击连线 · 阅读关系</span>`;
 }
 
+function clearMapContext() {
+  mapContextNodeId = null;
+  mapContextLinkIndex = null;
+}
+
 function syncSecondaryViews(options = {}) {
   topologyApi?.update(
     {
@@ -255,7 +261,8 @@ function syncSecondaryViews(options = {}) {
       overviewMode,
       selectedNodeId,
       selectedLinkIndex,
-      contextNodeId: mapContextNodeId
+      contextNodeId: mapContextNodeId,
+      contextLinkIndex: mapContextLinkIndex
     },
     options
   );
@@ -270,7 +277,7 @@ function syncSecondaryViews(options = {}) {
 
 function setActiveView(view, options = {}) {
   if (!['topology', 'galaxy', 'timeline'].includes(view)) return;
-  if (view !== activeView) mapContextNodeId = null;
+  if (view !== activeView) clearMapContext();
   activeView = view;
   zoomSpring.cancel();
   document.querySelector("#app").dataset.activeView = view;
@@ -286,7 +293,7 @@ function setActiveView(view, options = {}) {
 
   if (view === "topology") {
     topologyApi?.resize({ preserveTransform: true });
-    syncSecondaryViews({ center: Boolean(selectedNodeId) });
+    syncSecondaryViews({ center: selectedNodeId !== null || selectedLinkIndex !== null });
   } else if (view === "galaxy") {
     if (selectedNodeId) {
       focusGalaxyLayout(selectedNodeId);
@@ -997,11 +1004,6 @@ function clearRelationTour() {
   if (activeTourIndex === null) return;
   const record = linkRecords[activeTourIndex];
   record.pulseMesh.visible = false;
-  record.label.classList.remove("is-touring");
-  record.label.style.visibility = "";
-  record.label.style.setProperty("--avoid-x", "0px");
-  record.label.style.setProperty("--avoid-y", "0px");
-  record.labelOffset = null;
   record.synapses.forEach((terminal) => { terminal.material.opacity = record.baseSynapseOpacity ?? 0.48; });
   [record.link.source, record.link.target].forEach((id) => {
     const node = nodeRecords.get(id);
@@ -1026,8 +1028,6 @@ function updateRelationTour(timestamp) {
   record.pulseMesh.visible = true;
   record.pulseMaterial.uniforms.uProgress.value = sample.progress;
   record.pulseMaterial.uniforms.uGain.value = sample.gain;
-  record.label.classList.toggle("is-touring", sample.labelGlow > 0.02);
-  record.label.style.setProperty("--tour-opacity", String(sample.labelGlow));
   record.synapses.forEach((terminal) => {
     const light = sample.directed
       ? sample.gain * Math.max(0, 1 - Math.abs(sample.progress - terminal.userData.t) / 0.18)
@@ -1042,46 +1042,6 @@ function updateRelationTour(timestamp) {
     node.material.emissiveIntensity = node.baseEmissiveIntensity + gain * 0.72;
     node.glowMaterial.opacity = node.baseGlowOpacity + gain * 0.26;
   });
-}
-
-function updateGalaxyLabelPlacement() {
-  const visible = linkRecords.filter((r) => r.label.classList.contains("is-visible") || r.label.classList.contains("is-touring"));
-  if (!visible.length) return;
-  const toScreen = (position) => {
-    const p = position.clone().project(camera);
-    return { x: (p.x + 1) * window.innerWidth / 2, y: (1 - p.y) * window.innerHeight / 2 };
-  };
-  const names = new Map(), obstacles = [];
-  // Read all geometry first, then write offsets, avoiding repeated layout flushes.
-  nodeRecords.forEach((node, id) => {
-    const rect = node.label.getBoundingClientRect();
-    if (!(rect.width > 0 && rect.height > 0)) return;
-    names.set(id, { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
-    obstacles.push({ left: rect.left, right: rect.left + rect.width, top: rect.top, bottom: rect.top + rect.height });
-  });
-  const topbar = document.querySelector(".topbar");
-  for (const element of [topbar, detailPanelOpen ? detailPanel : null]) {
-    if (!element) continue;
-    const rect = element.getBoundingClientRect();
-    obstacles.push({ left: rect.left, right: rect.left + rect.width, top: rect.top, bottom: rect.top + rect.height });
-  }
-  const priority = (r) => r.index === selectedLinkIndex ? 3 : r.index === hoveredLinkIndex ? 2 : r.index === activeTourIndex ? 1 : 0;
-  const measurements = visible.sort((a, b) => priority(b) - priority(a)).map((record) => ({
-    record, center: toScreen(record.labelObject.position), width: record.label.offsetWidth || 180, height: record.label.offsetHeight || 30
-  }));
-  for (const { record, center, width, height } of measurements) {
-    const start = names.get(record.link.source) ?? toScreen(getNodePosition(record.link.source));
-    const end = names.get(record.link.target) ?? toScreen(getNodePosition(record.link.target));
-    const offset = placeRelationLabel({ center, start, end, width, height, obstacles,
-      viewport: { width: window.innerWidth, height: window.innerHeight }, previous: record.labelOffset });
-    record.label.style.visibility = offset ? "" : "hidden";
-    if (offset) {
-      record.labelOffset = offset;
-      record.label.style.setProperty("--avoid-x", `${offset.x}px`);
-      record.label.style.setProperty("--avoid-y", `${offset.y}px`);
-      obstacles.push(relationLabelBox({ x: center.x + offset.x, y: center.y + offset.y }, width, height));
-    }
-  }
 }
 
 function focusCameraOnNode(nodeId) {
@@ -1138,7 +1098,7 @@ function focusCameraOnLink(index) {
 function focusNode(nodeId, options = {}) {
   const node = nodeById.get(nodeId);
   if (!node) return;
-  mapContextNodeId = null;
+  clearMapContext();
 
   const wasOverview = overviewMode;
   overviewMode = false;
@@ -1227,7 +1187,7 @@ function renderDetailPanel(node) {
 function renderLinkDetail(linkIndex) {
   const record = linkRecords[linkIndex];
   if (!record) return;
-  mapContextNodeId = null;
+  clearMapContext();
   const { link } = record;
   const source = nodeById.get(link.source);
   const target = nodeById.get(link.target);
@@ -1265,11 +1225,11 @@ function renderLinkDetail(linkIndex) {
     </div>
   `;
   updateHighlights();
-  syncSecondaryViews();
+  syncSecondaryViews({ center: activeView === "topology" });
 }
 
 function enterOverview(options = {}) {
-  mapContextNodeId = null;
+  clearMapContext();
   clearRelationTour();
   relationTour.reset(performance.now());
   const wasOverview = overviewMode;
@@ -1516,7 +1476,7 @@ groupFilters.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-group]");
   if (!button) return;
   activeGroup = button.dataset.group;
-  mapContextNodeId = null;
+  clearMapContext();
   if (activeView === "timeline" && selectedNodeId && !isNodeInActiveGroup(nodeById.get(selectedNodeId))) {
     selectedNodeId = null;
     selectedLinkIndex = null;
@@ -1610,9 +1570,10 @@ document.querySelector("#overviewToggle").addEventListener("click", () => {
 });
 
 function closeDetailPanel() {
-  const returnToContext = activeView === "topology" && selectedNodeId !== null;
+  const returnToContext = activeView === "topology" && (selectedNodeId !== null || selectedLinkIndex !== null);
   if (returnToContext) {
     mapContextNodeId = selectedNodeId;
+    mapContextLinkIndex = selectedLinkIndex;
     selectedNodeId = null;
     selectedLinkIndex = null;
     hoveredNodeId = null;
@@ -1627,7 +1588,9 @@ function closeDetailPanel() {
   if (returnToContext) {
     updateHighlights();
     syncSecondaryViews({ fit: true });
-    viewStatus.textContent = "已退回全图，保留刚才人物的一度关系脉络";
+    viewStatus.textContent = mapContextLinkIndex !== null
+      ? "已退回全图，保留刚才的关系及两端人物"
+      : "已退回全图，保留刚才人物的一度关系脉络";
   }
   document.querySelector("#overviewToggle").focus({ preventScroll: true });
 }
@@ -1718,7 +1681,6 @@ function animate(timestamp = 0) {
   });
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
-  updateGalaxyLabelPlacement();
 }
 
 renderFilters();

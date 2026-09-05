@@ -161,6 +161,71 @@ for (const node of nodeElements()) {
 }
 map.update({ contextNodeId: null });
 assert.ok(nodeElements().every((n) => !n.classes.has("is-context-muted") && !n.classes.has("is-dimmed")));
+
+// Exercise every relation in a desktop sidebar and a narrow phone bottom sheet.
+// The panel deliberately reports an offscreen position during its transition.
+function finishAnimation() {
+  const pending = frames; frames = []; now += 1000;
+  for (const callback of pending) callback(now);
+  assert.equal(frames.length, 0);
+}
+const edgeElements = () => findAll(svg, (e) => e.classes.has("topology-edge"));
+for (const config of [
+  { width: 1440, height: 900, panelWidth: 384, panelHeight: 780, topbarBottom: 72, frameRight: 992, frameBottom: 822 },
+  { width: 390, height: 844, panelWidth: 366, panelHeight: 290, topbarBottom: 210, frameRight: 366, frameBottom: 464 }
+]) {
+  const { width, height, panelWidth, panelHeight, topbarBottom, frameRight, frameBottom } = config;
+  svg.getBoundingClientRect = () => ({ left: 0, top: 0, width, height, right: width, bottom: height });
+  bar.getBoundingClientRect = () => ({ bottom: topbarBottom });
+  panel.getBoundingClientRect = () => ({ left: width + 100, top: height + 100, width: panelWidth, height: panelHeight, right: width + 100 + panelWidth, bottom: height + 100 + panelHeight });
+  panel.classes.delete("is-collapsed");
+  map.resize({ preserveTransform: false });
+  let enlarged = 0;
+  for (let index = 0; index < links.length; index += 1) {
+    const link = links[index], endpoints = new Set([link.source, link.target]);
+    map.update({ selectedNodeId: null, selectedLinkIndex: index, contextNodeId: null, contextLinkIndex: null,
+      activeGroup: "all", overviewMode: false, depthMode: "1" }, { center: true });
+    finishAnimation();
+    const [tx, ty, scale] = parse(viewport);
+    assert.ok([tx, ty, scale].every(Number.isFinite) && scale > 0 && scale <= 2.4);
+    if (scale > 1) enlarged += 1;
+    for (const node of nodeElements()) {
+      assert.equal(node.classes.has("is-link-endpoint"), endpoints.has(node.dataset.nodeId));
+      if (!endpoints.has(node.dataset.nodeId)) continue;
+      assert.equal(node.classes.has("is-dimmed"), false);
+      assert.equal(node.classes.has("is-selected"), false, "关系聚焦不改变端点基础大小");
+      const [x, y] = parse(node);
+      const cardWidth = Number(node.children.find((e) => e.classes.has("topology-node-card")).children[0].getAttribute("width"));
+      assert.ok(tx + (x - cardWidth / 2 - 4) * scale >= 24 - 1e-6, `${width}px 关系 ${index} 起端不应裁切`);
+      assert.ok(tx + (x + cardWidth / 2 + 4) * scale <= frameRight + 1e-6, `${width}px 关系 ${index} 不应藏在侧栏后`);
+      assert.ok(ty + (y - 14) * scale >= topbarBottom + 30 - 1e-6, `${width}px 关系 ${index} 不应藏在工具栏后`);
+      assert.ok(ty + (y + 34) * scale <= frameBottom + 1e-6, `${width}px 关系 ${index} 人名不应藏在底部卡片后`);
+    }
+    if (index === 0) {
+      const centered = viewport.getAttribute("transform");
+      svg.fire("wheel", { deltaY: -100 });
+      assert.notEqual(viewport.getAttribute("transform"), centered);
+      map.update({}, { center: true }); finishAnimation();
+      const recentered = parse(viewport);
+      assert.ok(recentered.every((value, i) => Math.abs(value - [tx, ty, scale][i]) < 1e-8), "再次点击同条关系应重新取景");
+    }
+    map.update({ selectedLinkIndex: null, contextLinkIndex: index, overviewMode: true, depthMode: "all" }, { fit: true });
+    finishAnimation();
+    assert.equal(viewport.getAttribute("transform"), "translate(0 0) scale(1)");
+    for (const node of nodeElements()) {
+      assert.equal(node.classes.has("is-context-muted"), !endpoints.has(node.dataset.nodeId));
+      assert.equal(node.classes.has("is-dimmed"), false, "关闭关系卡后无关节点恢复中等亮度");
+      assert.equal(node.classes.has("is-link-endpoint"), false);
+    }
+    for (const path of edgeElements()) {
+      assert.equal(path.classes.has("is-context-muted"), Number(path.dataset.linkIndex) !== index);
+      assert.equal(path.classes.has("is-selected"), false);
+    }
+  }
+  assert.ok(enlarged > 0, "局部关系应放大，长关系优先保证双端可见");
+}
+map.update({ contextLinkIndex: null });
+assert.ok(nodeElements().every((n) => !n.classes.has("is-context-muted")));
 map.destroy();
 Object.assign(globalThis, originalGlobals);
 
@@ -186,4 +251,4 @@ for (const fps of [20, 30, 60, 120]) {
   assert.ok(Math.abs(spring.step(0.016, true) - 140) < 1e-8);
 }
 assert.ok(Math.max(...finalDistances) - Math.min(...finalDistances) < 0.01);
-console.log("地图与惯性回归通过：73 节点点击、拖动不误选、关系聚焦、重置中断旧动画、20–120 FPS 弹簧与边界。");
+console.log("地图与惯性回归通过：73 节点点击、85 条关系在桌面/手机双端取景与关闭返回、旧动画中断、20–120 FPS 弹簧与边界。");

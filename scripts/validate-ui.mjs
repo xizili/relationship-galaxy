@@ -18,7 +18,7 @@ class Element {
     this.listeners = new Map(); this.innerHTML = ""; this.value = ""; this.hidden = false;
     this.clientWidth = 1440; this.clientHeight = 900;
     const classes = new Set();
-    this.classList = { add: (...names) => names.forEach((name) => classes.add(name)), remove: (...names) => names.forEach((name) => classes.delete(name)), contains: (name) => classes.has(name), toggle: (name, force) => { const enabled = force ?? !classes.has(name); enabled ? classes.add(name) : classes.delete(name); return enabled; } };
+    this.classList = { add: (...names) => names.forEach((name) => classes.add(name)), remove: (...names) => names.forEach((name) => classes.delete(name)), contains: (name) => classes.has(name), toggle: (name, ...force) => { const enabled = force.length ? Boolean(force[0]) : !classes.has(name); enabled ? classes.add(name) : classes.delete(name); return enabled; } };
   }
   setAttribute(key, value) { this.attributes.set(key, String(value)); }
   removeAttribute(key) { this.attributes.delete(key); }
@@ -42,7 +42,8 @@ Object.assign(windowStub, { innerWidth: 1440, innerHeight: 900, devicePixelRatio
 class Renderer { constructor() { this.domElement = new Element(); } setPixelRatio() {} setSize() {} render() {} }
 class LabelObject extends RealThree.Object3D { constructor(element) { super(); this.element = element; } }
 class Controls { constructor() { this.target = new RealThree.Vector3(); } update(delta) { this.lastDelta = delta; } addEventListener() {} }
-const secondaryView = () => ({ update() {}, resize() {}, positionPopover() {} });
+const topologyUpdates = [];
+const secondaryView = (updates = []) => ({ update(state, options) { updates.push({ state: { ...state }, options: { ...options } }); }, resize() {}, positionPopover() {} });
 const context = vm.createContext({
   console, performance: { now: () => 0 }, document: doc, window: windowStub,
   requestAnimationFrame: () => 1, Event: class {}, CSS: { escape: (s) => s },
@@ -51,12 +52,12 @@ const context = vm.createContext({
   MapIcon: {}, Orbit: {}, RotateCcw: {}, Search: {}, Telescope: {}, X: {},
   groups, links, nodes, relationTypes, sourceSummary, portraits,
   portraitAssetUrl: (id) => portraits[id] ? `/portraits/${id}.webp` : "",
-  ...layout, ...tour, starVertices, createZoomSpring, initTopology: secondaryView, initTimeline: secondaryView,
+  ...layout, ...tour, starVertices, createZoomSpring, initTopology: () => secondaryView(topologyUpdates), initTimeline: () => secondaryView(),
   soundtrack, createGoldDust, initSoundtrack: () => ({})
 });
 let source = readFileSync(new URL("../src/main.js", import.meta.url), "utf8");
 source = source.replace(/^import[\s\S]*?;\n/gm, "");
-source += `\nglobalThis.testApi = { focusNode, setActiveView, enterOverview, renderLinkDetail, renderSearchResults, animate, nodeRecords, linkRecords, controls, camera, goldDust, getState: () => ({ activeView, overviewMode, detailPanelOpen, selectedNodeId, selectedLinkIndex, mapContextNodeId, activeGroup, depthMode, cameraGoal, targetGoal }) };`;
+source += `\nglobalThis.testApi = { focusNode, setActiveView, enterOverview, renderLinkDetail, renderSearchResults, animate, nodeRecords, linkRecords, controls, camera, goldDust, getState: () => ({ activeView, overviewMode, detailPanelOpen, selectedNodeId, selectedLinkIndex, mapContextNodeId, mapContextLinkIndex, activeGroup, depthMode, cameraGoal, targetGoal }) };`;
 vm.runInContext(source, context);
 const api = context.testApi;
 assert.equal(api.getState().activeView, "galaxy");
@@ -100,6 +101,10 @@ for (const [id, gain] of [[touring.link.source, sampled.sourceGlow], [touring.li
   assert.ok(Math.abs(node.glowMaterial.opacity - node.baseGlowOpacity - gain * 0.26) < 1e-9);
   assert.equal(node.mesh.scale.x, 1, "发光不应改变节点大小");
 }
+api.animate(3400); // Mid-tour: the previous version displayed relation text here.
+assert.equal(api.linkRecords.filter((record) => record.pulseMesh.visible).length, 1);
+assert.ok(api.linkRecords.every((r) => !r.label.classList.contains("is-touring") && !r.label.classList.contains("is-visible")), "巡游全程不显示关系文字");
+assert.doesNotMatch(source, /updateGalaxyLabelPlacement|--avoid-[xy]|labelOffset/);
 
 for (const node of nodes) {
   api.focusNode(node.id);
@@ -159,6 +164,38 @@ assert.equal(api.getState().mapContextNodeId, null);
 element("#closeDetailPanel").fire("click");
 element("#resetView").fire("click");
 assert.equal(api.getState().mapContextNodeId, null, "重置须恢复所有节点高亮");
+for (let index = 0; index < links.length; index += 1) {
+  api.renderLinkDetail(index);
+  assert.equal(api.getState().selectedLinkIndex, index);
+  assert.equal(api.getState().mapContextNodeId, null);
+  assert.equal(api.getState().mapContextLinkIndex, null);
+  assert.equal(topologyUpdates.at(-1).options.center, true, `地图连线 ${index} 应触发聚焦取景`);
+  assert.equal(api.getState().detailPanelOpen, true);
+  assert.equal(element(".depth-control").hidden, false);
+  element("#closeDetailPanel").fire("click");
+  assert.equal(api.getState().mapContextLinkIndex, index);
+  assert.equal(api.getState().selectedLinkIndex, null);
+  assert.equal(api.getState().selectedNodeId, null);
+  assert.equal(api.getState().overviewMode, true);
+  assert.equal(api.getState().detailPanelOpen, false);
+  assert.equal(api.getState().activeGroup, "all");
+  assert.equal(api.getState().depthMode, "all");
+  assert.equal(element(".depth-control").hidden, true);
+  assert.equal(topologyUpdates.at(-1).options.fit, true);
+  assert.equal(topologyUpdates.at(-1).state.contextLinkIndex, index);
+}
+api.focusNode("jung");
+assert.equal(api.getState().mapContextLinkIndex, null, "人物聚焦应清除旧关系余光");
+for (const clear of [
+  () => element("#resetView").fire("click"),
+  () => api.enterOverview(),
+  () => element("#groupFilters").fire("click", { target: { closest: () => ({ dataset: { group: "all" } }) } }),
+  () => api.setActiveView("timeline")
+]) {
+  api.setActiveView("topology"); api.renderLinkDetail(0); element("#closeDetailPanel").fire("click");
+  clear();
+  assert.equal(api.getState().mapContextLinkIndex, null, "重置、全览、筛选与切换模式不得残留关系余光");
+}
 api.setActiveView("galaxy");
 for (let index = 0; index < links.length; index += 1) {
   api.renderLinkDetail(index);
@@ -166,7 +203,17 @@ for (let index = 0; index < links.length; index += 1) {
   assert.deepEqual(activeIds, [links[index].source, links[index].target].sort());
   assert.equal(element(".depth-control").hidden, false);
   assert.ok(api.getState().cameraGoal && api.getState().targetGoal);
+  const record = api.linkRecords[index];
+  assert.ok(record.label.classList.contains("is-visible"), "主动聚焦关系仍显示关系文字");
+  assert.ok(record.labelObject.position.distanceTo(record.curve.getPoint(0.5)) < 1e-8, "银河文字随连线锚点，不额外移动或隐藏");
+  assert.notEqual(record.label.style.visibility, "hidden");
 }
+api.renderLinkDetail(0);
+api.setActiveView("topology");
+assert.equal(topologyUpdates.at(-1).options.center, true, "跨模式返回地图也应聚焦第 0 条关系");
+api.setActiveView("galaxy");
+element("#closeDetailPanel").fire("click");
+assert.equal(api.getState().selectedLinkIndex, 0, "银河关闭侧栏行为保持不变");
 api.enterOverview();
 assert.equal(element(".depth-control").hidden, true);
 api.focusNode("freud");

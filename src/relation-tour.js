@@ -13,8 +13,6 @@ export function relationPulse(link, elapsedMs, durationMs = 3200) {
     directed,
     progress: clamp((t - 0.12) / 0.66),
     gain,
-    // Text is a second beat: between the two names, or after a simultaneous pair.
-    labelGlow: directed ? envelope(t, 0.27, 0.39, 0.59, 0.68) : envelope(t, 0.3, 0.43, 0.82, 1),
     sourceGlow: directed ? envelope(t, 0, 0.12, 0.4, 0.66) : gain,
     targetGlow: directed ? envelope(t, 0.69, 0.8, 0.86, 1) : gain
   };

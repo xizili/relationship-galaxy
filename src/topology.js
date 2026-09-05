@@ -49,6 +49,7 @@ function linkPath(start, end, bend) {
   };
   return {
     d: `M ${start.x} ${start.y} Q ${control.x} ${control.y} ${end.x} ${end.y}`,
+    control,
     midpoint: {
       x: (start.x + 2 * control.x + end.x) / 4,
       y: (start.y + 2 * control.y + end.y) / 4
@@ -138,7 +139,8 @@ export function initTopology({
     overviewMode: true,
     selectedNodeId: null,
     selectedLinkIndex: null,
-    contextNodeId: null
+    contextNodeId: null,
+    contextLinkIndex: null
   };
   let pointerAction = null;
   let lastDragAt = 0;
@@ -431,7 +433,8 @@ export function initTopology({
       const radius = NODE_RADIUS * k * (id === state.selectedNodeId ? 1.38 : 1);
       obstacles.push(relationLabelBox(p, radius * 2 + 4, radius * 2 + 4));
       const hiddenAtDistance = k < 0.7 && r.element.classList.contains("is-minor");
-      const visible = (!r.element.classList.contains("is-label-hidden") && !hiddenAtDistance) || id === state.selectedNodeId || id === revealedNodeId;
+      const visible = (!r.element.classList.contains("is-label-hidden") && !hiddenAtDistance)
+        || r.element.classList.contains("is-link-endpoint") || id === state.selectedNodeId || id === revealedNodeId;
       if (!visible) return;
       const measured = r.name.getComputedTextLength?.();
       const width = (measured > 0 ? measured + 8 : r.labelWidth) * k;
@@ -493,7 +496,10 @@ export function initTopology({
     const inDepth = depthSet(state.selectedNodeId);
     const selectedLink = state.selectedLinkIndex !== null ? links[state.selectedLinkIndex] : null;
     const focused = Boolean(state.selectedNodeId || selectedLink);
-    const context = !focused && state.contextNodeId ? new Set([state.contextNodeId, ...(adjacency.get(state.contextNodeId) ?? [])]) : null;
+    const contextLink = !focused && state.contextLinkIndex !== null ? links[state.contextLinkIndex] : null;
+    const context = focused ? null : state.contextNodeId
+      ? new Set([state.contextNodeId, ...(adjacency.get(state.contextNodeId) ?? [])])
+      : contextLink ? new Set([contextLink.source, contextLink.target]) : null;
     const selectedNeighbors = state.selectedNodeId
       ? adjacency.get(state.selectedNodeId) ?? new Set()
       : new Set();
@@ -505,6 +511,7 @@ export function initTopology({
       record.element.classList.toggle("is-dimmed", focused && !depthVisible);
       record.element.classList.toggle("is-context-muted", Boolean(context && !context.has(id)));
       record.element.classList.toggle("is-selected", id === state.selectedNodeId);
+      record.element.classList.toggle("is-link-endpoint", id === selectedLink?.source || id === selectedLink?.target);
       record.element.classList.toggle("is-neighbor", selectedNeighbors.has(id));
     });
 
@@ -525,7 +532,9 @@ export function initTopology({
       record.visiblePath.classList.toggle("is-hidden", hidden);
       record.hitPath.classList.toggle("is-hidden", hidden);
       record.visiblePath.classList.toggle("is-dimmed", dimmed);
-      record.visiblePath.classList.toggle("is-context-muted", Boolean(context && !(link.source === state.contextNodeId || link.target === state.contextNodeId)));
+      const contextRelated = contextLink ? index === state.contextLinkIndex
+        : link.source === state.contextNodeId || link.target === state.contextNodeId;
+      record.visiblePath.classList.toggle("is-context-muted", Boolean(context && !contextRelated));
       record.visiblePath.classList.toggle("is-highlighted", connected || selected);
       record.visiblePath.classList.toggle("is-selected", selected);
       const marker = `url(#topology-arrow-${connected || selected ? "active" : "neutral"})`;
@@ -618,6 +627,48 @@ export function initTopology({
     const targetX = visibleWidth * 0.5 - point.x * targetScale;
     const targetY = centerY - point.y * targetScale;
     animateTransform({ x: targetX, y: targetY, k: targetScale }, 420);
+  }
+
+  function centerLink(linkIndex) {
+    const record = edgeRecords[linkIndex];
+    if (!record) return;
+    const { link } = record.entry;
+    const boxes = [link.source, link.target].map((id) => {
+      const point = positions.get(id);
+      const node = nodeRecords.get(id);
+      const footprint = nodeLabelLayout(node.node, nodeIndexById.get(id)).footprint;
+      const measured = node.name.getComputedTextLength?.();
+      const halfName = measured > 0 ? measured / 2 + 8 : 0;
+      return { left: point.x + Math.min(footprint.left, -halfName),
+        right: point.x + Math.max(footprint.right, halfName),
+        top: point.y + footprint.top, bottom: point.y + footprint.bottom };
+    });
+    const { control, midpoint } = geometryForRecord(record);
+    // Include the curved line's control hull and space for its short label.
+    boxes.push(relationLabelBox(control, 16, 16), relationLabelBox(midpoint, record.labelWidth, 64));
+    const bounds = {
+      left: Math.min(...boxes.map((b) => b.left)) - 12,
+      right: Math.max(...boxes.map((b) => b.right)) + 12,
+      top: Math.min(...boxes.map((b) => b.top)) - 12,
+      bottom: Math.max(...boxes.map((b) => b.bottom)) + 12
+    };
+    const panel = document.querySelector("#detailPanel");
+    const panelRect = panel?.getBoundingClientRect();
+    const open = panel && !panel.classList.contains("is-collapsed");
+    const bottomSheet = open && panelRect?.width >= dimensions.width * 0.72;
+    // Width/height remain stable during the sidebar's opening translation.
+    // Its animated left/top would incorrectly frame the graph behind the card.
+    const visibleWidth = open && !bottomSheet ? Math.max(240, dimensions.width - panelRect.width - 40) : dimensions.width;
+    const visibleBottom = bottomSheet ? dimensions.height - panelRect.height - 90 : dimensions.height - 78;
+    const frame = { left: 24, right: visibleWidth - 24, top: dimensions.topInset + 12,
+      bottom: Math.max(dimensions.topInset + 52, visibleBottom) };
+    const scale = Math.min(2.4, (frame.right - frame.left) / (bounds.right - bounds.left),
+      (frame.bottom - frame.top) / (bounds.bottom - bounds.top));
+    animateTransform({
+      x: (frame.left + frame.right) / 2 - (bounds.left + bounds.right) / 2 * scale,
+      y: (frame.top + frame.bottom) / 2 - (bounds.top + bounds.bottom) / 2 * scale,
+      k: scale
+    }, 420);
   }
 
   function clientToGraph(clientX, clientY) {
@@ -748,17 +799,18 @@ export function initTopology({
 
   return {
     update(nextState = {}, options = {}) {
-      const previousNodeId = state.selectedNodeId;
       state = { ...state, ...nextState };
       updateVisualState();
-      if (options.center && state.selectedNodeId && state.selectedNodeId !== previousNodeId) {
-        centerNode(state.selectedNodeId);
+      if (options.center) {
+        if (state.selectedNodeId) centerNode(state.selectedNodeId);
+        else if (state.selectedLinkIndex !== null) centerLink(state.selectedLinkIndex);
       }
       if (state.overviewMode && options.fit) fit();
       positionPopover();
     },
     fit,
     centerNode,
+    centerLink,
     positionPopover,
     resize,
     destroy() {
