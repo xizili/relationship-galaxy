@@ -15,7 +15,8 @@
     "check:map-motion": "node scripts/validate-map-motion.mjs",
     "check:map-layout": "node scripts/validate-map-layout.mjs",
     "check:soundtrack": "node scripts/validate-soundtrack.mjs",
-    "check": "npm run check:data && npm run check:layout && npm run check:tour && npm run check:ui && npm run check:map-motion && npm run check:map-layout && npm run check:soundtrack"
+    "check:dust": "node scripts/validate-gold-dust.mjs",
+    "check": "npm run check:data && npm run check:layout && npm run check:tour && npm run check:ui && npm run check:map-motion && npm run check:map-layout && npm run check:soundtrack && npm run check:dust"
   },
   "dependencies": {
     "lucide": "^0.468.0",

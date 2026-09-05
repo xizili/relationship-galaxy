@@ -10,6 +10,7 @@ import { starVertices } from "../src/node-shapes.js";
 import * as tour from "../src/relation-tour.js";
 import { createZoomSpring } from "../src/nebula-motion.js";
 import { soundtrack } from "../src/soundtrack.js";
+import { createGoldDust } from "../src/gold-dust.js";
 
 class Element {
   constructor() {
@@ -51,11 +52,11 @@ const context = vm.createContext({
   groups, links, nodes, relationTypes, sourceSummary, portraits,
   portraitAssetUrl: (id) => portraits[id] ? `/portraits/${id}.webp` : "",
   ...layout, ...tour, starVertices, createZoomSpring, initTopology: secondaryView, initTimeline: secondaryView,
-  soundtrack, initSoundtrack: () => ({})
+  soundtrack, createGoldDust, initSoundtrack: () => ({})
 });
 let source = readFileSync(new URL("../src/main.js", import.meta.url), "utf8");
 source = source.replace(/^import[\s\S]*?;\n/gm, "");
-source += `\nglobalThis.testApi = { focusNode, setActiveView, enterOverview, renderLinkDetail, renderSearchResults, animate, nodeRecords, linkRecords, controls, camera, getState: () => ({ activeView, overviewMode, detailPanelOpen, selectedNodeId, selectedLinkIndex, activeGroup, depthMode, cameraGoal, targetGoal }) };`;
+source += `\nglobalThis.testApi = { focusNode, setActiveView, enterOverview, renderLinkDetail, renderSearchResults, animate, nodeRecords, linkRecords, controls, camera, goldDust, getState: () => ({ activeView, overviewMode, detailPanelOpen, selectedNodeId, selectedLinkIndex, mapContextNodeId, activeGroup, depthMode, cameraGoal, targetGoal }) };`;
 vm.runInContext(source, context);
 const api = context.testApi;
 assert.equal(api.getState().activeView, "galaxy");
@@ -91,6 +92,14 @@ api.animate(1900);
 assert.equal(api.linkRecords.filter((record) => record.pulseMesh.visible).length, 1);
 api.animate(2500);
 assert.ok([...api.nodeRecords.values()].some((record) => record.label.classList.contains("is-storylit")));
+const touring = api.linkRecords.find((record) => record.pulseMesh.visible);
+const sampled = tour.relationPulse(touring.link, 600);
+for (const [id, gain] of [[touring.link.source, sampled.sourceGlow], [touring.link.target, sampled.targetGlow]]) {
+  const node = api.nodeRecords.get(id);
+  assert.ok(Math.abs(node.material.emissiveIntensity - node.baseEmissiveIntensity - gain * 0.72) < 1e-9);
+  assert.ok(Math.abs(node.glowMaterial.opacity - node.baseGlowOpacity - gain * 0.26) < 1e-9);
+  assert.equal(node.mesh.scale.x, 1, "发光不应改变节点大小");
+}
 
 for (const node of nodes) {
   api.focusNode(node.id);
@@ -101,6 +110,11 @@ for (const node of nodes) {
   assert.ok(api.nodeRecords.get(node.id).mesh.scale.x > 1);
   assert.ok([...api.nodeRecords.values()].filter((record) => record.node.id !== node.id).every((record) => record.mesh.scale.x === 1));
   assert.ok(api.linkRecords.every((record) => !record.pulseMesh.visible));
+  for (const id of [touring.link.source, touring.link.target]) {
+    const previous = api.nodeRecords.get(id);
+    assert.equal(previous.material.emissiveIntensity, previous.baseEmissiveIntensity, "聚焦打断巡游时恢复当前高亮，而非旧亮度");
+    assert.equal(previous.glowMaterial.opacity, previous.baseGlowOpacity);
+  }
   assert.equal(element(".depth-control").hidden, false);
   assert.equal(element("#galaxyHint").hidden, true);
   assert.ok(!element("#detailPanelContent").innerHTML.includes("<figcaption"));
@@ -131,6 +145,20 @@ for (const view of ["topology", "timeline"]) {
   assert.equal(element("#resetView").hidden, false);
   if (view === "timeline") assert.equal(element("#timelineView").scrollTop, 0);
 }
+api.setActiveView("topology");
+api.focusNode("freud", { camera: false });
+element("#closeDetailPanel").fire("click");
+assert.equal(api.getState().selectedNodeId, null);
+assert.equal(api.getState().mapContextNodeId, "freud");
+assert.equal(api.getState().overviewMode, true);
+assert.equal(api.getState().detailPanelOpen, false);
+assert.equal(element(".depth-control").hidden, true);
+assert.ok([...api.nodeRecords.values()].every((r) => r.mesh.scale.x === 1));
+api.focusNode("jung", { camera: false });
+assert.equal(api.getState().mapContextNodeId, null);
+element("#closeDetailPanel").fire("click");
+element("#resetView").fire("click");
+assert.equal(api.getState().mapContextNodeId, null, "重置须恢复所有节点高亮");
 api.setActiveView("galaxy");
 for (let index = 0; index < links.length; index += 1) {
   api.renderLinkDetail(index);

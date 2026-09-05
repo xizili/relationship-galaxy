@@ -118,6 +118,49 @@ const values = currentTransform.match(/-?\d+(?:\.\d+)?/g).map(Number);
 const arendt = nodeElements().find((e) => e.dataset.nodeId === "arendt").getAttribute("transform").match(/-?\d+(?:\.\d+)?/g).map(Number);
 const focusedY = values[1] + arendt[1] * values[2];
 assert.ok(focusedY > 110 && focusedY < 510, "焦点应处于工具栏与侧栏之间");
+panel.classes.add("is-collapsed");
+map.resize({ preserveTransform: false });
+map.update({ selectedNodeId: "freud", selectedLinkIndex: null, overviewMode: false, depthMode: "1", contextNodeId: null });
+const connected = new Set(["freud", ...links.filter((l) => l.source === "freud" || l.target === "freud").map((l) => l.source === "freud" ? l.target : l.source)]);
+for (const node of nodeElements()) assert.equal(node.classes.has("is-dimmed"), !connected.has(node.dataset.nodeId));
+const parse = (e) => e.getAttribute("transform").match(/-?\d+(?:\.\d+)?/g).map(Number);
+function verifyLabelClearance() {
+  const [tx, ty, scale] = parse(viewport);
+  const obstacles = nodeElements().flatMap((element) => {
+    const [x, y] = parse(element), cx = tx + x * scale, cy = ty + y * scale;
+    const nameRect = element.children.find((e) => e.classes.has("topology-node-card")).children[0];
+    const width = Number(nameRect.getAttribute("width")) * scale;
+    const radius = 9 * scale * (element.classes.has("is-selected") ? 1.38 : 1);
+    const boxes = [{ left: cx - radius - 2, right: cx + radius + 2, top: cy - radius - 2, bottom: cy + radius + 2 }];
+    if (!(scale < 0.7 && element.classes.has("is-minor")) || element.classes.has("is-selected")) boxes.push(
+      { left: cx - width / 2, right: cx + width / 2, top: cy + 13 * scale, bottom: cy + 33 * scale });
+    return boxes;
+  });
+  const labels = findAll(svg, (e) => e.classes.has("topology-edge-label") && e.classes.has("is-visible") && !e.classes.has("is-occluded") && !e.classes.has("is-hidden"));
+  assert.ok(labels.length > 0, "有空间时应显示关系标签");
+  for (const label of labels) {
+    const [x, y] = parse(label), width = Number(label.children[0].getAttribute("width")) * scale;
+    const box = { left: tx + x * scale - width / 2, right: tx + x * scale + width / 2, top: ty + y * scale - 14 * scale, bottom: ty + y * scale + 14 * scale };
+    assert.ok(obstacles.every((o) => box.right <= o.left || box.left >= o.right || box.bottom <= o.top || box.top >= o.bottom), "关系标签不得遮盖任何人名、节点或已有关系标签");
+    obstacles.push(box);
+  }
+}
+verifyLabelClearance();
+svg.fire("wheel", { deltaY: -220 });
+verifyLabelClearance();
+svg.fire("wheel", { deltaY: 800 });
+verifyLabelClearance();
+map.update({ selectedNodeId: null, contextNodeId: "freud", overviewMode: true, depthMode: "all" }, { fit: true });
+for (const callback of frames) callback(now + 3000);
+frames = [];
+assert.equal(viewport.getAttribute("transform"), "translate(0 0) scale(1)");
+for (const node of nodeElements()) {
+  assert.equal(node.classes.has("is-context-muted"), !connected.has(node.dataset.nodeId));
+  assert.equal(node.classes.has("is-selected"), false);
+  assert.equal(node.classes.has("is-dimmed"), false, "回全图后不用聚焦时的低亮度");
+}
+map.update({ contextNodeId: null });
+assert.ok(nodeElements().every((n) => !n.classes.has("is-context-muted") && !n.classes.has("is-dimmed")));
 map.destroy();
 Object.assign(globalThis, originalGlobals);
 

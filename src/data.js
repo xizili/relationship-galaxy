@@ -723,7 +723,7 @@ export const links = xmind.relationships.map((relation) => {
     directed: startArrow !== endArrow,
     bidirectional: startArrow && endArrow,
     type: relationshipType(relation.title),
-    label: shortLabels[relation.id] ?? (relation.title || "主题关联（原图未注释）"),
+    label: shortLabels[relation.id] ?? (relation.title || "主题关联"),
     fullText: relation.title,
     sourceAnnotated: Boolean(relation.title),
     weight: 1

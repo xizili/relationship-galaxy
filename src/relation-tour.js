@@ -21,21 +21,34 @@ export function relationPulse(link, elapsedMs, durationMs = 3200) {
 }
 
 /** Find a stable screen-space label position without covering the two names. */
-export function placeRelationLabel({ center, width, height, obstacles = [], viewport, normal = { x: 0, y: -1 }, previous = null }) {
+export function relationLabelBox(center, width, height) {
+  return { left: center.x - width / 2, right: center.x + width / 2, top: center.y - height / 2, bottom: center.y + height / 2 };
+}
+
+export function placeRelationLabel({ center, width, height, obstacles = [], viewport, normal = { x: 0, y: -1 }, start = null, end = null, previous = null }) {
   const clear = ({ x, y }) => {
     const box = { left: center.x + x - width / 2, right: center.x + x + width / 2,
       top: center.y + y - height / 2, bottom: center.y + y + height / 2 };
     return box.left >= 10 && box.right <= viewport.width - 10 && box.top >= 10 && box.bottom <= viewport.height - 10
       && obstacles.every((o) => box.right + 10 <= o.left || box.left - 10 >= o.right || box.bottom + 10 <= o.top || box.top - 10 >= o.bottom);
   };
+  const preferred = start && end ? { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 } : center;
+  if (start && end) normal = { x: end.y - start.y, y: start.x - end.x };
   const length = Math.hypot(normal.x, normal.y) || 1;
   const nx = normal.x / length, ny = normal.y / length;
-  const candidates = previous ? [previous] : [];
-  for (const distance of [28, -28, 52, -52, 82, -82, 120, -120]) {
-    candidates.push({ x: nx * distance, y: ny * distance });
+  const candidates = [];
+  for (const distance of [0, 18, -18, 32, -32, 52, -52, 82, -82, 120, -120]) {
+    for (const t of start && end ? [0.5, 0.4, 0.6, 0.3, 0.7] : [0.5]) {
+      const anchor = start && end ? { x: start.x + (end.x - start.x) * t, y: start.y + (end.y - start.y) * t } : center;
+      candidates.push({ x: anchor.x - center.x + nx * distance, y: anchor.y - center.y + ny * distance });
+    }
   }
-  candidates.push({ x: 0, y: -height - 30 }, { x: 0, y: height + 30 });
-  return candidates.find(clear) ?? null;
+  const score = (p) => Math.hypot(center.x + p.x - preferred.x, center.y + p.y - preferred.y);
+  const best = candidates.filter(clear).sort((a, b) => score(a) - score(b))[0];
+  if (!best) return previous && clear(previous) ? previous : null;
+  // A tiny hysteresis stops jitter, but a newly clear midpoint wins immediately.
+  if (score(best) > 1 && previous && clear(previous) && score(previous) <= score(best) + 8) return previous;
+  return best;
 }
 
 /** One gentle pulse every 5–6 seconds, never repeating the same edge consecutively. */

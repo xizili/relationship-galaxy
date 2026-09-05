@@ -1,5 +1,6 @@
 import { starPoints } from "./node-shapes.js";
 import { createMapLayout } from "./map-layout.js";
+import { placeRelationLabel, relationLabelBox } from "./relation-tour.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const NODE_RADIUS = 9;
@@ -136,11 +137,13 @@ export function initTopology({
     depthMode: "all",
     overviewMode: true,
     selectedNodeId: null,
-    selectedLinkIndex: null
+    selectedLinkIndex: null,
+    contextNodeId: null
   };
   let pointerAction = null;
   let lastDragAt = 0;
   let transformAnimation = 0;
+  let revealedNodeId = null;
 
   const nodeRecords = new Map();
   const edgeRecords = [];
@@ -284,7 +287,7 @@ export function initTopology({
 
       const label = String(link.label ?? relationTypes[link.type]?.label ?? "关系");
       const displayLabel = label.length > 24 ? `${label.slice(0, 23)}…` : label;
-      const labelWidth = clamp(displayLabel.length * 11 + 24, 72, 248);
+      const labelWidth = clamp(displayLabel.length * 12 + 24, 72, 312);
       const labelGroup = svgElement("g", {
         class: "topology-edge-label",
         "data-link-index": index,
@@ -305,7 +308,7 @@ export function initTopology({
 
       edgeLayer.append(visiblePath, hitPath);
       labelLayer.appendChild(labelGroup);
-      edgeRecords.push({ entry, visiblePath, hitPath, labelGroup, bend });
+      edgeRecords.push({ entry, visiblePath, hitPath, labelGroup, labelText, labelWidth, bend });
     });
   }
 
@@ -377,9 +380,11 @@ export function initTopology({
           onFocusNode?.(node.id);
         }
       });
+      for (const event of ["mouseenter", "focus"]) record.addEventListener(event, () => { revealedNodeId = node.id; placeMapLabels(); });
+      for (const event of ["mouseleave", "blur"]) record.addEventListener(event, () => { if (revealedNodeId === node.id) revealedNodeId = null; placeMapLabels(); });
 
       nodeLayer.appendChild(record);
-      nodeRecords.set(node.id, { element: record, node, radius });
+      nodeRecords.set(node.id, { element: record, node, radius, name, labelWidth });
     });
   }
 
@@ -410,7 +415,56 @@ export function initTopology({
         `translate(${geometry.midpoint.x} ${geometry.midpoint.y})`
       );
     });
+    placeMapLabels();
     positionPopover();
+  }
+
+  function placeMapLabels() {
+    const active = edgeRecords.filter((r) => r.labelGroup.classList.contains("is-visible") && !r.labelGroup.classList.contains("is-hidden"));
+    if (!active.length) return;
+    const k = transform.k;
+    const screen = (p) => ({ x: transform.x + p.x * k, y: transform.y + p.y * k });
+    const obstacles = [], names = new Map();
+    nodeRecords.forEach((r, id) => {
+      if (r.element.classList.contains("is-hidden")) return;
+      const p = screen(positions.get(id));
+      const radius = NODE_RADIUS * k * (id === state.selectedNodeId ? 1.38 : 1);
+      obstacles.push(relationLabelBox(p, radius * 2 + 4, radius * 2 + 4));
+      const hiddenAtDistance = k < 0.7 && r.element.classList.contains("is-minor");
+      const visible = (!r.element.classList.contains("is-label-hidden") && !hiddenAtDistance) || id === state.selectedNodeId || id === revealedNodeId;
+      if (!visible) return;
+      const measured = r.name.getComputedTextLength?.();
+      const width = (measured > 0 ? measured + 8 : r.labelWidth) * k;
+      const center = { x: p.x, y: p.y + 23 * k };
+      const box = relationLabelBox(center, width, 20 * k);
+      obstacles.push(box); names.set(id, center);
+    });
+    const svgRect = svg.getBoundingClientRect();
+    for (const selector of [".topbar", ".topology-caption", "#detailPanel"]) {
+      const element = document.querySelector(selector);
+      if (!element || element.classList?.contains("is-collapsed")) continue;
+      const rect = element.getBoundingClientRect();
+      if (!(rect.width > 0 && rect.height > 0)) continue;
+      obstacles.push({ left: rect.left - svgRect.left, right: rect.right - svgRect.left, top: rect.top - svgRect.top, bottom: rect.bottom - svgRect.top });
+    }
+    active.sort((a, b) => Number(b.entry.index === state.selectedLinkIndex) - Number(a.entry.index === state.selectedLinkIndex));
+    for (const record of active) {
+      const { link } = record.entry;
+      const center = screen(geometryForRecord(record).midpoint);
+      const start = names.get(link.source) ?? screen(positions.get(link.source));
+      const end = names.get(link.target) ?? screen(positions.get(link.target));
+      const measured = record.labelText.getComputedTextLength?.();
+      const width = (measured > 0 ? measured + 24 : record.labelWidth) * k;
+      const height = 28 * k;
+      const rect = record.labelGroup.children[0];
+      rect.setAttribute("width", width / k); rect.setAttribute("x", -width / k / 2);
+      const offset = placeRelationLabel({ center, start, end, width, height, obstacles, viewport: dimensions });
+      record.labelGroup.classList.toggle("is-occluded", !offset);
+      if (!offset) continue;
+      const anchor = { x: center.x + offset.x, y: center.y + offset.y };
+      record.labelGroup.setAttribute("transform", `translate(${(anchor.x - transform.x) / k} ${(anchor.y - transform.y) / k})`);
+      obstacles.push(relationLabelBox(anchor, width, height));
+    }
   }
 
   function depthSet(startId) {
@@ -439,6 +493,7 @@ export function initTopology({
     const inDepth = depthSet(state.selectedNodeId);
     const selectedLink = state.selectedLinkIndex !== null ? links[state.selectedLinkIndex] : null;
     const focused = Boolean(state.selectedNodeId || selectedLink);
+    const context = !focused && state.contextNodeId ? new Set([state.contextNodeId, ...(adjacency.get(state.contextNodeId) ?? [])]) : null;
     const selectedNeighbors = state.selectedNodeId
       ? adjacency.get(state.selectedNodeId) ?? new Set()
       : new Set();
@@ -448,6 +503,7 @@ export function initTopology({
       const depthVisible = inDepth.has(id);
       record.element.classList.toggle("is-hidden", !groupVisible);
       record.element.classList.toggle("is-dimmed", focused && !depthVisible);
+      record.element.classList.toggle("is-context-muted", Boolean(context && !context.has(id)));
       record.element.classList.toggle("is-selected", id === state.selectedNodeId);
       record.element.classList.toggle("is-neighbor", selectedNeighbors.has(id));
     });
@@ -469,6 +525,7 @@ export function initTopology({
       record.visiblePath.classList.toggle("is-hidden", hidden);
       record.hitPath.classList.toggle("is-hidden", hidden);
       record.visiblePath.classList.toggle("is-dimmed", dimmed);
+      record.visiblePath.classList.toggle("is-context-muted", Boolean(context && !(link.source === state.contextNodeId || link.target === state.contextNodeId)));
       record.visiblePath.classList.toggle("is-highlighted", connected || selected);
       record.visiblePath.classList.toggle("is-selected", selected);
       const marker = `url(#topology-arrow-${connected || selected ? "active" : "neutral"})`;
@@ -477,6 +534,7 @@ export function initTopology({
       record.labelGroup.classList.toggle("is-visible", connected || selected);
       record.labelGroup.classList.toggle("is-hidden", hidden);
     });
+    placeMapLabels();
   }
 
   function positionPopover(nodeId = state.selectedNodeId) {
@@ -514,6 +572,7 @@ export function initTopology({
     viewport.setAttribute("transform", `translate(${transform.x} ${transform.y}) scale(${transform.k})`);
     svg.classList.toggle("is-far", transform.k < 0.7);
     svg.classList.toggle("is-near", transform.k > 1.35);
+    placeMapLabels();
     positionPopover();
   }
 

@@ -788,7 +788,6 @@ button {
   box-shadow: 0 0 18px color-mix(in srgb, var(--node-color), transparent 72%);
   transition:
     opacity 150ms ease,
-    transform 150ms ease,
     border-color 150ms ease;
 }
 
@@ -827,6 +826,7 @@ button {
 .node-label.is-overview span { display: none; }
 .node-label.is-overview.is-muted { opacity: 0.08; }
 .node-label.is-overview.is-storylit {
+  transition: none;
   opacity: calc(0.14 + var(--story-glow, 0) * 0.86);
   color: #fff5d9;
   text-shadow: 0 0 12px var(--node-color);
@@ -853,8 +853,7 @@ button {
   opacity: 0;
   transform: translateY(3px);
   transition:
-    opacity 150ms ease,
-    transform 150ms ease;
+    opacity 150ms ease;
 }
 
 .link-label.is-visible {
@@ -1533,6 +1532,10 @@ button {
 .topology-edge.is-dimmed {
   opacity: 0.055;
 }
+
+.topology-edge.is-context-muted { opacity: 0.24; }
+.topology-node.is-context-muted { opacity: 0.48; }
+.topology-edge-label.is-occluded { visibility: hidden; }
 
 .topology-edge.is-highlighted {
   stroke: #65574b;
