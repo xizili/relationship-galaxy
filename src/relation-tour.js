@@ -13,9 +13,29 @@ export function relationPulse(link, elapsedMs, durationMs = 3200) {
     directed,
     progress: clamp((t - 0.12) / 0.66),
     gain,
+    // Text is a second beat: between the two names, or after a simultaneous pair.
+    labelGlow: directed ? envelope(t, 0.27, 0.39, 0.59, 0.68) : envelope(t, 0.3, 0.43, 0.82, 1),
     sourceGlow: directed ? envelope(t, 0, 0.12, 0.4, 0.66) : gain,
     targetGlow: directed ? envelope(t, 0.69, 0.8, 0.86, 1) : gain
   };
+}
+
+/** Find a stable screen-space label position without covering the two names. */
+export function placeRelationLabel({ center, width, height, obstacles = [], viewport, normal = { x: 0, y: -1 }, previous = null }) {
+  const clear = ({ x, y }) => {
+    const box = { left: center.x + x - width / 2, right: center.x + x + width / 2,
+      top: center.y + y - height / 2, bottom: center.y + y + height / 2 };
+    return box.left >= 10 && box.right <= viewport.width - 10 && box.top >= 10 && box.bottom <= viewport.height - 10
+      && obstacles.every((o) => box.right + 10 <= o.left || box.left - 10 >= o.right || box.bottom + 10 <= o.top || box.top - 10 >= o.bottom);
+  };
+  const length = Math.hypot(normal.x, normal.y) || 1;
+  const nx = normal.x / length, ny = normal.y / length;
+  const candidates = previous ? [previous] : [];
+  for (const distance of [28, -28, 52, -52, 82, -82, 120, -120]) {
+    candidates.push({ x: nx * distance, y: ny * distance });
+  }
+  candidates.push({ x: 0, y: -height - 30 }, { x: 0, y: height + 30 });
+  return candidates.find(clear) ?? null;
 }
 
 /** One gentle pulse every 5–6 seconds, never repeating the same edge consecutively. */

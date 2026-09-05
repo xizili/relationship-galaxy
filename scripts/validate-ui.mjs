@@ -9,6 +9,7 @@ import * as layout from "../src/galaxy-layout.js";
 import { starVertices } from "../src/node-shapes.js";
 import * as tour from "../src/relation-tour.js";
 import { createZoomSpring } from "../src/nebula-motion.js";
+import { initSoundtrack, soundtrack } from "../src/soundtrack.js";
 
 class Element {
   constructor() {
@@ -49,7 +50,8 @@ const context = vm.createContext({
   MapIcon: {}, Orbit: {}, RotateCcw: {}, Search: {}, Telescope: {}, X: {},
   groups, links, nodes, relationTypes, sourceSummary, portraits,
   portraitAssetUrl: (id) => portraits[id] ? `/portraits/${id}.webp` : "",
-  ...layout, ...tour, starVertices, createZoomSpring, initTopology: secondaryView, initTimeline: secondaryView
+  ...layout, ...tour, starVertices, createZoomSpring, initTopology: secondaryView, initTimeline: secondaryView,
+  initSoundtrack: () => initSoundtrack(doc)
 });
 let source = readFileSync(new URL("../src/main.js", import.meta.url), "utf8");
 source = source.replace(/^import[\s\S]*?;\n/gm, "");
@@ -221,6 +223,24 @@ for (const group of ["all", ...Object.keys(groups)]) {
 delete globalThis.document;
 assert.ok(!html.includes('id="topologyPopover"'));
 assert.ok(html.includes(">地图模式</button>"));
+assert.ok(!html.includes("策展布局"));
+api.enterOverview();
+api.animate(30001);
+assert.equal(element("#galaxyHint").hidden, true);
+api.focusNode("freud"); api.enterOverview();
+assert.equal(element("#galaxyHint").hidden, true, "提示到期后不能因返回全览而重新出现");
+assert.ok(!html.includes("<iframe"), "首次进入不连接第三方播放器");
+element("#musicPanel").hidden = true;
+assert.equal(element("#musicPlayer").innerHTML, "");
+element("#musicToggle").fire("click");
+assert.equal(element("#musicPanel").hidden, false);
+assert.equal(element("#musicPlayer").innerHTML, "");
+element("#loadMusic").fire("click");
+assert.ok(element("#musicPlayer").innerHTML.includes(soundtrack.embedUrl));
+assert.ok(soundtrack.embedUrl.includes("autoplay=0"));
+element("#closeMusic").fire("click");
+assert.equal(element("#musicPlayer").innerHTML, "", "关闭播放器必须停止播放并移除第三方内容");
+assert.equal(element("#musicPanel").hidden, true);
 const css = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
 assert.match(css, /\[hidden\]\s*\{\s*display:\s*none\s*!important;/);
 console.log("后台交互测试通过：73 节点、85 连线、100 银色突触、全节点侧栏、关系双端聚焦、视图重置、深度栏与图片署名集中展示。");

@@ -362,11 +362,23 @@ button {
   top: 92px;
   left: 22px;
   margin: 0;
-  color: rgba(228, 235, 248, 0.65);
+  color: rgba(228, 235, 248, 0.32);
   font-size: 14px;
   line-height: 1.75;
   text-shadow: 0 2px 10px #080908;
   pointer-events: none;
+  animation: galaxy-hint-life 30s linear forwards;
+}
+
+@keyframes galaxy-hint-life {
+  0% { opacity: 0; }
+  5%, 50% { opacity: 1; }
+  28%, 76% { opacity: 0.5; }
+  90% { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .galaxy-hint { animation: none; }
 }
 
 .image-credits-toggle {
@@ -383,6 +395,24 @@ button {
 .image-credits h3 { margin: 0 0 6px; font-size: 16px; }
 .image-credits p { font-size: 14px; line-height: 1.6; }
 .image-credits a { color: #bcd9fa; }
+.music-toggle {
+  position: fixed; z-index: 21; left: 18px; bottom: 16px;
+  border: 1px solid #aab5c144; background: #14191ee8; color: #ccd4df;
+  font-size: 22px; border-radius: 50%;
+}
+.music-panel {
+  position: fixed; z-index: 31; left: 18px; bottom: 68px;
+  width: min(516px, calc(100vw - 36px)); max-height: calc(100dvh - 100px);
+  padding: 18px; overflow: auto; border: 1px solid #8395aa66;
+  border-radius: 10px; background: #111920f5; color: #e1e8f1;
+  box-shadow: 0 20px 60px #0006;
+}
+.music-panel header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.music-panel h2 { margin: 0; font: 22px Georgia, serif; }
+.music-panel p { margin: 8px 0 14px; font-size: 14px; line-height: 1.6; color: #b4c0ce; }
+.music-panel a { color: #d1e1f6; text-underline-offset: 3px; }
+.load-music { padding: 10px 14px; border: 1px solid #93acc7; border-radius: 6px; background: #253647; cursor: pointer; }
+.music-panel iframe { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; min-height: 200px; border: 0; }
 @media (max-width: 1240px) {
   .galaxy-hint { top: 132px; }
 }
@@ -820,6 +850,7 @@ button {
 }
 
 .link-label {
+  translate: var(--avoid-x, 0px) var(--avoid-y, 0px);
   padding: 3px 6px;
   border: 1px solid color-mix(in srgb, var(--relation-color), transparent 52%);
   border-radius: 6px;
@@ -841,6 +872,9 @@ button {
 }
 
 .link-label.is-touring {
+  max-width: 220px;
+  font-size: 12px;
+  line-height: 1.6;
   opacity: var(--tour-opacity, 0);
   transform: translateY(0);
   border-color: color-mix(in srgb, var(--relation-color), transparent 25%);
@@ -1444,24 +1478,19 @@ button {
   pointer-events: none;
 }
 
-.topology-caption span {
+.topology-caption p {
+  margin: 0;
   color: #8a7862;
   font-size: 9px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
-.topology-caption strong {
-  color: #352e27;
-  font-family: Georgia, "Noto Serif SC", "Songti SC", serif;
-  font-size: 13px;
-  font-weight: 500;
-}
 
 .relation-legend {
   position: absolute;
   z-index: 4;
-  bottom: 18px;
+  bottom: 66px;
   left: 18px;
   display: flex;
   max-width: min(680px, calc(100vw - 470px));

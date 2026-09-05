@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createRelationTour, relationPulse } from "../src/relation-tour.js";
+import { createRelationTour, relationPulse, placeRelationLabel } from "../src/relation-tour.js";
 import { nodes, links, NODE_RADIUS } from "../src/data.js";
 import { groups, classificationFor } from "../src/taxonomy.js";
 import { starVertices } from "../src/node-shapes.js";
@@ -24,11 +24,16 @@ const single = links.find((link) => link.directed);
 const pair = links.find((link) => link.bidirectional);
 const plain = links.find((link) => !link.directed && !link.bidirectional);
 const beginning = relationPulse(single, 500);
+assert.equal(beginning.labelGlow, 0, "先点亮起点姓名，不抢先显示关系文字");
+assert.ok(relationPulse(single, 1500).labelGlow > 0.95);
 const end = relationPulse(single, 2650);
 assert.ok(beginning.sourceGlow > 0.9 && beginning.targetGlow === 0);
 assert.ok(end.targetGlow > 0.9 && end.sourceGlow === 0);
+assert.equal(end.labelGlow, 0, "终点点亮时让姓名优先");
 assert.ok(beginning.progress < end.progress);
 for (const link of [pair, plain]) {
+  assert.equal(relationPulse(link, 500).labelGlow, 0);
+  assert.ok(relationPulse(link, 1500).labelGlow > 0.95, "双端先亮，关系文字后出现");
   for (let elapsed = 0; elapsed <= 3200; elapsed += 100) {
     const pulse = relationPulse(link, elapsed);
     assert.equal(pulse.directed, false);
@@ -38,7 +43,7 @@ for (const link of [pair, plain]) {
 for (const link of links) {
   for (let elapsed = 0; elapsed <= 3200; elapsed += 80) {
     const pulse = relationPulse(link, elapsed);
-    for (const key of ["sourceGlow", "targetGlow", "progress", "gain"]) assert.ok(pulse[key] >= 0 && pulse[key] <= 1);
+    for (const key of ["sourceGlow", "targetGlow", "labelGlow", "progress", "gain"]) assert.ok(pulse[key] >= 0 && pulse[key] <= 1);
   }
   assert.equal(relationPulse(link, 0).gain, 0);
   assert.equal(relationPulse(link, 3200).gain, 0);
@@ -56,4 +61,11 @@ assert.ok(tour.step(8800, [1, 2]));
 assert.equal(tour.step(8801, [42]), null, "筛选后清除不适用关系");
 assert.equal(tour.step(10601, [42]).index, 42);
 assert.equal(tour.step(10602, []), null);
+assert.ok(links.every((link) => !/[A-Za-z]/.test(link.label)), "图上关系短标签应全部中文");
+const obstacles = [{ left: 150, top: 240, right: 250, bottom: 280 }, { left: 350, top: 240, right: 450, bottom: 280 }];
+const placementArgs = { center: { x: 300, y: 260 }, width: 200, height: 30, obstacles, viewport: { width: 600, height: 500 } };
+const offset = placeRelationLabel(placementArgs);
+assert.ok(offset && Math.abs(offset.y) > 30);
+assert.deepEqual(placeRelationLabel({ ...placementArgs, previous: offset }), offset, "安全位置应稳定，避免标签左右跳动");
+assert.equal(placeRelationLabel({ ...placementArgs, obstacles: [{ left: 0, top: 0, right: 600, bottom: 500 }] }), null, "无安全位置时不遮挡姓名");
 console.log("统一大小与关系巡游检查通过：全部节点同径、单向先后点亮、双向/无向同步、间隔随机抽取、无连边筛选及暂停恢复。");

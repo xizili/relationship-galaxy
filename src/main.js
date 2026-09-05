@@ -13,9 +13,10 @@ import {
 } from "./galaxy-layout.js";
 import { initTopology } from "./topology.js";
 import { starVertices } from "./node-shapes.js";
-import { createRelationTour, relationPulse, pulseVertexShader, pulseFragmentShader } from "./relation-tour.js";
+import { createRelationTour, relationPulse, placeRelationLabel, pulseVertexShader, pulseFragmentShader } from "./relation-tour.js";
 import { initTimeline } from "./timeline.js";
 import { createZoomSpring } from "./nebula-motion.js";
+import { initSoundtrack } from "./soundtrack.js";
 
 createIcons({
   icons: {
@@ -75,6 +76,8 @@ let topologyApi = null;
 let timelineApi = null;
 const relationTour = createRelationTour();
 let activeTourIndex = null;
+const galaxyHintDeadline = performance.now() + 30000;
+let galaxyHintExpired = false;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x080908);
@@ -311,7 +314,7 @@ function setActiveView(view, options = {}) {
 function updateViewControls() {
   const focused = selectedNodeId !== null || selectedLinkIndex !== null;
   depthControl.hidden = activeView === "timeline" || !focused;
-  document.querySelector("#galaxyHint").hidden = activeView !== "galaxy" || focused;
+  document.querySelector("#galaxyHint").hidden = galaxyHintExpired || activeView !== "galaxy" || focused;
   const reset = document.querySelector("#resetView");
   reset.hidden = activeView === "galaxy";
   const label = activeView === "timeline" ? "重置时间轴" : "重置地图";
@@ -987,6 +990,10 @@ function clearRelationTour() {
   const record = linkRecords[activeTourIndex];
   record.pulseMesh.visible = false;
   record.label.classList.remove("is-touring");
+  record.label.style.visibility = "";
+  record.label.style.setProperty("--avoid-x", "0px");
+  record.label.style.setProperty("--avoid-y", "0px");
+  record.labelOffset = null;
   record.synapses.forEach((terminal) => { terminal.material.opacity = record.baseSynapseOpacity ?? 0.48; });
   [record.link.source, record.link.target].forEach((id) => {
     nodeRecords.get(id).label.classList.remove("is-storylit");
@@ -1008,8 +1015,8 @@ function updateRelationTour(timestamp) {
   record.pulseMesh.visible = true;
   record.pulseMaterial.uniforms.uProgress.value = sample.progress;
   record.pulseMaterial.uniforms.uGain.value = sample.gain;
-  record.label.classList.toggle("is-touring", sample.gain > 0.08);
-  record.label.style.setProperty("--tour-opacity", String(sample.gain));
+  record.label.classList.toggle("is-touring", sample.labelGlow > 0.02);
+  record.label.style.setProperty("--tour-opacity", String(sample.labelGlow));
   record.synapses.forEach((terminal) => {
     const light = sample.directed
       ? sample.gain * Math.max(0, 1 - Math.abs(sample.progress - terminal.userData.t) / 0.18)
@@ -1021,6 +1028,37 @@ function updateRelationTour(timestamp) {
     label.classList.toggle("is-storylit", gain > 0.01);
     label.style.setProperty("--story-glow", String(gain));
   });
+}
+
+function updateTourLabelPlacement() {
+  if (activeTourIndex === null) return;
+  const record = linkRecords[activeTourIndex];
+  if (!record.label.classList.contains("is-touring")) return;
+  const toScreen = (position) => {
+    const p = position.clone().project(camera);
+    return { x: (p.x + 1) * window.innerWidth / 2, y: (1 - p.y) * window.innerHeight / 2 };
+  };
+  const source = toScreen(getNodePosition(record.link.source));
+  const target = toScreen(getNodePosition(record.link.target));
+  const obstacles = [record.link.source, record.link.target].map((id) => nodeRecords.get(id).label.getBoundingClientRect());
+  const topbar = document.querySelector(".topbar");
+  if (topbar) obstacles.push(topbar.getBoundingClientRect());
+  if (detailPanelOpen) obstacles.push(detailPanel.getBoundingClientRect());
+  const offset = placeRelationLabel({
+    center: toScreen(record.labelObject.position),
+    width: record.label.offsetWidth || 180,
+    height: record.label.offsetHeight || 30,
+    obstacles: obstacles.filter((rect) => rect.width > 0),
+    viewport: { width: window.innerWidth, height: window.innerHeight },
+    normal: { x: target.y - source.y, y: source.x - target.x },
+    previous: record.labelOffset
+  });
+  record.label.style.visibility = offset ? "" : "hidden";
+  if (offset) {
+    record.labelOffset = offset;
+    record.label.style.setProperty("--avoid-x", `${offset.x}px`);
+    record.label.style.setProperty("--avoid-y", `${offset.y}px`);
+  }
 }
 
 function focusCameraOnNode(nodeId) {
@@ -1588,6 +1626,10 @@ function animate(timestamp = 0) {
   requestAnimationFrame(animate);
   const deltaSeconds = Math.min(0.05, Math.max(0, (timestamp - previousFrameTime) / 1000));
   previousFrameTime = timestamp;
+  if (!galaxyHintExpired && timestamp >= galaxyHintDeadline) {
+    galaxyHintExpired = true;
+    updateViewControls();
+  }
 
   if (activeView !== "galaxy") {
     clearRelationTour();
@@ -1626,10 +1668,12 @@ function animate(timestamp = 0) {
   });
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
+  updateTourLabelPlacement();
 }
 
 renderFilters();
 renderImageCredits();
+initSoundtrack();
 renderRelationLegend();
 topologyApi = initTopology({
   nodes,
