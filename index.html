@@ -142,6 +142,33 @@
       </section>
 
       <div id="linkToast" class="link-toast" aria-live="polite"></div>
+      <button id="guestbookToggle" class="guestbook-toggle" type="button" aria-haspopup="dialog" aria-controls="guestbookDialog">留言 · 私信</button>
+      <dialog id="guestbookDialog" class="guestbook-dialog" aria-labelledby="guestbookTitle">
+        <button id="guestbookClose" class="icon-button guestbook-close" type="button" aria-label="关闭留言板">×</button>
+        <span class="panel-kicker">来自星云的回声</span>
+        <h2 id="guestbookTitle">留言板</h2>
+        <p class="guestbook-intro">留下发现、疑问，或你想到的另一条连接。访客无需登录。</p>
+        <p id="guestbookStatus" class="guestbook-status" role="status" aria-live="polite">正在准备留言板…</p>
+        <button id="guestbookRetry" class="guestbook-action" type="button" hidden>重新连接</button>
+        <form id="guestbookForm">
+          <fieldset id="guestbookFields" disabled>
+            <label for="guestbookName">怎么称呼你 <span>可用昵称</span></label>
+            <input id="guestbookName" name="name" type="text" maxlength="30" placeholder="一位访客" autocomplete="nickname" />
+            <label for="guestbookBody">公开留言</label>
+            <textarea id="guestbookBody" name="body" maxlength="1000" minlength="2" rows="4" required placeholder="请勿留下邮箱、电话号码等私人信息。"></textarea>
+            <div class="guestbook-honeypot" aria-hidden="true"><label>Website<input name="website" tabindex="-1" autocomplete="off" /></label></div>
+            <p class="guestbook-note">最多 1000 字，提交后公开展示。请友善交流；管理员可移除垃圾或不当留言。为防刷屏，服务端会短期保存不可直接还原的访客网络标记。</p>
+            <button class="guestbook-action" type="submit">发表留言</button>
+          </fieldset>
+        </form>
+        <section class="guestbook-private" aria-label="邮箱私信">
+          <h3>只想私下聊聊？</h3>
+          <a href="mailto:neuroplus@126.com?subject=%E5%85%B3%E7%B3%BB%E7%9A%84%E9%93%B6%E6%B2%B3%20%C2%B7%20%E7%A7%81%E4%BF%A1">neuroplus@126.com ↗</a>
+          <p>点击打开你的邮件应用，内容不会出现在公开留言板。</p>
+        </section>
+        <section id="guestbookMessages" class="guestbook-messages" aria-label="公开留言列表"></section>
+        <button id="guestbookMore" class="guestbook-action" type="button" hidden>更早的留言</button>
+      </dialog>
       <audio id="backgroundMusic" preload="metadata" loop></audio>
       <button id="musicToggle" class="music-toggle" type="button" aria-label="开启音乐 · 萨蒂《第1号裸体舞曲》" aria-controls="backgroundMusic" aria-pressed="false">
         <span class="music-symbol" aria-hidden="true">♪</span><span id="musicState" aria-live="polite">开启音乐</span>

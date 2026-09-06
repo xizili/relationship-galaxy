@@ -81,7 +81,7 @@ const beforeDrag = dragged.getAttribute("transform");
 svg.fire("pointerdown", { target: dragged });
 svg.fire("pointermove", { target: dragged, clientX: 530, clientY: 420 });
 assert.ok(svg.captureCount > 0);
-assert.notEqual(dragged.getAttribute("transform"), beforeDrag);
+assert.equal(dragged.getAttribute("transform"), beforeDrag, "全览时拖动不得改变任何节点的地图坐标");
 svg.fire("pointerup");
 svg.fire("click");
 dragged.fire("click");

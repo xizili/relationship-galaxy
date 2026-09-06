@@ -778,7 +778,7 @@ export function initTopology({
   svg.addEventListener("pointerdown", (event) => {
     transformAnimation += 1;
     const nodeElement = event.target.closest?.("[data-node-id]");
-    if (nodeElement) {
+    if (nodeElement && (state.selectedNodeId !== null || state.selectedLinkIndex !== null)) {
       const nodeId = nodeElement.dataset.nodeId;
       const graphPoint = clientToGraph(event.clientX, event.clientY);
       const point = positions.get(nodeId);

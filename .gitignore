@@ -3,3 +3,6 @@ dist/
 .pnpm-store/
 .DS_Store
 *.log
+.wrangler/
+.dev.vars*
+guestbook/wrangler.jsonc

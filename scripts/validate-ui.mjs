@@ -11,6 +11,7 @@ import * as tour from "../src/relation-tour.js";
 import { createZoomSpring } from "../src/nebula-motion.js";
 import { soundtrack } from "../src/soundtrack.js";
 import { createGoldDust } from "../src/gold-dust.js";
+import { createDynamicTube, updateDynamicTube } from "../src/dynamic-tube.js";
 
 class Element {
   constructor() {
@@ -53,7 +54,7 @@ const context = vm.createContext({
   groups, links, nodes, relationTypes, sourceSummary, portraits,
   portraitAssetUrl: (id) => portraits[id] ? `/portraits/${id}.webp` : "",
   ...layout, ...tour, starVertices, createZoomSpring, initTopology: () => secondaryView(topologyUpdates), initTimeline: () => secondaryView(),
-  soundtrack, createGoldDust, initSoundtrack: () => ({})
+  soundtrack, createGoldDust, createDynamicTube, updateDynamicTube, initSoundtrack: () => ({}), initGuestbook() {}
 });
 let source = readFileSync(new URL("../src/main.js", import.meta.url), "utf8");
 source = source.replace(/^import[\s\S]*?;\n/gm, "");
@@ -61,6 +62,7 @@ source += `\nglobalThis.testApi = { focusNode, setActiveView, enterOverview, ren
 vm.runInContext(source, context);
 const api = context.testApi;
 assert.equal(api.getState().activeView, "galaxy");
+assert.equal(element("#groupFilters").innerHTML.match(/data-group="([^"]+)"/g)[1], 'data-group="neuroscience"');
 assert.equal(api.getState().overviewMode, true);
 assert.equal(api.getState().detailPanelOpen, false);
 assert.equal(api.controls.autoRotate, true);
@@ -107,7 +109,9 @@ assert.ok(api.linkRecords.every((r) => !r.label.classList.contains("is-touring")
 assert.doesNotMatch(source, /updateGalaxyLabelPlacement|--avoid-[xy]|labelOffset/);
 
 for (const node of nodes) {
+  const hiddenMapUpdates = topologyUpdates.length;
   api.focusNode(node.id);
+  assert.equal(topologyUpdates.length, hiddenMapUpdates, "银河聚焦时不得重新绘制隐藏地图");
   assert.equal(api.controls.autoRotate, true, `聚焦不得停止旋转：${node.id}`);
   assert.equal(api.getState().detailPanelOpen, true);
   assert.ok(element("#detailPanelContent").innerHTML.includes(node.cn));
@@ -314,4 +318,23 @@ for (const id of ["marom", "ogden"]) {
 }
 const css = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
 assert.match(css, /\[hidden\]\s*\{\s*display:\s*none\s*!important;/);
+// A full focus transition retains every line/pulse buffer; endpoints and labels follow every frame.
+api.setActiveView("galaxy"); api.focusNode("freud");
+const retainedLinks = api.linkRecords.map((r) => ({ line: r.mesh.geometry, sheath: r.sheath.geometry, position: r.mesh.geometry.attributes.position.array }));
+let disposals = 0;
+for (const r of retainedLinks) { r.line.addEventListener("dispose", () => { disposals += 1; }); r.sheath.addEventListener("dispose", () => { disposals += 1; }); }
+for (let frame = 0; frame < 130; frame += 1) {
+  const versions = retainedLinks.map((r) => r.line.attributes.position.version);
+  api.animate(31000 + frame * 1000 / 60);
+  if (frame < 20) assert.ok(retainedLinks.some((r, i) => r.line.attributes.position.version > versions[i]), "移动中的线条应逐帧更新，不再每 64 毫秒跳动");
+  for (const [index, record] of api.linkRecords.entries()) {
+    assert.equal(record.mesh.geometry, retainedLinks[index].line);
+    assert.equal(record.pulseMesh.geometry, retainedLinks[index].line);
+    assert.equal(record.sheath.geometry, retainedLinks[index].sheath);
+    assert.equal(record.mesh.geometry.attributes.position.array, retainedLinks[index].position);
+    assert.ok(record.labelObject.position.distanceTo(record.curve.getPoint(.5)) < 1e-8);
+    for (const terminal of record.synapses) assert.ok(terminal.position.distanceTo(record.curve.getPoint(terminal.userData.t)) < 1e-8);
+  }
+}
+assert.equal(disposals, 0);
 console.log("后台交互测试通过：73 节点、85 连线、100 银色突触、全节点侧栏、关系双端聚焦、视图重置、深度栏与图片署名集中展示。");

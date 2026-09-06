@@ -18,6 +18,10 @@ import { initTimeline } from "./timeline.js";
 import { createZoomSpring } from "./nebula-motion.js";
 import { initSoundtrack, soundtrack } from "./soundtrack.js";
 import { createGoldDust } from "./gold-dust.js";
+import { createDynamicTube, updateDynamicTube } from "./dynamic-tube.js";
+import { initGuestbook } from "./guestbook.js";
+
+initGuestbook();
 
 createIcons({
   icons: {
@@ -48,7 +52,7 @@ const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
 const nodeById = new Map(nodes.map((node) => [node.id, node]));
 const nodeRecords = new Map();
 const linkRecords = [];
-const groupKeys = Object.keys(groups);
+const groupKeys = ["neuroscience", ...Object.keys(groups).filter((key) => key !== "neuroscience")];
 const galaxyPositionScale = new THREE.Vector3(1.18, 0.84, 1.03);
 const baseGalaxyPositions = buildGalaxyLayout(nodes, links, galaxyPositionScale);
 const currentGalaxyPositions = clonePositionMap(baseGalaxyPositions);
@@ -73,7 +77,8 @@ let cameraGoal = null;
 let targetGoal = null;
 let cameraTransitionDeadline = 0;
 let previousFrameTime = 0;
-let lastGalaxyGeometryUpdate = 0;
+let galaxyGeometryDirty = false;
+const movedGalaxyNodes = new Set();
 let activeView = "galaxy";
 let topologyApi = null;
 let timelineApi = null;
@@ -199,6 +204,7 @@ function getTargetNodePosition(nodeOrId) {
 function setGalaxyLayoutTargets(positionMap) {
   targetGalaxyPositions = clonePositionMap(positionMap);
   galaxyLayoutTransitionActive = true;
+  galaxyGeometryDirty = true;
 }
 
 function restoreGalaxyLayout() {
@@ -254,7 +260,7 @@ function clearMapContext() {
 }
 
 function syncSecondaryViews(options = {}) {
-  topologyApi?.update(
+  if (activeView === "topology") topologyApi?.update(
     {
       activeGroup,
       depthMode,
@@ -266,7 +272,7 @@ function syncSecondaryViews(options = {}) {
     },
     options
   );
-  timelineApi?.update(
+  if (activeView === "timeline") timelineApi?.update(
     {
       activeGroup,
       selectedNodeId
@@ -723,7 +729,7 @@ function createLink(link, index) {
   const sourceNode = nodeById.get(link.source);
   const targetNode = nodeById.get(link.target);
   const curve = makeCurve(sourceNode, targetNode);
-  const geometry = new THREE.TubeGeometry(curve, 42, 0.68 + (link.weight ?? 1) * 0.18, 8, false);
+  const geometry = createDynamicTube(curve, 42, 0.68 + (link.weight ?? 1) * 0.18, 8);
   const material = new THREE.MeshBasicMaterial({
     color: 0xb9c5d6,
     transparent: true,
@@ -754,7 +760,7 @@ function createLink(link, index) {
   }
 
   // A soft sheath follows the actual edge, never adding fictitious connections.
-  const sheathGeometry = new THREE.TubeGeometry(curve, 32, 4.6, 6, false);
+  const sheathGeometry = createDynamicTube(curve, 32, 4.6, 6);
   const sheathMaterial = new THREE.ShaderMaterial({
     uniforms: { uOpacity: { value: 0.075 } },
     vertexShader: `varying vec3 vNormal; varying vec3 vView;
@@ -815,40 +821,32 @@ function refreshLinkGeometry(record) {
   if (!sourceNode || !targetNode) return;
 
   const curve = makeCurve(sourceNode, targetNode);
-  const nextGeometry = new THREE.TubeGeometry(
-    curve,
-    42,
-    0.68 + (record.link.weight ?? 1) * 0.18,
-    8,
-    false
-  );
-  record.mesh.geometry.dispose();
-  record.mesh.geometry = nextGeometry;
-  record.pulseMesh.geometry = nextGeometry;
+  updateDynamicTube(record.mesh.geometry, curve);
 
   record.synapses.forEach((terminal) => {
     const { t, direction } = terminal.userData;
     terminal.position.copy(curve.getPoint(t));
     terminal.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), curve.getTangent(t).normalize().multiplyScalar(direction));
   });
-  record.sheath.geometry.dispose();
-  record.sheath.geometry = new THREE.TubeGeometry(curve, 32, 4.6, 6, false);
+  updateDynamicTube(record.sheath.geometry, curve);
 
   record.labelObject.position.copy(curve.getPoint(0.5));
   record.curve = curve;
 }
 
-function updateGalaxyLayoutFrame(timestamp) {
+function updateGalaxyLayoutFrame(deltaSeconds) {
   if (!galaxyLayoutTransitionActive) return;
 
   const reducedMotion = reducedMotionQuery.matches;
-  const interpolation = reducedMotion ? 1 : 0.095;
+  const interpolation = reducedMotion ? 1 : 1 - Math.exp(-6 * deltaSeconds);
   let stillMoving = false;
+  movedGalaxyNodes.clear();
 
   currentGalaxyPositions.forEach((position, id) => {
     const target = targetGalaxyPositions.get(id);
     if (!target) return;
     const distance = position.distanceTo(target);
+    if (distance > 0) movedGalaxyNodes.add(id);
     if (distance > 0.08) {
       position.lerp(target, interpolation);
       stillMoving = true;
@@ -861,10 +859,10 @@ function updateGalaxyLayoutFrame(timestamp) {
     record?.glow.position.copy(position);
   });
 
-  if (timestamp - lastGalaxyGeometryUpdate >= 64 || !stillMoving) {
-    linkRecords.forEach(refreshLinkGeometry);
-    lastGalaxyGeometryUpdate = timestamp;
+  for (const record of linkRecords) {
+    if (galaxyGeometryDirty || movedGalaxyNodes.has(record.link.source) || movedGalaxyNodes.has(record.link.target)) refreshLinkGeometry(record);
   }
+  galaxyGeometryDirty = false;
   galaxyLayoutTransitionActive = stillMoving;
 }
 
@@ -1653,7 +1651,7 @@ function animate(timestamp = 0) {
   stars.rotation.y += 0.00008;
   stars.rotation.x += 0.000025;
 
-  updateGalaxyLayoutFrame(timestamp);
+  updateGalaxyLayoutFrame(deltaSeconds);
   updateRelationTour(timestamp);
 
   if (cameraGoal && targetGoal) {
