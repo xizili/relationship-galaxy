@@ -9,6 +9,7 @@ import * as layout from "../src/galaxy-layout.js";
 import { starVertices } from "../src/node-shapes.js";
 import * as tour from "../src/relation-tour.js";
 import { createZoomSpring } from "../src/nebula-motion.js";
+import { createCameraFlight } from "../src/camera-flight.js";
 import { soundtrack } from "../src/soundtrack.js";
 import { createDynamicTube, updateDynamicTube } from "../src/dynamic-tube.js";
 
@@ -41,7 +42,7 @@ const windowStub = new Element();
 Object.assign(windowStub, { innerWidth: 1440, innerHeight: 900, devicePixelRatio: 1, matchMedia: () => ({ matches: false }), dispatchEvent() {} });
 class Renderer { constructor() { this.domElement = new Element(); } setPixelRatio() {} setSize() {} render() {} }
 class LabelObject extends RealThree.Object3D { constructor(element) { super(); this.element = element; } }
-class Controls { constructor() { this.target = new RealThree.Vector3(); } update(delta) { this.lastDelta = delta; } addEventListener() {} }
+class Controls extends RealThree.EventDispatcher { constructor() { super(); this.target = new RealThree.Vector3(); } update(delta) { this.lastDelta = delta; } }
 const topologyUpdates = [];
 const secondaryView = (updates = []) => ({ update(state, options) { updates.push({ state: { ...state }, options: { ...options } }); }, resize() {}, positionPopover() {} });
 const context = vm.createContext({
@@ -52,12 +53,12 @@ const context = vm.createContext({
   MapIcon: {}, Orbit: {}, RotateCcw: {}, Search: {}, Telescope: {}, X: {},
   groups, links, nodes, relationTypes, sourceSummary, portraits,
   portraitAssetUrl: (id) => portraits[id] ? `/portraits/${id}.webp` : "",
-  ...layout, ...tour, starVertices, createZoomSpring, initTopology: () => secondaryView(topologyUpdates), initTimeline: () => secondaryView(),
+  ...layout, ...tour, starVertices, createZoomSpring, createCameraFlight, initTopology: () => secondaryView(topologyUpdates), initTimeline: () => secondaryView(),
   soundtrack, createDynamicTube, updateDynamicTube, initSoundtrack: () => ({}), initGuestbook() {}
 });
 let source = readFileSync(new URL("../src/main.js", import.meta.url), "utf8");
 source = source.replace(/^import[\s\S]*?;\n/gm, "");
-source += `\nglobalThis.testApi = { focusNode, setActiveView, enterOverview, renderLinkDetail, renderSearchResults, animate, nodeRecords, linkRecords, controls, camera, scene, getState: () => ({ activeView, overviewMode, detailPanelOpen, selectedNodeId, selectedLinkIndex, mapContextNodeId, mapContextLinkIndex, activeGroup, depthMode, cameraGoal, targetGoal }) };`;
+source += `\nglobalThis.testApi = { focusNode, setActiveView, enterOverview, renderLinkDetail, renderSearchResults, animate, nodeRecords, linkRecords, controls, camera, scene, renderer, getState: () => ({ activeView, overviewMode, detailPanelOpen, selectedNodeId, selectedLinkIndex, mapContextNodeId, mapContextLinkIndex, activeGroup, depthMode, cameraGoal, targetGoal }) };`;
 vm.runInContext(source, context);
 const api = context.testApi;
 assert.equal(api.getState().activeView, "galaxy");
@@ -252,6 +253,8 @@ assert.equal(api.controls.autoRotate, true);
 
 api.focusNode("kafka");
 api.setActiveView("timeline"); api.animate(5000); api.setActiveView("galaxy"); api.animate(7000);
+assert.ok(api.getState().cameraGoal, "跨模式返回首帧不能因旧计时截止而直接跳到终点");
+for (let frame = 1; frame <= 100; frame += 1) api.animate(7000 + frame * 1000 / 60);
 assert.equal(api.getState().cameraGoal, null);
 assert.ok(api.controls.target.distanceTo(layout.buildGalaxyLayout(nodes, links, new RealThree.Vector3(1.18, 0.84, 1.03)).get("kafka")) < 1e-9, "跨视图返回后的相机过渡必须落到目标");
 const plain = links.findIndex((link) => !link.directed && !link.bidirectional);
@@ -341,4 +344,26 @@ for (let frame = 0; frame < 130; frame += 1) {
   }
 }
 assert.equal(disposals, 0);
+api.focusNode("freud");
+api.controls.dispatchEvent({ type: "start" });
+assert.equal(api.getState().cameraGoal, null, "手动拖动应立即接管镜头");
+api.focusNode("jung");
+api.renderer.domElement.fire("wheel", { deltaY: 10, deltaMode: 0, preventDefault() {}, stopImmediatePropagation() {} });
+assert.equal(api.getState().cameraGoal, null, "滚轮缩放应中断聚焦镜头，不在稍后弹回");
+assert.equal(api.controls.autoRotate, true, "手动接管不得篡改旋转开关");
+let nextFrame = 35000;
+for (const select of [() => api.renderLinkDetail(0), () => api.enterOverview()]) {
+  select();
+  if (api.getState().overviewMode) {
+    const positionBeforeResize = api.camera.position.clone();
+    windowStub.fire("resize");
+    assert.ok(api.camera.position.equals(positionBeforeResize), "切换视图的尺寸同步不得截断全览过渡");
+    assert.ok(api.getState().cameraGoal);
+  }
+  const expectedTarget = api.getState().targetGoal.clone();
+  for (let frame = 0; frame < 100; frame += 1) { nextFrame += 1000 / 60; api.animate(nextFrame); }
+  assert.equal(api.getState().cameraGoal, null, "关系聚焦和全览也应自然完成过渡");
+  assert.ok(api.controls.target.distanceTo(expectedTarget) < 1e-8);
+}
+assert.doesNotMatch(source, /cameraTransitionDeadline|camera\.position\.lerp\(cameraGoal/);
 console.log("后台交互测试通过：73 节点、85 连线、100 银色突触、全节点侧栏、关系双端聚焦、视图重置、深度栏与图片署名集中展示。");

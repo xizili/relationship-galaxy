@@ -16,6 +16,7 @@ import { starVertices } from "./node-shapes.js";
 import { createRelationTour, relationPulse, pulseVertexShader, pulseFragmentShader } from "./relation-tour.js";
 import { initTimeline } from "./timeline.js";
 import { createZoomSpring } from "./nebula-motion.js";
+import { createCameraFlight } from "./camera-flight.js";
 import { initSoundtrack, soundtrack } from "./soundtrack.js";
 import { createDynamicTube, updateDynamicTube } from "./dynamic-tube.js";
 import { initGuestbook } from "./guestbook.js";
@@ -74,7 +75,6 @@ let hoveredNodeId = null;
 let hoveredLinkIndex = null;
 let cameraGoal = null;
 let targetGoal = null;
-let cameraTransitionDeadline = 0;
 let previousFrameTime = 0;
 let galaxyGeometryDirty = false;
 const movedGalaxyNodes = new Set();
@@ -117,6 +117,7 @@ controls.maxDistance = 5200;
 controls.autoRotateSpeed = 0.55;
 controls.autoRotate = true;
 const zoomSpring = createZoomSpring();
+const cameraFlight = createCameraFlight(camera, controls);
 const galaxyPointers = new Map();
 let suppressGalaxyClick = false;
 
@@ -285,6 +286,7 @@ function setActiveView(view, options = {}) {
   if (view !== activeView) clearMapContext();
   activeView = view;
   zoomSpring.cancel();
+  if (view !== "galaxy") cancelCameraTransition();
   document.querySelector("#app").dataset.activeView = view;
   document.querySelector("#topologyView")?.classList.toggle("is-active", view === "topology");
   sceneEl.classList.toggle("is-active", view === "galaxy");
@@ -389,22 +391,31 @@ function getOverviewCameraPlacement() {
   };
 }
 
+function cancelCameraTransition() {
+  cameraFlight.cancel();
+  cameraGoal = null;
+  targetGoal = null;
+}
+
+function startCameraTransition(position, target) {
+  cameraGoal = position.clone();
+  targetGoal = target.clone();
+  cameraFlight.start(cameraGoal, targetGoal);
+}
+
 function moveCameraToOverview(options = {}) {
   zoomSpring.cancel();
   const placement = getOverviewCameraPlacement();
 
   if (options.immediate) {
+    cancelCameraTransition();
     camera.position.copy(placement.position);
     controls.target.copy(placement.target);
     controls.update();
-    cameraGoal = null;
-    targetGoal = null;
     return;
   }
 
-  cameraGoal = placement.position;
-  targetGoal = placement.target;
-  cameraTransitionDeadline = performance.now() + 1100;
+  startCameraTransition(placement.position, placement.target);
 }
 
 function groupStats() {
@@ -1064,9 +1075,7 @@ function focusCameraOnNode(nodeId) {
     .add(direction.multiplyScalar(distance))
     .add(side.multiplyScalar(84));
 
-  cameraGoal = cameraPosition;
-  targetGoal = position;
-  cameraTransitionDeadline = performance.now() + 1100;
+  startCameraTransition(cameraPosition, position);
 }
 
 function focusCameraOnLink(index) {
@@ -1082,9 +1091,8 @@ function focusCameraOnLink(index) {
   const distance = THREE.MathUtils.clamp(radius / Math.sin(halfFov) * 1.12, 340, controls.maxDistance);
   const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
   const offset = window.innerWidth > 900 ? distance * Math.tan(halfFov) * 0.26 : 0;
-  targetGoal = midpoint.addScaledVector(right, offset);
-  cameraGoal = targetGoal.clone().addScaledVector(direction, distance);
-  cameraTransitionDeadline = performance.now() + 1100;
+  const framingTarget = midpoint.addScaledVector(right, offset);
+  startCameraTransition(framingTarget.clone().addScaledVector(direction, distance), framingTarget);
 }
 
 function focusNode(nodeId, options = {}) {
@@ -1397,8 +1405,7 @@ function hideLinkToast() {
 }
 
 controls.addEventListener("start", () => {
-  cameraGoal = null;
-  targetGoal = null;
+  cancelCameraTransition();
   zoomSpring.cancel();
 });
 
@@ -1407,7 +1414,7 @@ renderer.domElement.addEventListener("wheel", (event) => {
   if (activeView !== "galaxy") return;
   event.preventDefault();
   event.stopImmediatePropagation();
-  cameraGoal = null; targetGoal = null;
+  cancelCameraTransition();
   const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
   zoomSpring.impulse(camera.position.distanceTo(controls.target), delta, controls.minDistance, controls.maxDistance);
 }, { capture: true, passive: false });
@@ -1617,7 +1624,8 @@ function resize() {
   renderer.setSize(width, height);
   labelRenderer.setSize(width, height);
   if (overviewMode) {
-    moveCameraToOverview({ immediate: true });
+    // The view-switch resize event must not cut a running overview flight short.
+    moveCameraToOverview({ immediate: !cameraFlight.active });
   }
 }
 
@@ -1645,11 +1653,8 @@ function animate(timestamp = 0) {
   updateRelationTour(timestamp);
 
   if (cameraGoal && targetGoal) {
-    camera.position.lerp(cameraGoal, 0.055);
-    controls.target.lerp(targetGoal, 0.065);
-    if (timestamp >= cameraTransitionDeadline || (camera.position.distanceTo(cameraGoal) < 1.2 && controls.target.distanceTo(targetGoal) < 0.8)) {
-      camera.position.copy(cameraGoal);
-      controls.target.copy(targetGoal);
+    cameraFlight.update(deltaSeconds, reducedMotionQuery.matches);
+    if (!cameraFlight.active) {
       cameraGoal = null;
       targetGoal = null;
     }

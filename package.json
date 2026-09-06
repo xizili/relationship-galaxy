@@ -18,7 +18,8 @@
     "check:dust": "node scripts/validate-gold-dust.mjs",
     "check:geometry": "node scripts/validate-dynamic-tube.mjs",
     "check:guestbook": "node scripts/validate-guestbook.mjs",
-    "check": "npm run check:data && npm run check:layout && npm run check:tour && npm run check:ui && npm run check:map-motion && npm run check:map-layout && npm run check:soundtrack && npm run check:dust && npm run check:geometry && npm run check:guestbook"
+    "check:camera": "node scripts/validate-camera-flight.mjs",
+    "check": "npm run check:data && npm run check:layout && npm run check:tour && npm run check:ui && npm run check:map-motion && npm run check:map-layout && npm run check:soundtrack && npm run check:dust && npm run check:geometry && npm run check:guestbook && npm run check:camera"
   },
   "dependencies": {
     "lucide": "^0.468.0",
