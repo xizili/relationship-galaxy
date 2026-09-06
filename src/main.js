@@ -17,7 +17,6 @@ import { createRelationTour, relationPulse, pulseVertexShader, pulseFragmentShad
 import { initTimeline } from "./timeline.js";
 import { createZoomSpring } from "./nebula-motion.js";
 import { initSoundtrack, soundtrack } from "./soundtrack.js";
-import { createGoldDust } from "./gold-dust.js";
 import { createDynamicTube, updateDynamicTube } from "./dynamic-tube.js";
 import { initGuestbook } from "./guestbook.js";
 
@@ -616,11 +615,6 @@ function makeStarField() {
 }
 
 const stars = makeStarField();
-const goldDust = createGoldDust({
-  center: graphCenter, radii: graphSize.clone().multiplyScalar(0.58),
-  compact: window.innerWidth <= 760, pixelRatio: window.devicePixelRatio || 1
-});
-scene.add(goldDust.points);
 
 function makeTopicStar(radius) {
   const shape = new THREE.Shape();
@@ -1633,10 +1627,6 @@ function animate(timestamp = 0) {
   requestAnimationFrame(animate);
   const deltaSeconds = Math.min(0.05, Math.max(0, (timestamp - previousFrameTime) / 1000));
   previousFrameTime = timestamp;
-  goldDust.update(deltaSeconds, {
-    active: activeView === "galaxy", focused: !overviewMode,
-    reducedMotion: reducedMotionQuery.matches, hidden: document.hidden
-  });
   if (!galaxyHintExpired && timestamp >= galaxyHintDeadline) {
     galaxyHintExpired = true;
     updateViewControls();

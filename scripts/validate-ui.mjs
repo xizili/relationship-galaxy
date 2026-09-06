@@ -10,7 +10,6 @@ import { starVertices } from "../src/node-shapes.js";
 import * as tour from "../src/relation-tour.js";
 import { createZoomSpring } from "../src/nebula-motion.js";
 import { soundtrack } from "../src/soundtrack.js";
-import { createGoldDust } from "../src/gold-dust.js";
 import { createDynamicTube, updateDynamicTube } from "../src/dynamic-tube.js";
 
 class Element {
@@ -54,11 +53,11 @@ const context = vm.createContext({
   groups, links, nodes, relationTypes, sourceSummary, portraits,
   portraitAssetUrl: (id) => portraits[id] ? `/portraits/${id}.webp` : "",
   ...layout, ...tour, starVertices, createZoomSpring, initTopology: () => secondaryView(topologyUpdates), initTimeline: () => secondaryView(),
-  soundtrack, createGoldDust, createDynamicTube, updateDynamicTube, initSoundtrack: () => ({}), initGuestbook() {}
+  soundtrack, createDynamicTube, updateDynamicTube, initSoundtrack: () => ({}), initGuestbook() {}
 });
 let source = readFileSync(new URL("../src/main.js", import.meta.url), "utf8");
 source = source.replace(/^import[\s\S]*?;\n/gm, "");
-source += `\nglobalThis.testApi = { focusNode, setActiveView, enterOverview, renderLinkDetail, renderSearchResults, animate, nodeRecords, linkRecords, controls, camera, goldDust, getState: () => ({ activeView, overviewMode, detailPanelOpen, selectedNodeId, selectedLinkIndex, mapContextNodeId, mapContextLinkIndex, activeGroup, depthMode, cameraGoal, targetGoal }) };`;
+source += `\nglobalThis.testApi = { focusNode, setActiveView, enterOverview, renderLinkDetail, renderSearchResults, animate, nodeRecords, linkRecords, controls, camera, scene, getState: () => ({ activeView, overviewMode, detailPanelOpen, selectedNodeId, selectedLinkIndex, mapContextNodeId, mapContextLinkIndex, activeGroup, depthMode, cameraGoal, targetGoal }) };`;
 vm.runInContext(source, context);
 const api = context.testApi;
 assert.equal(api.getState().activeView, "galaxy");
@@ -66,6 +65,11 @@ assert.equal(element("#groupFilters").innerHTML.match(/data-group="([^"]+)"/g)[1
 assert.equal(api.getState().overviewMode, true);
 assert.equal(api.getState().detailPanelOpen, false);
 assert.equal(api.controls.autoRotate, true);
+assert.equal(api.scene.getObjectByName("gold-dust"), undefined, "不创建金色粒子层");
+assert.ok(api.scene.getObjectByName("stars")?.isPoints, "保留原有远处星空");
+const pointLayers = [];
+api.scene.traverse((object) => { if (object.isPoints) pointLayers.push(object.name); });
+assert.deepEqual(pointLayers, ["stars"], "场景中没有额外的装饰粒子绘制层");
 assert.equal(api.nodeRecords.size, 73);
 assert.equal(api.linkRecords.length, 85);
 assert.equal(api.nodeRecords.get("cybernetics").mesh.geometry.type, "ExtrudeGeometry");
