@@ -1,5 +1,6 @@
 // Background-only regression checks: no browser or desktop access.
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { nodes, links, groups, relationTypes } from "../src/data.js";
 import { initTopology } from "../src/topology.js";
 import { createZoomSpring } from "../src/nebula-motion.js";
@@ -123,26 +124,44 @@ map.resize({ preserveTransform: false });
 map.update({ selectedNodeId: "freud", selectedLinkIndex: null, overviewMode: false, depthMode: "1", contextNodeId: null });
 const connected = new Set(["freud", ...links.filter((l) => l.source === "freud" || l.target === "freud").map((l) => l.source === "freud" ? l.target : l.source)]);
 for (const node of nodeElements()) assert.equal(node.classes.has("is-dimmed"), !connected.has(node.dataset.nodeId));
-const parse = (e) => e.getAttribute("transform").match(/-?\d+(?:\.\d+)?/g).map(Number);
+const parse = (e) => e.getAttribute("transform").match(/[-+]?\d*\.?\d+(?:e[-+]?\d+)?/gi).map(Number);
+const rectangle = (x, y, width, height, degrees = 0) => {
+  const angle = degrees * Math.PI / 180, c = Math.cos(angle), s = Math.sin(angle);
+  return [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([a, b]) => ({ x: x + a * width / 2 * c - b * height / 2 * s, y: y + a * width / 2 * s + b * height / 2 * c }));
+};
+function apart(a, b) {
+  return [a, b].some((poly) => poly.some((point, i) => {
+    const next = poly[(i + 1) % poly.length], axis = { x: point.y - next.y, y: next.x - point.x };
+    const project = (p) => p.x * axis.x + p.y * axis.y;
+    const pa = a.map(project), pb = b.map(project);
+    return Math.max(...pa) <= Math.min(...pb) + 1e-7 || Math.max(...pb) <= Math.min(...pa) + 1e-7;
+  }));
+}
 function verifyLabelClearance() {
-  const [tx, ty, scale] = parse(viewport);
-  const obstacles = nodeElements().flatMap((element) => {
-    const [x, y] = parse(element), cx = tx + x * scale, cy = ty + y * scale;
-    const nameRect = element.children.find((e) => e.classes.has("topology-node-card")).children[0];
-    const width = Number(nameRect.getAttribute("width")) * scale;
-    const radius = 9 * scale * (element.classes.has("is-selected") ? 1.38 : 1);
-    const boxes = [{ left: cx - radius - 2, right: cx + radius + 2, top: cy - radius - 2, bottom: cy + radius + 2 }];
-    if (!(scale < 0.7 && element.classes.has("is-minor")) || element.classes.has("is-selected")) boxes.push(
-      { left: cx - width / 2, right: cx + width / 2, top: cy + 13 * scale, bottom: cy + 33 * scale });
-    return boxes;
+  const names = [];
+  const obstacles = nodeElements().filter((e) => !e.classes.has("is-focus-background") && !e.classes.has("is-hidden")).flatMap((element) => {
+    const [x, y] = parse(element);
+    const card = element.children.find((e) => e.classes.has("topology-node-card"));
+    const [dx, dy] = parse(card), width = Number(card.children[0].getAttribute("width"));
+    const radius = 9 * (element.classes.has("is-selected") ? 1.38 : 1);
+    const name = rectangle(x + dx, y + dy + 24, width, 22);
+    names.push(name);
+    return [rectangle(x, y, radius * 2 + 4, radius * 2 + 4), name];
   });
   const labels = findAll(svg, (e) => e.classes.has("topology-edge-label") && e.classes.has("is-visible") && !e.classes.has("is-occluded") && !e.classes.has("is-hidden"));
-  assert.ok(labels.length > 0, "有空间时应显示关系标签");
   for (const label of labels) {
-    const [x, y] = parse(label), width = Number(label.children[0].getAttribute("width")) * scale;
-    const box = { left: tx + x * scale - width / 2, right: tx + x * scale + width / 2, top: ty + y * scale - 14 * scale, bottom: ty + y * scale + 14 * scale };
-    assert.ok(obstacles.every((o) => box.right <= o.left || box.left >= o.right || box.bottom <= o.top || box.top >= o.bottom), "关系标签不得遮盖任何人名、节点或已有关系标签");
+    const [x, y, angle = 0] = parse(label), width = Number(label.children[0].getAttribute("width"));
+    const box = rectangle(x, y, width, 28, angle);
+    assert.ok(obstacles.every((o) => apart(box, o)), `关系 ${label.dataset.linkIndex} 标签不得遮盖可见人名、节点或已有关系标签`);
     obstacles.push(box);
+  }
+  for (const path of findAll(svg, (e) => e.classes.has("topology-edge") && e.classes.has("is-highlighted"))) {
+    const [sx, sy, cx, cy, ex, ey] = path.getAttribute("d").match(/[-+]?\d*\.?\d+(?:e[-+]?\d+)?/gi).map(Number);
+    for (let sample = 0; sample <= 180; sample += 1) {
+      const t = sample / 180, x = (1 - t) ** 2 * sx + 2 * (1 - t) * t * cx + t * t * ex;
+      const y = (1 - t) ** 2 * sy + 2 * (1 - t) * t * cy + t * t * ey;
+      assert.ok(names.every((name) => apart(rectangle(x, y, 1, 1), name)), `${nodeElements().find((e) => e.classes.has("is-selected"))?.dataset.nodeId}: 人名不得压住聚焦关系 ${path.dataset.linkIndex}, sample ${sample}`);
+    }
   }
 }
 verifyLabelClearance();
@@ -170,6 +189,61 @@ function finishAnimation() {
   assert.equal(frames.length, 0);
 }
 const edgeElements = () => findAll(svg, (e) => e.classes.has("topology-edge"));
+const edgeHits = () => findAll(svg, (e) => e.classes.has("topology-edge-hit"));
+const edgeLabels = () => findAll(svg, (e) => e.classes.has("topology-edge-label"));
+const overviewSnapshot = nodeElements().map((e) => e.getAttribute("transform"));
+for (const person of nodes) {
+  map.update({ selectedNodeId: person.id, selectedLinkIndex: null, contextNodeId: null,
+    contextLinkIndex: null, overviewMode: false, depthMode: "1", activeGroup: "all" }, { center: true });
+  finishAnimation();
+  const incident = links.flatMap((link, index) => link.source === person.id || link.target === person.id ? [index] : []);
+  const displayed = edgeLabels().filter((e) => e.classes.has("is-visible") && !e.classes.has("is-hidden") && !e.classes.has("is-occluded"));
+  assert.deepEqual(displayed.map((e) => Number(e.dataset.linkIndex)).sort((a, b) => a - b), incident, `${person.id} 的所有直接关系必须有简略标签`);
+  assert.ok(displayed.every((e) => Array.from(e.children[1].textContent).length <= 11));
+  verifyLabelClearance();
+  const centerElement = nodeElements().find((e) => e.classes.has("is-selected")), [centerX, centerY] = parse(centerElement);
+  const neighborAngles = nodeElements().filter((e) => e.classes.has("is-neighbor")).map((e) => {
+    const [x, y] = parse(e); return Math.atan2(y - centerY, x - centerX);
+  }).sort((a, b) => a - b);
+  if (neighborAngles.length >= 3) {
+    const gaps = neighborAngles.map((angle, i) => neighborAngles[(i + 1) % neighborAngles.length] + (i === neighborAngles.length - 1 ? 2 * Math.PI : 0) - angle);
+    assert.ok(Math.min(...gaps) >= Math.min(Math.PI * 0.42, Math.PI * 1.58 / (neighborAngles.length - 1)) - 1e-8, "密集直连关系须有明确的角度间隔");
+  }
+  for (const hit of edgeHits()) {
+    const allowed = incident.includes(Number(hit.dataset.linkIndex));
+    assert.equal(hit.classes.has("is-inactive"), !allowed);
+    assert.equal(hit.getAttribute("tabindex"), allowed ? "0" : "-1");
+    assert.equal(hit.getAttribute("aria-disabled"), String(!allowed));
+    const previousCount = selectedLinks.length;
+    hit.fire("click"); hit.fire("keydown", { key: "Enter" }); hit.fire("keydown", { key: " " });
+    assert.equal(selectedLinks.length - previousCount, allowed ? 3 : 0, "背景线不得响应点击或键盘");
+  }
+  if (incident.length) {
+    const label = displayed[0], previousCount = selectedLinks.length;
+    label.fire("click");
+    assert.equal(selectedLinks.length, previousCount + 1, "关系文字本身也是点击目标");
+    const beforeRelation = nodeElements().map((e) => e.getAttribute("transform"));
+    map.update({ selectedNodeId: null, selectedLinkIndex: incident[0] }, { center: true }); finishAnimation();
+    assert.deepEqual(nodeElements().map((e) => e.getAttribute("transform")), beforeRelation, "人物转入其关系时保持局部位置");
+    assert.equal(edgeHits().filter((e) => !e.classes.has("is-inactive")).length, 1);
+  }
+  map.update({ selectedNodeId: null, selectedLinkIndex: null, contextNodeId: person.id, overviewMode: true, depthMode: "all" }, { fit: true });
+  finishAnimation();
+  assert.deepEqual(nodeElements().map((e) => e.getAttribute("transform")), overviewSnapshot, "关闭后恢复全图坐标，连续探索不得累计变形");
+  assert.ok(edgeHits().every((e) => !e.classes.has("is-inactive") && e.getAttribute("tabindex") === "0"));
+  assert.ok(nodeElements().every((e) => parse(e.children.find((child) => child.classes.has("topology-node-card"))).every((v) => v === 0)));
+}
+// Even “all depths” keeps unrelated edge input disabled during person focus.
+map.update({ selectedNodeId: "freud", selectedLinkIndex: null, contextNodeId: null, overviewMode: false, depthMode: "all" });
+assert.equal(edgeHits().filter((e) => !e.classes.has("is-inactive")).length, 15);
+const radial = nodeElements().map((e) => e.getAttribute("transform"));
+map.resize({ preserveTransform: true });
+assert.deepEqual(nodeElements().map((e) => e.getAttribute("transform")), radial, "侧栏重测尺寸不得还原聚焦展开");
+map.update({ selectedNodeId: null, overviewMode: true, depthMode: "all" }, { fit: true }); finishAnimation();
+const stylesheet = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
+assert.match(stylesheet, /\.topology-edge\s*\{[^}]*pointer-events:\s*none/);
+assert.match(stylesheet, /\.topology-edge-hit\.is-inactive\s*\{\s*pointer-events:\s*none/);
+assert.match(stylesheet, /\.topology-edge-hit\s*\{[^}]*vector-effect:\s*non-scaling-stroke/);
 for (const config of [
   { width: 1440, height: 900, panelWidth: 384, panelHeight: 780, topbarBottom: 72, frameRight: 992, frameBottom: 822 },
   { width: 390, height: 844, panelWidth: 366, panelHeight: 290, topbarBottom: 210, frameRight: 366, frameBottom: 464 }
@@ -180,6 +254,20 @@ for (const config of [
   panel.getBoundingClientRect = () => ({ left: width + 100, top: height + 100, width: panelWidth, height: panelHeight, right: width + 100 + panelWidth, bottom: height + 100 + panelHeight });
   panel.classes.delete("is-collapsed");
   map.resize({ preserveTransform: false });
+  map.update({ selectedNodeId: "freud", selectedLinkIndex: null, contextNodeId: null, contextLinkIndex: null, overviewMode: false, depthMode: "1" }, { center: true });
+  finishAnimation(); verifyLabelClearance();
+  assert.equal(edgeLabels().filter((e) => e.classes.has("is-visible") && !e.classes.has("is-occluded")).length, 15);
+  const focusedBeforeResize = nodeElements().map((e) => e.getAttribute("transform"));
+  map.resize({ preserveTransform: true });
+  assert.deepEqual(nodeElements().map((e) => e.getAttribute("transform")), focusedBeforeResize);
+  const neighbor = nodeElements().filter((e) => e.classes.has("is-neighbor")).sort((a, b) => parse(b)[0] - parse(a)[0])[0];
+  const initial = parse(neighbor), scaleBeforeDrag = parse(viewport)[2];
+  svg.fire("pointerdown", { target: neighbor });
+  svg.fire("pointermove", { target: neighbor, clientX: 509, clientY: 400 });
+  svg.fire("pointerup", { target: neighbor });
+  assert.ok(Math.abs(parse(neighbor)[0] - initial[0] - 9 / scaleBeforeDrag) < 1e-8, "展开后的邻居拖动不得跳回全图边界");
+  now += 500;
+  map.update({ selectedNodeId: null, selectedLinkIndex: null, overviewMode: true, depthMode: "all" }, { fit: true }); finishAnimation();
   let enlarged = 0;
   for (let index = 0; index < links.length; index += 1) {
     const link = links[index], endpoints = new Set([link.source, link.target]);
@@ -196,6 +284,11 @@ for (const config of [
       assert.equal(node.classes.has("is-selected"), false, "关系聚焦不改变端点基础大小");
       const [x, y] = parse(node);
       const cardWidth = Number(node.children.find((e) => e.classes.has("topology-node-card")).children[0].getAttribute("width"));
+      const [nameX, nameY] = parse(node.children.find((e) => e.classes.has("topology-node-card")));
+      assert.ok(tx + (x + nameX - cardWidth / 2) * scale >= 24 - 1e-6);
+      assert.ok(tx + (x + nameX + cardWidth / 2) * scale <= frameRight + 1e-6, "取景须包括外移后的人名");
+      assert.ok(ty + (y + nameY + 13) * scale >= topbarBottom + 30 - 1e-6);
+      assert.ok(ty + (y + nameY + 35) * scale <= frameBottom + 1e-6);
       assert.ok(tx + (x - cardWidth / 2 - 4) * scale >= 24 - 1e-6, `${width}px 关系 ${index} 起端不应裁切`);
       assert.ok(tx + (x + cardWidth / 2 + 4) * scale <= frameRight + 1e-6, `${width}px 关系 ${index} 不应藏在侧栏后`);
       assert.ok(ty + (y - 14) * scale >= topbarBottom + 30 - 1e-6, `${width}px 关系 ${index} 不应藏在工具栏后`);
@@ -227,6 +320,21 @@ for (const config of [
 map.update({ contextLinkIndex: null });
 assert.ok(nodeElements().every((n) => !n.classes.has("is-context-muted")));
 map.destroy();
+
+// Opposite-direction parallel edges need separate curves AND caption lanes.
+panel.classes.add("is-collapsed");
+svg.getBoundingClientRect = () => ({ left: 0, top: 0, width: 1440, height: 900, right: 1440, bottom: 900 });
+bar.getBoundingClientRect = () => ({ bottom: 72 });
+const parallelLinks = [
+  { ...links[0], source: "freud", target: "fromm", label: "同一对人物的第一条关系" },
+  { ...links[0], source: "fromm", target: "freud", label: "同一对人物的第二条关系" }
+];
+const parallelMap = initTopology({ nodes: nodes.filter((n) => ["freud", "fromm"].includes(n.id)), links: parallelLinks, groups, relationTypes });
+parallelMap.update({ selectedNodeId: "freud", overviewMode: false, depthMode: "1" });
+assert.equal(edgeLabels().filter((e) => e.classes.has("is-visible") && !e.classes.has("is-occluded")).length, 2);
+assert.notEqual(edgeElements()[0].getAttribute("d"), edgeElements()[1].getAttribute("d"));
+verifyLabelClearance();
+parallelMap.destroy();
 Object.assign(globalThis, originalGlobals);
 
 // Zoom remains smooth, bounded and stable at different frame rates.
@@ -251,4 +359,4 @@ for (const fps of [20, 30, 60, 120]) {
   assert.ok(Math.abs(spring.step(0.016, true) - 140) < 1e-8);
 }
 assert.ok(Math.max(...finalDistances) - Math.min(...finalDistances) < 0.01);
-console.log("地图与惯性回归通过：73 节点点击、85 条关系在桌面/手机双端取景与关闭返回、旧动画中断、20–120 FPS 弹簧与边界。");
+console.log("地图与惯性回归通过：73 人物全直连标签、角度展开、人名与连线分离、背景线禁点、85 关系双端取景/关闭返回、并行关系、拖动与弹簧边界。");

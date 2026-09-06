@@ -1504,6 +1504,7 @@ button {
 /* ── Topology SVG ─────────────────────────────────────────────────────── */
 
 .topology-edge {
+  pointer-events: none;
   fill: none;
   stroke: #999891;
   stroke-width: 1.2;
@@ -1515,10 +1516,14 @@ button {
 .topology-edge-hit {
   fill: none;
   stroke: transparent;
-  stroke-width: 14;
+  stroke-width: 18;
+  vector-effect: non-scaling-stroke;
   pointer-events: stroke;
   cursor: pointer;
 }
+
+.topology-edge-hit.is-inactive { pointer-events: none; }
+.topology-edge-hit:focus-visible { stroke: #65574b22; outline: none; }
 
 .topology-edge.is-dimmed {
   opacity: 0.055;
@@ -1557,6 +1562,9 @@ button {
 .topology-edge-label.is-visible {
   opacity: 1;
 }
+
+.topology-edge-label.is-visible.is-interactive { pointer-events: all; cursor: pointer; }
+.topology-node.is-focus-background .topology-node-card { visibility: hidden; opacity: 0; pointer-events: none; }
 
 .topology-edge-label rect {
   fill: rgba(249, 246, 239, 0.95);
@@ -1672,10 +1680,12 @@ button {
 #topologyGraph .topology-node.is-label-hidden:focus .topology-node-card,
 #topologyGraph .topology-node.is-label-hidden.is-selected .topology-node-card,
 #topologyGraph .topology-node.is-label-hidden.is-link-endpoint .topology-node-card,
+#topologyGraph .topology-node.is-label-hidden.is-neighbor .topology-node-card,
 #topologyGraph.is-far .topology-node.is-minor:hover .topology-node-card,
 #topologyGraph.is-far .topology-node.is-minor:focus .topology-node-card,
 #topologyGraph.is-far .topology-node.is-minor.is-selected .topology-node-card,
-#topologyGraph.is-far .topology-node.is-minor.is-link-endpoint .topology-node-card {
+#topologyGraph.is-far .topology-node.is-minor.is-link-endpoint .topology-node-card,
+#topologyGraph.is-far .topology-node.is-minor.is-neighbor .topology-node-card {
   opacity: 1;
 }
 
