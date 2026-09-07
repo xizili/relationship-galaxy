@@ -80,13 +80,14 @@ export function initGuestbook({ root = document, fetcher = fetch, baseUrl = impo
     const data = new FormData(form);
     busy = true; fields.disabled = true; say("正在发表…");
     try {
-      await request("/messages", {
+      const result = await request("/messages", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: data.get("name"), body: data.get("body"), website: data.get("website"), requestId })
       });
       form.reset(); requestId = crypto.randomUUID();
-      try { await loadMessages(); say("留言已发表，所有访客都可以看到。"); }
-      catch { say("留言已发表，但列表刷新失败。请重新连接查看，无需重复提交。"); retry.hidden = false; }
+      const confirmation = result.visible === false ? "这条留言已被管理员隐藏，不再公开显示。" : "留言已发表，所有访客都可以看到。";
+      try { await loadMessages(); say(confirmation); }
+      catch { say(`${confirmation} 列表刷新失败，请重新连接查看，无需重复提交。`); retry.hidden = false; }
     } catch (error) { say(error.message || "发表失败，文字已保留，请稍后重试。"); }
     finally { busy = false; fields.disabled = false; }
   });

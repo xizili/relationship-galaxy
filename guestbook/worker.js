@@ -45,16 +45,16 @@ async function route(request, env) {
   const input = await readPayload(request);
   if (!input || typeof input !== "object" || typeof input.body !== "string" || typeof input.name !== "string" || input.website) return reply({ error: "请检查留言内容。" }, 400);
   const name = input.name.trim() || "一位访客", body = input.body.trim();
-  if (name.length > 30 || body.length < 2 || body.length > 1000 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(name + body)) return reply({ error: "昵称最多 30 字，留言需为 2—1000 字。" }, 400);
+  if ([...name].length > 30 || [...body].length < 2 || [...body].length > 1000 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(name + body)) return reply({ error: "昵称最多 30 字，留言需为 2—1000 字。" }, 400);
   if (typeof input.requestId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(input.requestId)) return reply({ error: "请刷新页面后重试。" }, 400);
   const encoded = new TextEncoder().encode(`${env.IP_HASH_SALT}:${request.headers.get("cf-connecting-ip")}`);
   const digest = await crypto.subtle.digest("SHA-256", encoded);
   const visitor = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
   // Retry-safe: a timeout after a successful write must not create a duplicate.
-  const previous = await env.DB.prepare("SELECT id, name, body, created_at, visitor_hash FROM messages WHERE request_id = ?").bind(input.requestId).first();
+  const previous = await env.DB.prepare("SELECT id, name, body, created_at, visitor_hash, hidden FROM messages WHERE request_id = ?").bind(input.requestId).first();
   if (previous) {
-    if (previous.visitor_hash !== visitor || previous.name !== name || previous.body !== body) return reply({ error: "提交内容已变化，请重新打开留言板后重试。" }, 409);
-    return reply({ message: publicMessage(previous) });
+    if (previous.visitor_hash !== visitor || previous.name !== name || previous.body !== body) return reply({ error: "提交记录或网络状态已变化。请先复制留言文字，再刷新网页后重试。" }, 409);
+    return reply({ message: publicMessage(previous), visible: !previous.hidden });
   }
   const now = Date.now();
   // One atomic INSERT ... SELECT keeps concurrent requests inside the rate limit.
@@ -64,8 +64,8 @@ async function route(request, env) {
     (SELECT COUNT(*) FROM messages WHERE visitor_hash = ? AND created_at > ?) < 10
     ON CONFLICT(request_id) DO NOTHING`)
     .bind(input.requestId, name, body, now, visitor, visitor, now - 60000, visitor, now - DAY).run();
-  const saved = await env.DB.prepare("SELECT id, name, body, created_at, visitor_hash FROM messages WHERE request_id = ?").bind(input.requestId).first();
-  if (saved && saved.visitor_hash === visitor && saved.name === name && saved.body === body) return reply({ message: publicMessage(saved) }, result.meta.changes ? 201 : 200);
+  const saved = await env.DB.prepare("SELECT id, name, body, created_at, visitor_hash, hidden FROM messages WHERE request_id = ?").bind(input.requestId).first();
+  if (saved && saved.visitor_hash === visitor && saved.name === name && saved.body === body) return reply({ message: publicMessage(saved), visible: !saved.hidden }, result.meta.changes ? 201 : 200);
   return reply({ error: "请稍候再留言：每分钟 1 条，每 24 小时最多 10 条。" }, 429);
 }
 
