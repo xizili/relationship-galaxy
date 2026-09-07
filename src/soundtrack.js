@@ -17,45 +17,77 @@ export function initSoundtrack(doc = document) {
   const audio = doc.querySelector("#backgroundMusic");
   let wanted = false;
   let generation = 0;
+  let awaitingGesture = false;
+  const gestureEvents = ["click", "touchend", "keydown"];
   audio.src = `${import.meta.env?.BASE_URL ?? "/"}${soundtrack.file}`;
   audio.loop = true;
   audio.volume = 0.3;
+  function waitForGesture(enabled) {
+    if (awaitingGesture === enabled) return;
+    awaitingGesture = enabled;
+    for (const type of gestureEvents) {
+      if (enabled) doc.addEventListener(type, resumeOnGesture, { capture: true, passive: true });
+      else doc.removeEventListener(type, resumeOnGesture, true);
+    }
+  }
+  function resumeOnGesture(event) {
+    if (!wanted || !awaitingGesture || !event.isTrusted || toggle.contains(event.target)) return;
+    if (event.type === "keydown" && (event.repeat || event.ctrlKey || event.metaKey || event.altKey || ["Escape", "Control", "Meta", "Alt", "Shift"].includes(event.key))) return;
+    // Call play synchronously inside the real gesture, not from a timer/promise.
+    // The music button is excluded so its close action cannot also start audio.
+    void play();
+  }
   function display(state) {
-    const labels = { playing: "关闭音乐", loading: "关闭音乐", paused: "开启音乐", blocked: "开启音乐", error: "重试音乐" };
+    const labels = { playing: "关闭音乐", loading: "关闭音乐", paused: "开启音乐", blocked: "待播放 · 关闭", error: "重试音乐" };
     label.textContent = labels[state];
     toggle.dataset.state = state;
-    toggle.setAttribute("aria-pressed", String(state === "playing" || state === "loading"));
-    toggle.setAttribute("aria-label", `${labels[state]} · 萨蒂《第1号裸体舞曲》`);
-    toggle.title = state === "blocked" ? "浏览器需要你点击后才能播放音乐" : `${labels[state]} · ${soundtrack.title}`;
+    toggle.setAttribute("aria-pressed", String(wanted));
+    toggle.setAttribute("aria-label", `${state === "blocked" ? "关闭音乐（等待首次交互后播放）" : labels[state]} · 萨蒂《第1号裸体舞曲》`);
+    toggle.title = state === "blocked" ? "配乐默认开启，点击页面后尝试播放；点击此按钮可关闭配乐" : `${labels[state]} · ${soundtrack.title}`;
   }
   function close() {
     wanted = false;
     generation += 1;
+    waitForGesture(false);
+    audio.autoplay = false;
     audio.pause();
     display("paused");
   }
-  async function play() {
+  async function play({ initial = false } = {}) {
     wanted = true;
+    audio.autoplay = true;
+    waitForGesture(initial);
     const request = ++generation;
     display("loading");
     try {
       await audio.play();
       // A late play promise must never undo an explicit off action.
       if (!wanted) { audio.pause(); return; }
-      if (request === generation) display("playing");
+      if (request === generation) { waitForGesture(false); display("playing"); }
     } catch (error) {
       if (request !== generation) return;
-      wanted = false;
-      display(error?.name === "NotAllowedError" ? "blocked" : "error");
+      if (error?.name === "NotAllowedError") {
+        // Keep the default-on intent; the browser still decides when sound is allowed.
+        waitForGesture(true);
+        display("blocked");
+      } else {
+        wanted = false;
+        audio.autoplay = false;
+        waitForGesture(false);
+        display("error");
+      }
     }
   }
   toggle.addEventListener("click", () => { if (wanted) close(); else void play(); });
-  audio.addEventListener("playing", () => { if (!wanted) audio.pause(); else display("playing"); });
-  audio.addEventListener("pause", () => {
-    if (wanted && audio.paused) { wanted = false; generation += 1; display("paused"); }
+  audio.addEventListener("playing", () => {
+    if (!wanted) audio.pause();
+    else { waitForGesture(false); display("playing"); }
   });
-  audio.addEventListener("error", () => { wanted = false; generation += 1; display("error"); });
-  // Attempt once on entry. Never turn another, unrelated click into consent.
-  const ready = play();
+  audio.addEventListener("pause", () => {
+    if (wanted && audio.paused) close();
+  });
+  audio.addEventListener("error", () => { close(); display("error"); });
+  // Start on every visit. If blocked, retry on a real interaction until switched off.
+  const ready = play({ initial: true });
   return { close, play, ready };
 }
