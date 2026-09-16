@@ -1,3 +1,4 @@
+import { t, getLanguage, nodeName, nodeInfo, linkLabel, linkFullText, compactLabel } from "./i18n.js";
 import { starPoints } from "./node-shapes.js";
 import { createMapLayout } from "./map-layout.js";
 import { placeRelationLabel, relationLabelBox } from "./relation-tour.js";
@@ -74,7 +75,7 @@ export function initTopology({
 
   svg.innerHTML = "";
   svg.setAttribute("role", "application");
-  svg.setAttribute("aria-label", "人物关系地图，可缩放、拖动并选择人物或关系");
+  svg.setAttribute("aria-label", t("人物关系地图，可缩放、拖动并选择人物或关系"));
 
   const adjacency = new Map(nodes.map((node) => [node.id, new Set()]));
   const degree = new Map(nodes.map((node) => [node.id, 0]));
@@ -162,7 +163,7 @@ export function initTopology({
   }
 
   function compactRoleText(node) {
-    return node.role.length > 11 ? `${node.role.slice(0, 10)}…` : node.role;
+    return compactLabel(nodeInfo(node, "role"), 11, 32);
   }
 
   function shouldPersistLabel(node, width) {
@@ -177,9 +178,9 @@ export function initTopology({
     const radius = NODE_RADIUS;
     const roleText = compactRoleText(node);
     const labelWidth = clamp(
-      node.cn.length * 13 + 12,
+      nodeName(node).length * (getLanguage() === "en" ? 7.3 : 13) + 12,
       52,
-      144
+      getLanguage() === "en" ? 260 : 144
     );
     const cardX = -labelWidth / 2;
     const markerFootprint = {
@@ -293,7 +294,7 @@ export function initTopology({
         "data-link-index": index,
         tabindex: 0,
         role: "button",
-        "aria-label": `${link.fullText || link.label}`
+        "aria-label": linkFullText(link) || linkLabel(link)
       });
       hitPath.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -307,9 +308,9 @@ export function initTopology({
         }
       });
 
-      const label = String(link.label ?? relationTypes[link.type]?.label ?? "关系");
-      const displayLabel = label.length > 24 ? `${label.slice(0, 23)}…` : label;
-      const labelWidth = clamp(displayLabel.length * 12 + 24, 72, 312);
+      const label = linkLabel(link);
+      const displayLabel = compactLabel(label, 24, 48);
+      const labelWidth = clamp(displayLabel.length * (getLanguage() === "en" ? 7 : 12) + 24, 72, 360);
       const labelGroup = svgElement("g", {
         class: "topology-edge-label",
         "data-link-index": index,
@@ -355,7 +356,7 @@ export function initTopology({
         "data-node-id": node.id,
         tabindex: 0,
         role: "button",
-        "aria-label": `${node.cn}，${node.role}`,
+        "aria-label": `${nodeName(node)}, ${nodeInfo(node, "role")}`,
         style: `--node-color:${groupColor}`
       });
       record.appendChild(
@@ -372,7 +373,7 @@ export function initTopology({
           : svgElement("circle", { class: "topology-node-core", r: radius })
       );
       const accessibleTitle = svgElement("title");
-      accessibleTitle.textContent = `${node.cn}：${node.role}`;
+      accessibleTitle.textContent = `${nodeName(node)}: ${nodeInfo(node, "role")}`;
       record.appendChild(accessibleTitle);
 
       const card = svgElement("g", { class: "topology-node-card" });
@@ -391,7 +392,7 @@ export function initTopology({
         y: 27,
         "text-anchor": "middle"
       });
-      name.textContent = node.cn;
+      name.textContent = nodeName(node);
       card.append(name);
       record.appendChild(card);
 
@@ -437,7 +438,7 @@ export function initTopology({
       const selectedLink = state.selectedLinkIndex !== null ? links[state.selectedLinkIndex] : null;
       const focusedName = focusLayout?.ids.has(id) || id === selectedLink?.source || id === selectedLink?.target;
       const measured = focusedName ? record.name.getComputedTextLength?.() : 0;
-      record.nameWidth = focusedName ? Math.max(record.labelWidth, measured > 0 ? measured + 10 : record.node.cn.length * 13 + 12) : record.labelWidth;
+      record.nameWidth = focusedName ? Math.max(record.labelWidth, measured > 0 ? measured + 10 : nodeName(record.node).length * (getLanguage() === "en" ? 7.3 : 13) + 12) : record.labelWidth;
       record.card.children[0].setAttribute("width", record.nameWidth);
       record.card.children[0].setAttribute("x", -record.nameWidth / 2);
       let offset = focusLayout?.names.get(id);
@@ -600,8 +601,8 @@ export function initTopology({
       if (link.bidirectional) record.visiblePath.setAttribute("marker-start", marker);
       record.labelGroup.classList.toggle("is-visible", connected || selected);
       record.labelGroup.classList.toggle("is-hidden", hidden);
-      record.labelText.textContent = connected ? compactMapRelation(link.label ?? record.displayLabel) : record.displayLabel;
-      const captionWidth = connected ? Math.max(48, Array.from(record.labelText.textContent).length * 12 + 20) : record.labelWidth;
+      record.labelText.textContent = connected ? (getLanguage() === "en" ? compactLabel(linkLabel(link), 11, 28) : compactMapRelation(linkLabel(link))) : record.displayLabel;
+      const captionWidth = connected ? Math.max(48, Array.from(record.labelText.textContent).length * (getLanguage() === "en" ? 7 : 12) + 20) : record.labelWidth;
       record.labelGroup.children[0].setAttribute("width", captionWidth);
       record.labelGroup.children[0].setAttribute("x", -captionWidth / 2);
     });
@@ -873,6 +874,23 @@ export function initTopology({
   resize({ preserveTransform: false });
 
   return {
+    refreshLanguage() {
+      svg.setAttribute("aria-label", t("人物关系地图，可缩放、拖动并选择人物或关系"));
+      nodeRecords.forEach((record) => {
+        const { node } = record;
+        record.name.textContent = nodeName(node);
+        record.element.setAttribute("aria-label", `${nodeName(node)}, ${nodeInfo(node, "role")}`);
+        record.element.querySelector("title").textContent = `${nodeName(node)}: ${nodeInfo(node, "role")}`;
+        record.labelWidth = nodeLabelLayout(node).labelWidth;
+      });
+      edgeRecords.forEach((record) => {
+        record.displayLabel = compactLabel(linkLabel(record.entry.link), 24, 48);
+        record.labelWidth = clamp(record.displayLabel.length * (getLanguage() === "en" ? 7 : 12) + 24, 72, 360);
+        record.hitPath.setAttribute("aria-label", linkFullText(record.entry.link));
+      });
+      renderGeometry();
+      updateVisualState();
+    },
     update(nextState = {}, options = {}) {
       state = { ...state, ...nextState };
       const previousLayoutFocus = layoutFocusNodeId;

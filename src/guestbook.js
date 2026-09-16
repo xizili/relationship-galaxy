@@ -1,15 +1,22 @@
+import { t, locale, onLanguageChange } from "./i18n.js";
 // Only the public API address lives here. Messages are never stored in a visitor's browser.
 export function initGuestbook({ root = document, fetcher = fetch, baseUrl = import.meta.env.BASE_URL } = {}) {
   const dialog = root.querySelector("#guestbookDialog");
   const form = root.querySelector("#guestbookForm");
   const fields = root.querySelector("#guestbookFields");
   const status = root.querySelector("#guestbookStatus");
-  const list = root.querySelector("#guestbookMessages");
+  const list = root.querySelector("#guestbookEntries");
   const more = root.querySelector("#guestbookMore");
   const retry = root.querySelector("#guestbookRetry");
   let endpoint = "", before = null, busy = false, initialized = false;
   let requestId = crypto.randomUUID();
-  const say = (message) => { status.textContent = message; };
+  let statusMessage = "正在准备留言板…";
+  const dates = new Set();
+  const say = (message) => { statusMessage = message; status.textContent = t(message); };
+  onLanguageChange(() => {
+    status.textContent = t(statusMessage);
+    dates.forEach((date) => { date.textContent = new Date(date.dateTime).toLocaleDateString(locale()); });
+  });
 
   async function request(path, options = {}) {
     const response = await fetcher(`${endpoint}${path}`, { ...options, signal: AbortSignal.timeout(12000), credentials: "omit" });
@@ -26,14 +33,15 @@ export function initGuestbook({ root = document, fetcher = fetch, baseUrl = impo
       const body = root.createElement("p");
       name.textContent = message.name;
       date.dateTime = new Date(message.createdAt).toISOString();
-      date.textContent = new Date(message.createdAt).toLocaleDateString("zh-CN");
+      date.textContent = new Date(message.createdAt).toLocaleDateString(locale());
+      dates.add(date);
       body.textContent = message.body;
       heading.append(name, date); article.append(heading, body); list.append(article);
     }
   }
   async function loadMessages(append = false) {
     const data = await request(`/messages${append && before ? `?before=${before}` : ""}`);
-    if (!append) list.replaceChildren();
+    if (!append) { list.replaceChildren(); dates.clear(); }
     appendMessages(data.messages);
     before = data.nextBefore;
     more.hidden = !before;

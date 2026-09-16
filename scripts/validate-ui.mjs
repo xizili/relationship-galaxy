@@ -12,6 +12,7 @@ import { createZoomSpring } from "../src/nebula-motion.js";
 import { createCameraFlight } from "../src/camera-flight.js";
 import { soundtrack } from "../src/soundtrack.js";
 import { createDynamicTube, updateDynamicTube } from "../src/dynamic-tube.js";
+import * as i18n from "../src/i18n.js";
 
 class Element {
   constructor() {
@@ -44,7 +45,7 @@ class Renderer { constructor() { this.domElement = new Element(); } setPixelRati
 class LabelObject extends RealThree.Object3D { constructor(element) { super(); this.element = element; } }
 class Controls extends RealThree.EventDispatcher { constructor() { super(); this.target = new RealThree.Vector3(); } update(delta) { this.lastDelta = delta; } }
 const topologyUpdates = [];
-const secondaryView = (updates = []) => ({ update(state, options) { updates.push({ state: { ...state }, options: { ...options } }); }, resize() {}, positionPopover() {} });
+const secondaryView = (updates = []) => ({ update(state, options) { updates.push({ state: { ...state }, options: { ...options } }); }, resize() {}, positionPopover() {}, refreshLanguage() {} });
 const context = vm.createContext({
   console, performance: { now: () => 0 }, document: doc, window: windowStub,
   requestAnimationFrame: () => 1, Event: class {}, CSS: { escape: (s) => s },
@@ -54,7 +55,8 @@ const context = vm.createContext({
   groups, links, nodes, relationTypes, sourceSummary, portraits,
   portraitAssetUrl: (id) => portraits[id] ? `/portraits/${id}.webp` : "",
   ...layout, ...tour, starVertices, createZoomSpring, createCameraFlight, initTopology: () => secondaryView(topologyUpdates), initTimeline: () => secondaryView(),
-  soundtrack, createDynamicTube, updateDynamicTube, initSoundtrack: () => ({}), initGuestbook() {}
+  soundtrack, createDynamicTube, updateDynamicTube, initSoundtrack: () => ({}), initGuestbook() {},
+  ...i18n, localizeDocument: () => i18n.localizeDocument(doc)
 });
 let source = readFileSync(new URL("../src/main.js", import.meta.url), "utf8");
 source = source.replace(/^import[\s\S]*?;\n/gm, "");
@@ -366,4 +368,32 @@ for (const select of [() => api.renderLinkDetail(0), () => api.enterOverview()])
   assert.ok(api.controls.target.distanceTo(expectedTarget) < 1e-8);
 }
 assert.doesNotMatch(source, /cameraTransitionDeadline|camera\.position\.lerp\(cameraGoal/);
+// Language switching must not invoke any focus/reset transition or rebuild 3D buffers.
+for (const view of ["galaxy", "topology", "timeline"]) {
+  api.setActiveView(view); api.focusNode("kafka");
+  const state = api.getState();
+  const position = api.camera.position.clone(), target = api.controls.target.clone();
+  const meshes = [...api.nodeRecords.values()].map((r) => r.mesh);
+  const geometries = api.linkRecords.map((r) => r.mesh.geometry);
+  const rotation = api.controls.autoRotate;
+  element("#detailPanel").scrollTop = 70;
+  i18n.setLanguage("en");
+  assert.deepEqual(api.getState(), state);
+  assert.ok(api.camera.position.equals(position) && api.controls.target.equals(target));
+  assert.equal(api.controls.autoRotate, rotation);
+  assert.equal(element("#detailPanel").scrollTop, 70);
+  assert.match(element("#detailPanelContent").innerHTML, /Franz Kafka/);
+  assert.match(api.nodeRecords.get("freud").label.innerHTML, /Sigmund Freud/);
+  assert.deepEqual([...api.nodeRecords.values()].map((r) => r.mesh), meshes);
+  assert.deepEqual(api.linkRecords.map((r) => r.mesh.geometry), geometries);
+  api.renderSearchResults("弗洛伊德"); assert.match(element("#searchResults").innerHTML, /data-search-node="freud"/);
+  api.renderSearchResults("Freud"); assert.match(element("#searchResults").innerHTML, /data-search-node="freud"/);
+  i18n.setLanguage("zh");
+  assert.match(element("#detailPanelContent").innerHTML, /没有人既能有真正的精神生活/);
+  api.renderLinkDetail(0);
+  const relationState = api.getState();
+  i18n.setLanguage("en"); assert.deepEqual(api.getState(), relationState);
+  assert.ok(element("#detailPanelContent").innerHTML.includes(i18n.linkLabel(links[0])));
+  i18n.setLanguage("zh"); assert.deepEqual(api.getState(), relationState);
+}
 console.log("后台交互测试通过：73 节点、85 连线、100 银色突触、全节点侧栏、关系双端聚焦、视图重置、深度栏与图片署名集中展示。");

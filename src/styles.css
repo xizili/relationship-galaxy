@@ -2432,3 +2432,37 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   .depth-control button { min-width: 44px; padding: 0 8px; }
   #app:has(.detail-panel.is-collapsed):has(.depth-control:not([hidden])) .guestbook-toggle { bottom: 72px; }
 }
+
+/* Language lives with view navigation; it does not add another toolbar row. */
+.language-control { display: flex; align-items: center; border-left: 1px solid #82786c44; padding-left: 4px; }
+.language-control select {
+  width: 82px; min-height: var(--control-size); padding: 0 4px;
+  border: 0; border-radius: 5px; background: transparent; color: inherit;
+  font: inherit; font-size: 13px; cursor: pointer;
+}
+.language-control select:focus-visible { outline: 2px solid #b89b71; outline-offset: 2px; }
+.language-control option { color: #292720; background: #f8f4ec; }
+html[lang="en-US"] .brand h1 { font-size: 16px; }
+html[lang="en-US"] .brand > div { min-width: 0; }
+html[lang="en-US"] .brand p { display: none; }
+html[lang="en-US"] .node-label strong { font-size: 12px; letter-spacing: 0; }
+html[lang="en-US"] .link-label { max-width: 300px; white-space: normal; text-align: center; }
+html[lang="en-US"] .person-card-copy { min-width: 0; overflow-wrap: break-word; }
+html[lang="en-US"] .detail-panel h2 { font-size: 22px; }
+@media (min-width: 761px) and (max-width: 1180px) {
+  :root { --chrome-bottom: 188px; }
+  .topbar { grid-template-columns: auto 1fr auto; }
+  .topbar .view-actions { grid-area: 1 / 3; }
+  .view-switcher { justify-content: center; }
+  .search-wrap { grid-area: 2 / 1 / 3 / -1; }
+  .segmented { grid-area: 3 / 1 / 4 / -1; }
+}
+@media (max-width: 760px) {
+  .view-switcher { min-width: 0; gap: 2px; }
+  .view-switcher button { min-width: 0; padding: 0 7px; }
+  .language-control select { width: 76px; }
+  html[lang="en-US"] .brand h1 { font-size: 13px; overflow-wrap: anywhere; white-space: normal; }
+}
+@media (min-width: 761px) and (max-width: 900px) {
+  .brand-mark, .brand p { display: none; }
+}

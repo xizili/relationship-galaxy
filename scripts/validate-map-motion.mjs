@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { nodes, links, groups, relationTypes } from "../src/data.js";
 import { initTopology } from "../src/topology.js";
 import { createZoomSpring } from "../src/nebula-motion.js";
+import { setLanguage } from "../src/i18n.js";
 
 class SvgElement {
   constructor(tag = "div") {
@@ -23,6 +24,7 @@ class SvgElement {
     if (key.startsWith("data-")) this.dataset[key.slice(5).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = String(value);
   }
   getAttribute(key) { return this.attributes.get(key); }
+  querySelector(selector) { return this.children.find((child) => child.tag === selector) ?? null; }
   append(...children) { children.forEach((child) => this.appendChild(child)); }
   appendChild(child) { this.children.push(child); child.parent = this; }
   closest(selector) {
@@ -63,6 +65,11 @@ let overviews = 0;
 const map = initTopology({ nodes, links, groups, relationTypes, onFocusNode: (id) => selected.push(id), onFocusLink: (id) => selectedLinks.push(id), onOverview: () => { overviews += 1; } });
 const nodeElements = () => findAll(svg, (e) => Boolean(e.dataset.nodeId));
 assert.equal(nodeElements().length, 73);
+const initialTransforms = nodeElements().map((node) => node.getAttribute("transform"));
+setLanguage("en"); map.refreshLanguage();
+assert.equal(nodeElements()[0].getAttribute("aria-label").includes(nodes[0].name), true);
+assert.deepEqual(nodeElements().map((node) => node.getAttribute("transform")), initialTransforms);
+setLanguage("zh"); map.refreshLanguage();
 for (const node of nodeElements()) {
   const hit = node.children.find((e) => e.tag === "circle" || e.tag === "polygon");
   const captures = svg.captureCount;

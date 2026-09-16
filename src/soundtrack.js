@@ -1,3 +1,4 @@
+import { t, onLanguageChange } from "./i18n.js";
 // The composition and this particular recording have separate rights.
 export const soundtrack = Object.freeze({
   title: "Gymnopédie No. 1 · D 大调第1号《裸体舞曲》",
@@ -18,6 +19,7 @@ export function initSoundtrack(doc = document) {
   let wanted = false;
   let generation = 0;
   let awaitingGesture = false;
+  let displayState = "loading";
   const gestureEvents = ["click", "touchend", "keydown"];
   audio.src = `${import.meta.env?.BASE_URL ?? "/"}${soundtrack.file}`;
   audio.loop = true;
@@ -38,12 +40,13 @@ export function initSoundtrack(doc = document) {
     void play();
   }
   function display(state) {
+    displayState = state;
     const labels = { playing: "关闭音乐", loading: "关闭音乐", paused: "开启音乐", blocked: "待播放 · 关闭", error: "重试音乐" };
-    label.textContent = labels[state];
+    label.textContent = t(labels[state]);
     toggle.dataset.state = state;
     toggle.setAttribute("aria-pressed", String(wanted));
-    toggle.setAttribute("aria-label", `${state === "blocked" ? "关闭音乐（等待首次交互后播放）" : labels[state]} · 萨蒂《第1号裸体舞曲》`);
-    toggle.title = state === "blocked" ? "配乐默认开启，点击页面后尝试播放；点击此按钮可关闭配乐" : `${labels[state]} · ${soundtrack.title}`;
+    toggle.setAttribute("aria-label", t(`${state === "blocked" ? "关闭音乐（等待首次交互后播放）" : labels[state]} · 萨蒂《第1号裸体舞曲》`));
+    toggle.title = t(state === "blocked" ? "配乐默认开启，点击页面后尝试播放；点击此按钮可关闭配乐" : `${labels[state]} · ${soundtrack.title}`);
   }
   function close() {
     wanted = false;
@@ -87,6 +90,7 @@ export function initSoundtrack(doc = document) {
     if (wanted && audio.paused) close();
   });
   audio.addEventListener("error", () => { close(); display("error"); });
+  onLanguageChange(() => display(displayState));
   // Start on every visit. If blocked, retry on a real interaction until switched off.
   const ready = play({ initial: true });
   return { close, play, ready };

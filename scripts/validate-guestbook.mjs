@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import worker from "../guestbook/worker.js";
 import pagesWorker from "../guestbook/pages/public/_worker.js";
 import { initGuestbook } from "../src/guestbook.js";
+import { setLanguage } from "../src/i18n.js";
 
 const db = new DatabaseSync(":memory:");
 db.exec(readFileSync(new URL("../guestbook/migrations/0001_messages.sql", import.meta.url), "utf8"));
@@ -110,10 +111,10 @@ try {
   } });
   root.querySelector("#guestbookToggle").fire("click"); await settle();
   assert.equal(root.querySelector("#guestbookFields").disabled, false);
-  assert.equal(root.querySelector("#guestbookMessages").children.length, 20);
+  assert.equal(root.querySelector("#guestbookEntries").children.length, 20);
   assert.equal(root.querySelector("#guestbookMore").hidden, false);
   await root.querySelector("#guestbookMore").fire("click");
-  assert.equal(root.querySelector("#guestbookMessages").children.length, 26);
+  assert.equal(root.querySelector("#guestbookEntries").children.length, 26);
   const form = root.querySelector("#guestbookForm");
   form.values = { name: "界面访客", body: "<script>只是文字</script>", website: "" }; form.fire("input");
   await form.fire("submit");
@@ -122,9 +123,16 @@ try {
   await form.fire("submit");
   assert.match(root.querySelector("#guestbookStatus").textContent, /已发表/);
   assert.equal(db.prepare("SELECT COUNT(*) AS count FROM messages WHERE name='界面访客'").get().count, 1);
-  assert.equal(root.querySelector("#guestbookMessages").children[0].children[1].textContent, "<script>只是文字</script>");
+  assert.equal(root.querySelector("#guestbookEntries").children[0].children[1].textContent, "<script>只是文字</script>");
   form.values = { name: "界面访客", body: "过于频繁的第二条", website: "" }; form.fire("input");
+  setLanguage("en");
+  const firstBody = root.querySelector("#guestbookEntries").children[0].children[1].textContent;
+  assert.equal(firstBody, "<script>只是文字</script>", "语言切换不能翻译或改写访客留言");
+  assert.equal(form.values.body, "过于频繁的第二条");
+  assert.equal(root.querySelector("#guestbookDialog").open, true);
   await form.fire("submit");
+  assert.match(root.querySelector("#guestbookStatus").textContent, /Please wait/);
+  setLanguage("zh");
   assert.match(root.querySelector("#guestbookStatus").textContent, /请稍候/);
   assert.equal(form.values.body, "过于频繁的第二条");
 } finally { globalThis.FormData = realFormData; }

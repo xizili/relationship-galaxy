@@ -1,4 +1,5 @@
 import "./styles.css";
+import { t, setLanguage, onLanguageChange, nodeName, otherName, nodeInfo, linkLabel, linkFullText, compactLabel, localizeElement, localizeDocument, setLocalizedHtml } from "./i18n.js";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { CSS2DObject, CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
@@ -21,6 +22,7 @@ import { initSoundtrack, soundtrack } from "./soundtrack.js";
 import { createDynamicTube, updateDynamicTube } from "./dynamic-tube.js";
 import { initGuestbook } from "./guestbook.js";
 
+localizeDocument();
 initGuestbook();
 
 createIcons({
@@ -163,7 +165,7 @@ function renderPersonPortrait(node, variant = "") {
       >
         <img
           src="${escapeHtml(portraitAssetUrl(node.id))}"
-          alt="${escapeHtml(node.cn)}肖像"
+          alt="${escapeHtml(nodeName(node))} ${t("肖像")}"
           loading="lazy"
           decoding="async"
         />
@@ -181,14 +183,15 @@ function renderImageCredits() {
   document.querySelector("#imageCreditsContent").innerHTML = nodes.filter((node) => portraits[node.id]).map((node) => {
     const p = portraits[node.id];
     const license = p.licenseUrl ? `<a href="${escapeHtml(p.licenseUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(p.license)}</a>` : escapeHtml(p.license);
-    return `<article id="credit-${node.id}"><h3>${escapeHtml(node.cn)}</h3>
+    return `<article id="credit-${node.id}"><h3>${escapeHtml(nodeName(node))}</h3>
       <p>${escapeHtml(p.creator)} · ${license} · <a href="${escapeHtml(p.sourcePageUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(p.sourceLabel || "图片来源")}</a></p>
       <p>${escapeHtml([p.imageNote, p.modifications || "网页缩略图显示与裁切", p.rightsNote].filter(Boolean).join(" · "))}</p></article>`;
   }).join("");
+  localizeElement(document.querySelector("#imageCredits"));
 }
 
 function displayName(node) {
-  return `${node.cn} ${node.name}`;
+  return `${nodeName(node)} ${otherName(node)}`;
 }
 
 function getNodePosition(nodeOrId) {
@@ -222,11 +225,11 @@ function relationColor(type) {
 }
 
 function relationLabel(type) {
-  return relationTypes[type]?.label ?? "关系";
+  return t(relationTypes[type]?.label ?? "关系");
 }
 
 function relationFullText(link) {
-  return link.sourceAnnotated === false ? "原图有此连线，未标注关系文字。" : link.fullText;
+  return linkFullText(link);
 }
 
 function relationDirectionMark(link, nodeId) {
@@ -235,7 +238,7 @@ function relationDirectionMark(link, nodeId) {
 }
 
 function originalRelationOrder(link) {
-  return `${nodeById.get(link.originalSource).cn} ${link.originalDirection} ${nodeById.get(link.originalTarget).cn}`;
+  return `${nodeName(nodeById.get(link.originalSource))} ${link.originalDirection} ${nodeName(nodeById.get(link.originalTarget))}`;
 }
 
 function renderNodeProvenance(node) {
@@ -243,7 +246,7 @@ function renderNodeProvenance(node) {
     `<a href="${escapeHtml(source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.label)}</a>`
   ).join(" · ");
   return `${citations ? `<p class="biography-sources">补充资料：${citations}</p>` : ""}
-    <details class="source-transcription"><summary>XMind 节点原文</summary><p>${escapeHtml(node.sourceText)}</p></details>`;
+    <details class="source-transcription"><summary>XMind 节点原文</summary><p data-i18n-skip lang="zh-CN">${escapeHtml(node.sourceText)}</p></details>`;
 }
 
 function renderDomainTags(node) {
@@ -252,6 +255,7 @@ function renderDomainTags(node) {
 
 function renderRelationLegend() {
   relationLegend.innerHTML = `<span>节点颜色 · 人物领域</span><span>箭头 · 关系方向</span><span>点击连线 · 阅读关系</span>`;
+  localizeElement(relationLegend);
 }
 
 function clearMapContext() {
@@ -321,7 +325,7 @@ function setActiveView(view, options = {}) {
 
   if (options.announce !== false) {
     const label = view === "topology" ? "地图模式" : view === "galaxy" ? "银河模式" : "时间轴";
-    viewStatus.textContent = `已切换到${label}`;
+    viewStatus.textContent = t(`已切换到${label}`);
   }
   updateViewControls();
 }
@@ -332,7 +336,7 @@ function updateViewControls() {
   document.querySelector("#galaxyHint").hidden = galaxyHintExpired || activeView !== "galaxy" || focused;
   const reset = document.querySelector("#resetView");
   reset.hidden = activeView === "galaxy";
-  const label = activeView === "timeline" ? "重置时间轴" : "重置地图";
+  const label = t(activeView === "timeline" ? "重置时间轴" : "重置地图");
   reset.title = label;
   reset.setAttribute("aria-label", label);
 }
@@ -349,7 +353,7 @@ function updateOverviewButton() {
   if (!button) return;
 
   const overviewPanelOpen = overviewMode && detailPanelOpen;
-  const label = "远望关系星云并打开介绍";
+  const label = t("远望关系星云并打开介绍");
   button.classList.remove("active");
   button.removeAttribute("aria-pressed");
   button.setAttribute("aria-expanded", String(overviewPanelOpen));
@@ -457,8 +461,8 @@ function renderOverviewPeople() {
             <button type="button" class="relation-row" data-focus-node="${node.id}">
               <span class="relation-dot" style="--relation-color:${groups[node.group].css}"></span>
               <span>
-                <strong>${node.kind === "topic" ? "★ " : ""}${escapeHtml(node.cn)}</strong>
-                <small>${escapeHtml(node.name)} · ${escapeHtml(groups[node.group].label)} · ${escapeHtml(node.role)}</small>
+                <strong>${node.kind === "topic" ? "★ " : ""}${escapeHtml(nodeName(node))}</strong>
+                <small>${escapeHtml(otherName(node))} · ${escapeHtml(groups[node.group].label)} · ${escapeHtml(nodeInfo(node, "role"))}</small>
               </span>
             </button>
           `
@@ -533,8 +537,8 @@ function renderOverviewHighlights() {
         <button type="button" class="relation-row" data-focus-node="${node.id}">
           <span class="relation-dot" style="--relation-color:${groups[node.group].css}"></span>
           <span>
-            <strong>${escapeHtml(node.cn)}</strong>
-            <small>${escapeHtml(node.degree)} 条关系 · ${escapeHtml(node.role)}</small>
+            <strong>${escapeHtml(nodeName(node))}</strong>
+            <small>${escapeHtml(node.degree)} 条关系 · ${escapeHtml(nodeInfo(node, "role"))}</small>
           </span>
         </button>
       `
@@ -585,6 +589,7 @@ function renderOverviewPanel() {
     <p class="source-note">星形代表主题。银河中，银色末梢表示关系指向，可为单侧、双侧或无末梢。主分类用于导航，人物卡另保留跨领域标签。关系方向与完整注释保留原图记录，不等同于逐条完成史实考证。</p>
     ${renderOverviewSection()}
   `;
+  localizeElement(detailPanelContent);
 }
 
 function makeStarField() {
@@ -674,7 +679,7 @@ function createNode(node) {
 
   const label = document.createElement("div");
   label.className = "node-label";
-  label.innerHTML = `<strong>${escapeHtml(node.cn)}</strong><span>${escapeHtml(node.role)}</span>`;
+  label.innerHTML = `<strong>${escapeHtml(nodeName(node))}</strong><span>${escapeHtml(nodeInfo(node, "role"))}</span>`;
   label.style.setProperty("--node-color", cssColor(color));
 
   const labelObject = new CSS2DObject(label);
@@ -730,6 +735,7 @@ function makeCurve(sourceNode, targetNode) {
   return new THREE.QuadraticBezierCurve3(start, control, end);
 }
 
+const localizedLinkLabel = linkLabel;
 function createLink(link, index) {
   const sourceNode = nodeById.get(link.source);
   const targetNode = nodeById.get(link.target);
@@ -798,7 +804,7 @@ function createLink(link, index) {
 
   const linkLabel = document.createElement("div");
   linkLabel.className = "link-label";
-  linkLabel.textContent = link.label.length > 28 ? `${link.label.slice(0, 27)}…` : link.label;
+  linkLabel.textContent = compactLabel(localizedLinkLabel(link));
   linkLabel.title = relationFullText(link);
   linkLabel.style.setProperty("--relation-color", cssColor(relationColor(link.type)));
   const linkLabelObject = new CSS2DObject(linkLabel);
@@ -886,6 +892,7 @@ function renderFilters() {
       return `<button type="button" data-group="${key}" class="${active.trim()}" ${colorStyle}>${label}</button>`;
     })
     .join("");
+  localizeElement(groupFilters);
 }
 
 function adjacentLinks(nodeId) {
@@ -1141,7 +1148,7 @@ function renderRelationList(nodeId) {
             <button type="button" class="relation-row" data-focus-node="${otherId}" data-link-index="${link.index}">
               <span class="relation-dot" style="--relation-color:${color}"></span>
               <span>
-                <strong>${relationDirectionMark(link, nodeId)} ${escapeHtml(otherNode.cn)}${link.projected ? " · 经主题节点" : ""}</strong>
+                <strong>${relationDirectionMark(link, nodeId)} ${escapeHtml(nodeName(otherNode))}${link.projected ? " · 经主题节点" : ""}</strong>
                 <small class="original-endpoints">原图：${escapeHtml(originalRelationOrder(link))}</small>
                 <small>${escapeHtml(relationFullText(link))}</small>
               </span>
@@ -1156,8 +1163,9 @@ function renderRelationList(nodeId) {
 function renderDetailPanel(node) {
   const group = groups[node.group];
   const relations = adjacentLinks(node.id);
-  const works = node.works?.length
-    ? `<div class="work-list">${node.works.map((work) => `<span>${escapeHtml(work)}</span>`).join("")}</div>`
+  const translatedWorks = nodeInfo(node, "works");
+  const works = translatedWorks?.length
+    ? `<div class="work-list">${translatedWorks.map((work) => `<span>${escapeHtml(work)}</span>`).join("")}</div>`
     : "";
 
   detailPanelContent.innerHTML = `
@@ -1167,12 +1175,12 @@ function renderDetailPanel(node) {
         <div class="panel-kicker" style="--node-color:${group.css}">
           <span></span>${escapeHtml(group.label)}
         </div>
-        <h2>${escapeHtml(node.cn)}</h2>
-        <p class="latin-name">${escapeHtml(node.name)} · ${escapeHtml(node.years)}</p>
-        <p class="role">${escapeHtml(node.role)}</p>
+        <h2>${escapeHtml(nodeName(node))}</h2>
+        <p class="latin-name">${escapeHtml(otherName(node))} · ${escapeHtml(node.years)}</p>
+        <p class="role">${escapeHtml(nodeInfo(node, "role"))}</p>
       </div>
     </div>
-    <p class="summary">${escapeHtml(node.summary)}</p>
+    <p class="summary">${escapeHtml(nodeInfo(node, "summary"))}</p>
     ${renderDomainTags(node)}
     ${renderNodeProvenance(node)}
     ${works}
@@ -1182,6 +1190,7 @@ function renderDetailPanel(node) {
     </div>
     ${renderRelationList(node.id)}
   `;
+  localizeElement(detailPanelContent);
 }
 
 function renderLinkDetail(linkIndex) {
@@ -1189,8 +1198,6 @@ function renderLinkDetail(linkIndex) {
   if (!record) return;
   clearMapContext();
   const { link } = record;
-  const source = nodeById.get(link.source);
-  const target = nodeById.get(link.target);
   overviewMode = false;
   selectedLinkIndex = linkIndex;
   selectedNodeId = null;
@@ -1205,13 +1212,21 @@ function renderLinkDetail(linkIndex) {
   setDetailPanelOpen(true);
   detailPanel.scrollTop = 0;
 
+  renderLinkPanel(link);
+  updateHighlights();
+  syncSecondaryViews({ center: activeView === "topology" });
+}
+
+function renderLinkPanel(link) {
+  const source = nodeById.get(link.source);
+  const target = nodeById.get(link.target);
   detailPanelContent.innerHTML = `
     <div class="panel-kicker" style="--node-color:${cssColor(relationColor(link.type))}">
       <span></span>${escapeHtml(relationLabel(link.type))}
     </div>
-    <h2>${escapeHtml(source.cn)} ${link.directed ? "→" : link.bidirectional ? "↔" : "—"} ${escapeHtml(target.cn)}</h2>
-    <p class="latin-name">${escapeHtml(source.name)} / ${escapeHtml(target.name)}</p>
-    <p class="role">${escapeHtml(link.label)}</p>
+    <h2>${escapeHtml(nodeName(source))} ${link.directed ? "→" : link.bidirectional ? "↔" : "—"} ${escapeHtml(nodeName(target))}</h2>
+    <p class="latin-name">${escapeHtml(otherName(source))} / ${escapeHtml(otherName(target))}</p>
+    <p class="role">${escapeHtml(linkLabel(link))}</p>
     <p class="original-endpoints">原图端点顺序：${escapeHtml(originalRelationOrder(link))}</p>
     <p class="summary">${escapeHtml(relationFullText(link))}</p>
     <div class="evidence-status">
@@ -1220,12 +1235,11 @@ function renderLinkDetail(linkIndex) {
       <span>${link.sourceAnnotated === false ? "原图直连，未写关系文字" : "XMind 完整原文"}</span>
     </div>
     <div class="relation-actions">
-      <button type="button" data-focus-node="${source.id}">${escapeHtml(source.cn)}</button>
-      <button type="button" data-focus-node="${target.id}">${escapeHtml(target.cn)}</button>
+      <button type="button" data-focus-node="${source.id}">${escapeHtml(nodeName(source))}</button>
+      <button type="button" data-focus-node="${target.id}">${escapeHtml(nodeName(target))}</button>
     </div>
   `;
-  updateHighlights();
-  syncSecondaryViews({ center: activeView === "topology" });
+  localizeElement(detailPanelContent);
 }
 
 function enterOverview(options = {}) {
@@ -1285,7 +1299,10 @@ function nodeSearchText(node) {
       node.summary,
       node.sourceText,
       ...(node.tags ?? []),
-      ...(node.works ?? [])
+      ...(node.works ?? []),
+      nodeInfo(node, "role"), nodeInfo(node, "summary"),
+      t(groups[node.group]?.label), ...node.tags.map(t),
+      ...(nodeInfo(node, "works") ?? [])
     ].join(" ")
   );
 }
@@ -1299,7 +1316,7 @@ function linkSearchText(link) {
       source.name,
       target.cn,
       target.name,
-      link.label,
+      link.label, link.fullText, linkLabel(link),
       relationFullText(link),
       relationLabel(link.type)
     ].join(" ")
@@ -1327,7 +1344,7 @@ function renderSearchResults(query) {
   const matches = [...nodeMatches, ...linkMatches].slice(0, 8);
 
   if (!matches.length) {
-    searchResults.innerHTML = `<div class="search-empty">没有匹配项</div>`;
+    setLocalizedHtml(searchResults, `<div class="search-empty">没有匹配项</div>`);
     searchResults.classList.add("is-open");
     return;
   }
@@ -1338,8 +1355,8 @@ function renderSearchResults(query) {
         const node = item.node;
         return `
           <button type="button" data-search-node="${node.id}">
-            <strong>${escapeHtml(node.cn)}</strong>
-            <span>${escapeHtml(node.role)}</span>
+            <strong>${escapeHtml(nodeName(node))}</strong>
+            <span>${escapeHtml(nodeInfo(node, "role"))}</span>
           </button>
         `;
       }
@@ -1349,13 +1366,14 @@ function renderSearchResults(query) {
       const target = nodeById.get(link.target);
       return `
         <button type="button" data-search-link="${index}">
-          <strong>${escapeHtml(source.cn)} ${link.directed ? "→" : link.bidirectional ? "↔" : "—"} ${escapeHtml(target.cn)}</strong>
-          <span>${escapeHtml(link.label)}</span>
+          <strong>${escapeHtml(nodeName(source))} ${link.directed ? "→" : link.bidirectional ? "↔" : "—"} ${escapeHtml(nodeName(target))}</strong>
+          <span>${escapeHtml(linkLabel(link))}</span>
         </button>
       `;
     })
     .join("");
   searchResults.classList.add("is-open");
+  localizeElement(searchResults);
 }
 
 function pointerFromEvent(event) {
@@ -1392,12 +1410,13 @@ function showLinkToast(event, index) {
   const source = nodeById.get(record.link.source);
   const target = nodeById.get(record.link.target);
   linkToast.innerHTML = `
-    <strong>${escapeHtml(source.cn)} ${record.link.directed ? "→" : record.link.bidirectional ? "↔" : "—"} ${escapeHtml(target.cn)}</strong>
-    <span>${escapeHtml(record.link.label)}</span>
+    <strong>${escapeHtml(nodeName(source))} ${record.link.directed ? "→" : record.link.bidirectional ? "↔" : "—"} ${escapeHtml(nodeName(target))}</strong>
+    <span>${escapeHtml(linkLabel(record.link))}</span>
   `;
   linkToast.style.left = `${Math.min(event.clientX + 16, window.innerWidth - 300)}px`;
   linkToast.style.top = `${Math.min(event.clientY + 16, window.innerHeight - 92)}px`;
   linkToast.classList.add("is-visible");
+  localizeElement(linkToast);
 }
 
 function hideLinkToast() {
@@ -1558,7 +1577,7 @@ document.querySelector("#orbitToggle").addEventListener("click", (event) => {
   controls.autoRotate = !controls.autoRotate;
   event.currentTarget.classList.toggle("active", controls.autoRotate);
   event.currentTarget.setAttribute("aria-pressed", String(controls.autoRotate));
-  const label = controls.autoRotate ? "停止自动旋转" : "开启自动旋转";
+  const label = t(controls.autoRotate ? "停止自动旋转" : "开启自动旋转");
   event.currentTarget.setAttribute("aria-label", label);
   event.currentTarget.title = label;
 });
@@ -1587,9 +1606,9 @@ function closeDetailPanel() {
   if (returnToContext) {
     updateHighlights();
     syncSecondaryViews({ fit: true });
-    viewStatus.textContent = mapContextLinkIndex !== null
+    viewStatus.textContent = t(mapContextLinkIndex !== null
       ? "已退回全图，保留刚才的关系及两端人物"
-      : "已退回全图，保留刚才人物的一度关系脉络";
+      : "已退回全图，保留刚才人物的一度关系脉络");
   }
   document.querySelector("#overviewToggle").focus({ preventScroll: true });
 }
@@ -1675,6 +1694,38 @@ function animate(timestamp = 0) {
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 }
+
+function refreshLanguage() {
+  const panelScroll = detailPanel.scrollTop;
+  localizeDocument();
+  renderFilters();
+  renderRelationLegend();
+  renderImageCredits();
+  nodeRecords.forEach(({ node, label }) => {
+    label.innerHTML = `<strong>${escapeHtml(nodeName(node))}</strong><span>${escapeHtml(nodeInfo(node, "role"))}</span>`;
+  });
+  linkRecords.forEach(({ link, label }) => {
+    label.textContent = compactLabel(linkLabel(link));
+    label.title = relationFullText(link);
+  });
+  if (selectedNodeId) renderDetailPanel(nodeById.get(selectedNodeId));
+  else if (selectedLinkIndex !== null) renderLinkPanel(links[selectedLinkIndex]);
+  else renderOverviewPanel();
+  detailPanel.scrollTop = panelScroll;
+  topologyApi?.refreshLanguage();
+  timelineApi?.refreshLanguage();
+  renderSearchResults(searchInput.value);
+  updateViewControls();
+  updateOverviewButton();
+  hideLinkToast();
+  const orbitLabel = t(controls.autoRotate ? "停止自动旋转" : "开启自动旋转");
+  const orbitButton = document.querySelector("#orbitToggle");
+  orbitButton.title = orbitLabel;
+  orbitButton.setAttribute("aria-label", orbitLabel);
+  viewStatus.textContent = t(`已切换到${activeView === "topology" ? "地图模式" : activeView === "galaxy" ? "银河模式" : "时间轴"}`);
+}
+document.querySelector("#languageSelect").addEventListener("change", (event) => setLanguage(event.target.value));
+onLanguageChange(refreshLanguage);
 
 renderFilters();
 renderImageCredits();

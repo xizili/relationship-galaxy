@@ -1,0 +1,466 @@
+{
+  "freud": {
+    "role": "Founder of psychoanalysis",
+    "summary": "Jewish founder of psychoanalysis. The original map centers on him and branches out to early psychoanalysis, existential psychotherapy, and later figures in psychology.",
+    "works": [
+      "The Interpretation of Dreams",
+      "Psychoanalytic theory"
+    ]
+  },
+  "rollo": {
+    "role": "Leading figure in existential psychotherapy",
+    "summary": "The map lists Existence and connects him with Alfred Adler and Irvin D. Yalom.",
+    "works": [
+      "Existence"
+    ]
+  },
+  "fromm": {
+    "role": "Leading figure in humanistic psychoanalysis",
+    "summary": "Psychoanalyst and social thinker who emphasized how society and culture shape people; author of Beyond the Chains of Illusion and The Art of Loving.",
+    "works": [
+      "The Art of Loving",
+      "Beyond the Chains of Illusion"
+    ]
+  },
+  "horney": {
+    "role": "Neo-Freudian psychoanalyst",
+    "summary": "The map lists The Neurotic Personality of Our Time. She introduced feminist and cultural perspectives within the psychoanalytic tradition.",
+    "works": [
+      "The Neurotic Personality of Our Time"
+    ]
+  },
+  "yalom": {
+    "role": "Existential psychotherapist",
+    "summary": "The map lists Becoming Myself and notes that Yalom took an existentialism course that included Kierkegaard.",
+    "works": [
+      "Becoming Myself"
+    ]
+  },
+  "suzuki": {
+    "role": "Promoter of Zen thought",
+    "summary": "A pioneer in bringing Zen to the West. The map identifies Zen Buddhism and Psychoanalysis as a work he coauthored or discussed with Erich Fromm.",
+    "works": [
+      "Zen Buddhism and Psychoanalysis"
+    ]
+  },
+  "kierkegaard": {
+    "role": "Danish philosopher",
+    "summary": "The map lists Fear and Trembling and connects him with Franz Kafka, Peter F. Drucker, and Irvin D. Yalom.",
+    "works": [
+      "Fear and Trembling"
+    ]
+  },
+  "kafka": {
+    "role": "Writer",
+    "summary": "The map notes that he copied out passages by Kierkegaard, connecting literary, existentialist, and psychoanalytic contexts.",
+    "works": [
+      "The Metamorphosis"
+    ]
+  },
+  "marx": {
+    "role": "Philosopher and political economist",
+    "summary": "He appears in the map as a broad intellectual source, linking social theory with the background to later psychological and cultural thought.",
+    "works": [
+      "Capital"
+    ]
+  },
+  "adler": {
+    "role": "Founder of individual psychology",
+    "summary": "An important figure in the early psychoanalytic circle who later developed individual psychology. The map lists What Life Should Mean to You.",
+    "works": [
+      "What Life Should Mean to You"
+    ]
+  },
+  "campbell": {
+    "role": "Comparative mythologist",
+    "summary": "Scholar of literature and comparative mythology, and author of The Hero with a Thousand Faces. The original map notes that Freud inspired his understanding of the relationship between dreams and myths, and separately records Jung's influence on him.",
+    "works": [
+      "The Hero with a Thousand Faces"
+    ]
+  },
+  "jung": {
+    "role": "Founder of analytical psychology",
+    "summary": "He was close to Freud early on, but they later broke over differences in theoretical direction. The map connects him with Emma Jung, Sabina Spielrein, Joseph Campbell, and other figures.",
+    "works": [
+      "The collective unconscious",
+      "Archetype theory"
+    ]
+  },
+  "emma": {
+    "role": "Analytical psychologist",
+    "summary": "Analytical psychologist and Carl Jung's spouse. The map lists the biography Love and Sacrifice: The Life of Emma Jung.",
+    "works": [
+      "Love and Sacrifice"
+    ]
+  },
+  "kandel": {
+    "role": "Neuroscientist",
+    "summary": "Jewish Nobel laureate in physiology. The map lists In Search of Memory.",
+    "works": [
+      "In Search of Memory"
+    ]
+  },
+  "drucker": {
+    "role": "Founder of management studies",
+    "summary": "Jewish social ecologist. The original map records that he met Freud as a child; his mother described Freud as one of the people with an enormous influence on Europe.",
+    "works": [
+      "Adventures of a Bystander",
+      "The Ecological Vision"
+    ]
+  },
+  "maslow": {
+    "role": "Leading figure in humanistic psychology",
+    "summary": "Jewish originator of Maslow's pyramid of needs. The map connects him with the humanistic psychology movement.",
+    "works": [
+      "Hierarchy of needs"
+    ]
+  },
+  "wertheimer": {
+    "role": "Cofounder of Gestalt psychology",
+    "summary": "One of the three founders of Gestalt psychology. The map includes the statement, translated as: “The whole is greater than the sum of its parts.”",
+    "works": [
+      "Gestalt psychology"
+    ]
+  },
+  "spinoza": {
+    "role": "Philosopher",
+    "summary": "Dutch philosopher known for substance monism and the Ethics.",
+    "works": []
+  },
+  "benedict": {
+    "role": "Anthropologist and folklorist",
+    "summary": "American anthropologist and folklorist, and author of The Chrysanthemum and the Sword. The original map records that she supervised Margaret Mead's master's thesis.",
+    "works": [
+      "The Chrysanthemum and the Sword"
+    ]
+  },
+  "goldstein": {
+    "role": "Neurologist and psychiatrist",
+    "summary": "Neurologist and psychiatrist known for his holistic theory of the organism. The original map connects him with Abraham Maslow.",
+    "works": [
+      "Holistic organismic theory"
+    ]
+  },
+  "cannon": {
+    "role": "Physiologist",
+    "summary": "Studied the fight-or-flight response and developed the concept of homeostasis.",
+    "works": []
+  },
+  "bertalanffy": {
+    "role": "Founder of general systems theory",
+    "summary": "Biologist and founder of general systems theory. The map places him alongside the threads of Kurt Lewin, Gestalt psychology, and systems theory.",
+    "works": [
+      "General systems theory"
+    ]
+  },
+  "lewin": {
+    "role": "Social psychologist",
+    "summary": "Jewish scholar and an important figure in group dynamics and field theory. The map lists Principles of Topological Psychology.",
+    "works": [
+      "Group dynamics",
+      "Field theory"
+    ]
+  },
+  "arendt": {
+    "role": "Political philosopher",
+    "summary": "German-born American political philosopher and author of The Human Condition and The Life of the Mind. The original map separately records her friendship with Mary McCarthy and her teacher–student and romantic relationships with Martin Heidegger.",
+    "works": [
+      "The Human Condition",
+      "The Life of the Mind"
+    ]
+  },
+  "heidegger": {
+    "role": "Philosopher associated with existentialism",
+    "summary": "The map lists Being and Time and explicitly connects him with Hannah Arendt.",
+    "works": [
+      "Being and Time"
+    ]
+  },
+  "mccarthy": {
+    "role": "Writer and critic",
+    "summary": "American writer known for her sharp observations of intellectuals, marriage, and women's circumstances. Her major works include The Group.",
+    "works": []
+  },
+  "kuhn": {
+    "role": "Philosopher of science",
+    "summary": "American historian and philosopher of science who explained the development of science through paradigms, normal science, and scientific revolutions in The Structure of Scientific Revolutions.",
+    "works": [
+      "The Essential Tension"
+    ]
+  },
+  "aristotle": {
+    "role": "Ancient Greek philosopher",
+    "summary": "Ancient Greek philosopher whose studies spanned logic, ethics, politics, and the natural sciences.",
+    "works": []
+  },
+  "sontag": {
+    "role": "Writer and cultural critic",
+    "summary": "American writer, art critic, and film director concerned with literature, images, and modern culture.",
+    "works": []
+  },
+  "einstein": {
+    "role": "Theoretical physicist",
+    "summary": "Developed the theory of relativity and received the 1921 Nobel Prize in Physics for his explanation of the photoelectric effect.",
+    "works": []
+  },
+  "piaget": {
+    "role": "Psychologist and theorist of cognitive development",
+    "summary": "Swiss psychologist also versed in mathematics, logic, physics, biology, and other fields. The map lists Structuralism.",
+    "works": [
+      "Structuralism",
+      "Theory of cognitive development"
+    ]
+  },
+  "bateson": {
+    "role": "Anthropologist and cybernetic thinker",
+    "summary": "His work spanned anthropology, sociology, psychology, philosophy, linguistics, cybernetics, and communication studies. The map lists Steps to an Ecology of Mind.",
+    "works": [
+      "Steps to an Ecology of Mind"
+    ]
+  },
+  "koffka": {
+    "role": "Gestalt psychologist",
+    "summary": "One of the founders of Gestalt psychology, who studied perception and psychological development and authored Principles of Gestalt Psychology.",
+    "works": []
+  },
+  "levi": {
+    "role": "Structural anthropologist",
+    "summary": "French anthropologist, sociologist, philosopher, and linguist. The original map connects him with Piaget's structuralist line of thought.",
+    "works": [
+      "Tristes Tropiques",
+      "Structural Anthropology"
+    ]
+  },
+  "sartre": {
+    "role": "Existentialist philosopher",
+    "summary": "The map lists Being and Nothingness and places him along the trajectory from existentialist philosophy to psychotherapy.",
+    "works": [
+      "Being and Nothingness"
+    ]
+  },
+  "marom": {
+    "role": "Neuroscientist",
+    "summary": "Israeli neuroscientist who studies the dynamics of the nervous system and explores dialogue between neuroscience and psychoanalysis.",
+    "works": []
+  },
+  "ogden": {
+    "role": "Psychoanalyst",
+    "summary": "American psychoanalyst concerned with intersubjectivity and creative experience in analysis; author of The Matrix of the Mind and Creative Readings.",
+    "works": []
+  },
+  "klein": {
+    "role": "Founder of the Kleinian school",
+    "summary": "Jewish pioneer of child psychoanalysis. The map notes that she studied her own children and connects her with the psychoanalytic tradition.",
+    "works": [
+      "Object relations theory"
+    ]
+  },
+  "kahneman": {
+    "role": "Cognitive psychologist",
+    "summary": "Studied cognitive biases in judgment and decision-making, received the Nobel Prize in Economics, and wrote Thinking, Fast and Slow.",
+    "works": []
+  },
+  "treisman": {
+    "role": "Cognitive psychologist",
+    "summary": "Studied visual attention and perception and proposed feature integration theory.",
+    "works": []
+  },
+  "maturana": {
+    "role": "Biologist and thinker in second-order cybernetics",
+    "summary": "Chilean biologist, philosopher, and theorist of second-order cybernetics. The map lists From Being to Doing.",
+    "works": [
+      "From Being to Doing"
+    ]
+  },
+  "mead": {
+    "role": "Anthropologist",
+    "summary": "American anthropologist and recipient of the Presidential Medal of Freedom. The map notes that she published a pioneering article related to the cybernetics of cybernetics.",
+    "works": [
+      "Research in cultural anthropology"
+    ]
+  },
+  "foerster": {
+    "role": "Leading figure in second-order cybernetics",
+    "summary": "Scientist, physicist, and philosopher with dual American and Australian citizenship. The map notes that he developed second-order cybernetics and was known for the doomsday equation.",
+    "works": [
+      "Second-order cybernetics"
+    ]
+  },
+  "cybernetics": {
+    "role": "When the observer no longer remains invisible and becomes the environment",
+    "summary": "This is a topic in the original map, rather than a person. The star-shaped node connects Mead, Bateson, Maturana, and von Foerster; none of these four connections has a separate relationship label in XMind.",
+    "works": []
+  },
+  "rogers": {
+    "role": "One of the founders of humanistic psychology",
+    "summary": "Pioneered nondirective therapy, also known as client-centered therapy. The map lists On Becoming a Person.",
+    "works": [
+      "On Becoming a Person"
+    ]
+  },
+  "sabina": {
+    "role": "Early woman psychoanalyst",
+    "summary": "Early woman psychoanalyst and pioneer of child analysis who studied destructive drives, child psychology, and language development.",
+    "works": [
+      "Early psychoanalytic papers"
+    ]
+  },
+  "steiner": {
+    "role": "Philosopher and educator",
+    "summary": "Founder of anthroposophy and initiator of Waldorf education who also worked in architecture and the arts.",
+    "works": []
+  },
+  "goethe": {
+    "role": "Writer and naturalist",
+    "summary": "A major writer in German-language literature who also pursued research in philosophy, aesthetics, and the natural sciences.",
+    "works": []
+  },
+  "lacan": {
+    "role": "Leading figure in French psychoanalysis",
+    "summary": "Highly influential French psychoanalyst of the 20th century, described in the map as the “French Freud,” who reread Freud through language, structuralism, and philosophy.",
+    "works": [
+      "Structuralist psychoanalysis"
+    ]
+  },
+  "schwind": {
+    "role": "Romantic painter",
+    "summary": "Austrian painter whose work often resonates with music, legends, and poetry.",
+    "works": []
+  },
+  "feigenbaum": {
+    "role": "Mathematical physicist",
+    "summary": "Pioneer of chaos theory who discovered universality in period-doubling bifurcations and the Feigenbaum constants.",
+    "works": []
+  },
+  "smith": {
+    "role": "Economist and moral philosopher",
+    "summary": "Scottish thinker and author of The Wealth of Nations who studied economic life and moral judgment.",
+    "works": []
+  },
+  "darwin": {
+    "role": "Naturalist and biologist",
+    "summary": "British naturalist who systematically developed the theory explaining biological evolution through natural selection.",
+    "works": []
+  },
+  "malthus": {
+    "role": "Demographer and economist",
+    "summary": "British economist known for his discussion of the relationship between population growth and resources for subsistence in An Essay on the Principle of Population.",
+    "works": []
+  },
+  "mcculloch": {
+    "role": "Economist and editor",
+    "summary": "Scottish economist and editor who was an important disseminator of the Ricardian tradition in economics.",
+    "works": []
+  },
+  "erikson": {
+    "role": "Developmental psychologist and psychoanalyst",
+    "summary": "Psychoanalyst and developmental psychologist who proposed an eight-stage theory of psychosocial development across the lifespan and studied identity crises.",
+    "works": [
+      "Stages of psychosocial development"
+    ]
+  },
+  "anna": {
+    "role": "Leading figure in child psychoanalysis",
+    "summary": "Pioneer of child psychoanalysis who advanced child psychotherapy, education, and care through theoretical innovation and clinical practice.",
+    "works": [
+      "Child psychoanalysis"
+    ]
+  },
+  "connes": {
+    "role": "Mathematician",
+    "summary": "French mathematician and principal founder of noncommutative geometry who received the Fields Medal in 1982.",
+    "works": []
+  },
+  "changeux": {
+    "role": "French neuroscientist",
+    "summary": "Associated with research on epigenetics, synaptic stability, and proteins. The map connects him with global workspace theory.",
+    "works": [
+      "Work related to global workspace theory"
+    ]
+  },
+  "dehaene": {
+    "role": "Cognitive neuroscientist",
+    "summary": "French cognitive neuroscientist who studies the brain mechanisms underlying consciousness, language, and mathematical abilities.",
+    "works": [
+      "Reading in the Brain",
+      "How We Learn"
+    ]
+  },
+  "edelman": {
+    "role": "Proponent of neural Darwinism",
+    "summary": "American biologist, immunology specialist, neuroscientist, and Nobel laureate in physiology. The map notes “neural Darwinism.”",
+    "works": [
+      "Neural Darwinism"
+    ]
+  },
+  "sporns": {
+    "role": "Pioneer of network neuroscience",
+    "summary": "German neuroscientist and pioneer of connectome research who proposed viewing the brain as a complex network system.",
+    "works": [
+      "Network neuroscience"
+    ]
+  },
+  "friston": {
+    "role": "Originator of the free energy principle",
+    "summary": "British neuroscientist and master of theoretical modeling who proposed the free energy principle. The map connects him with Mark Solms's integrative approach to neuropsychoanalysis.",
+    "works": [
+      "Free energy principle"
+    ]
+  },
+  "solms": {
+    "role": "Leading figure in neuropsychoanalysis",
+    "summary": "South African psychoanalyst, neuropsychologist, and leading figure in neuropsychoanalysis. The map notes that he uses Friston's free energy principle to integrate Freud's theories.",
+    "works": [
+      "The Hidden Spring"
+    ]
+  },
+  "tononi": {
+    "role": "Originator of integrated information theory",
+    "summary": "Neuroscientist and neurologist of Italian origin who proposed integrated information theory.",
+    "works": [
+      "Integrated information theory"
+    ]
+  },
+  "koch": {
+    "role": "Leading figure in consciousness research",
+    "summary": "Neuroscientist who has long studied the neural basis of consciousness and, together with Francis Crick, advanced research into the neural correlates of consciousness.",
+    "works": [
+      "Neuroscience of consciousness"
+    ]
+  },
+  "merton": {
+    "role": "Monk, writer, and thinker",
+    "summary": "Catholic monk and writer, author of The Seven Storey Mountain, who explored interfaith dialogue over many years.",
+    "works": []
+  },
+  "beauvoir": {
+    "role": "Philosopher and writer",
+    "summary": "French existentialist thinker and feminist who wrote The Second Sex and The Blood of Others.",
+    "works": []
+  },
+  "zhuangzi": {
+    "role": "Pre-Qin philosopher",
+    "summary": "Daoist thinker of the Warring States period who used fables to explore the self, knowledge, change, and free wandering; the birth and death years are traditional approximations.",
+    "works": []
+  },
+  "mahler": {
+    "role": "Composer and conductor",
+    "summary": "Austrian composer and conductor known for his symphonies and vocal compositions.",
+    "works": []
+  },
+  "leibovitz": {
+    "role": "Portrait photographer",
+    "summary": "American photographer who worked for Rolling Stone magazine and is known for her portrait photography.",
+    "works": []
+  },
+  "lennon": {
+    "role": "Musician and songwriter",
+    "summary": "British musician and member of the Beatles, also known for his solo music and peace advocacy.",
+    "works": []
+  },
+  "ono": {
+    "role": "Artist and musician",
+    "summary": "Japanese-born artist and musician whose practice spans conceptual art, performance, film, and music.",
+    "works": []
+  }
+}

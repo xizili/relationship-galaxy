@@ -19,7 +19,8 @@
     "check:geometry": "node scripts/validate-dynamic-tube.mjs",
     "check:guestbook": "node scripts/validate-guestbook.mjs",
     "check:camera": "node scripts/validate-camera-flight.mjs",
-    "check": "npm run check:data && npm run check:layout && npm run check:tour && npm run check:ui && npm run check:map-motion && npm run check:map-layout && npm run check:soundtrack && npm run check:dust && npm run check:geometry && npm run check:guestbook && npm run check:camera"
+    "check:i18n": "node scripts/validate-i18n.mjs",
+    "check": "npm run check:data && npm run check:layout && npm run check:tour && npm run check:ui && npm run check:map-motion && npm run check:map-layout && npm run check:soundtrack && npm run check:dust && npm run check:geometry && npm run check:guestbook && npm run check:camera && npm run check:i18n"
   },
   "dependencies": {
     "lucide": "^0.468.0",

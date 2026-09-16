@@ -67,6 +67,13 @@
           <button type="button" data-view="topology" aria-pressed="false">地图模式</button>
           <button type="button" class="active" data-view="galaxy" aria-pressed="true">银河模式</button>
           <button type="button" data-view="timeline" aria-pressed="false">时间轴</button>
+          <label class="language-control" title="界面语言">
+            <span class="sr-only">界面语言</span>
+            <select id="languageSelect" aria-label="界面语言">
+              <option value="zh" lang="zh-CN" data-i18n-skip>中文</option>
+              <option value="en" lang="en" data-i18n-skip>English</option>
+            </select>
+          </label>
         </nav>
 
         <div class="search-wrap">
@@ -166,7 +173,7 @@
           <a href="mailto:neuroplus@126.com?subject=%E5%85%B3%E7%B3%BB%E7%9A%84%E9%93%B6%E6%B2%B3%20%C2%B7%20%E7%A7%81%E4%BF%A1">neuroplus@126.com ↗</a>
           <p>点击打开你的邮件应用，内容不会出现在公开留言板。</p>
         </section>
-        <section id="guestbookMessages" class="guestbook-messages" aria-label="公开留言列表"></section>
+        <section id="guestbookMessages" class="guestbook-messages" aria-label="公开留言列表"><div id="guestbookEntries" data-i18n-skip></div></section>
         <button id="guestbookMore" class="guestbook-action" type="button" hidden>更早的留言</button>
       </dialog>
       <audio id="backgroundMusic" autoplay preload="auto" loop></audio>

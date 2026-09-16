@@ -1,3 +1,4 @@
+import { t, nodeName, otherName, nodeInfo, localizeElement } from "./i18n.js";
 import { portraitAssetUrl } from "./portraits.js";
 import { birthYear } from "./galaxy-layout.js";
 
@@ -31,9 +32,11 @@ function yearLabel(year) { return year < 0 ? `前${Math.abs(year)}` : String(yea
 
 export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
   let updateRevision = 0;
+  let currentState = {};
   const visibleCount = document.querySelector("#timelineVisibleCount");
   const degreeMap = buildDegreeMap(nodes, links);
   const sortedNodes = nodes.filter((node) => node.kind === "person").sort((a, b) => birthYear(a) - birthYear(b) || a.cn.localeCompare(b.cn, "zh-CN"));
+  function render() {
   document.querySelector("#timelineYearRange").textContent = `${yearLabel(birthYear(sortedNodes[0]))}—${yearLabel(birthYear(sortedNodes.at(-1)))}`;
   const decades = new Map();
 
@@ -63,7 +66,7 @@ export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
                     data-node-id="${node.id}"
                     data-group="${node.group}"
                     style="--card-color:${group.css}"
-                    aria-label="查看${escapeHtml(node.cn)}，${escapeHtml(node.years)}"
+                    aria-label="查看${escapeHtml(nodeName(node))}，${escapeHtml(node.years)}"
                   >
                     <span class="timeline-card-year">${yearLabel(birthYear(node))}</span>
                     <span class="timeline-card-school"><i></i>${escapeHtml(group.label)}</span>
@@ -76,11 +79,11 @@ export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
                         decoding="async"
                       />` : `<span class="timeline-card-portrait portrait-placeholder" aria-label="暂无授权肖像">${escapeHtml(node.name.split(" ").map((part) => part[0]).slice(0, 2).join(""))}</span>`}
                       <span class="timeline-card-identity">
-                        <strong>${escapeHtml(node.cn)}</strong>
-                        <em>${escapeHtml(node.name)}</em>
+                        <strong>${escapeHtml(nodeName(node))}</strong>
+                        <em>${escapeHtml(otherName(node))}</em>
                       </span>
                     </span>
-                    <span class="timeline-card-role">${escapeHtml(node.role)}</span>
+                    <span class="timeline-card-role">${escapeHtml(nodeInfo(node, "role"))}</span>
                     <span class="timeline-card-meta">${escapeHtml(node.years)} · ${degreeMap.get(node.id) ?? 0} 条关系</span>
                   </button>
                 `;
@@ -98,10 +101,15 @@ export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
       <h3>跨越年代的主题</h3><p>主题没有出生年，单独列在这里。</p>
       ${topics.map((node) => `<button type="button" class="timeline-card" data-kind="topic" data-node-id="${node.id}" data-group="${node.group}" style="--card-color:${groups[node.group].css}">
         <span class="topic-card-star" aria-hidden="true">★</span>
-        <strong>${escapeHtml(node.cn)}</strong><span>${escapeHtml(node.role)}</span>
+        <strong>${escapeHtml(nodeName(node))}</strong><span>${escapeHtml(nodeInfo(node, "role"))}</span>
         <span>${degreeMap.get(node.id) ?? 0} 条主题关系</span>
       </button>`).join("")}
     </section>`);
+
+  localizeElement(root);
+  localizeElement(document.querySelector("#timelineYearRange"));
+  }
+  render();
 
   root.addEventListener("click", (event) => {
     const card = event.target.closest("[data-node-id]");
@@ -110,6 +118,7 @@ export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
   });
 
   function update(state = {}, options = {}) {
+    currentState = state;
     const revision = ++updateRevision;
     const { activeGroup = "all", selectedNodeId = null } = state;
     let count = 0;
@@ -125,7 +134,7 @@ export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
     root.querySelectorAll(".timeline-decade").forEach((section) => {
       const visibleCards = section.querySelectorAll(".timeline-card:not([hidden])");
       section.hidden = visibleCards.length === 0;
-      section.querySelector(".timeline-decade-head small").textContent = `${visibleCards.length} 位人物`;
+      section.querySelector(".timeline-decade-head small").textContent = t(`${visibleCards.length} 位人物`);
     });
 
     if (visibleCount) visibleCount.textContent = String(count);
@@ -140,5 +149,10 @@ export function initTimeline({ root, nodes, links, groups, onFocusNode }) {
     }
   }
 
-  return { update };
+  return { update, refreshLanguage() {
+    const view = document.querySelector("#timelineView");
+    const scrollTop = view.scrollTop;
+    render(); update(currentState);
+    view.scrollTop = scrollTop;
+  } };
 }

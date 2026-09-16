@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { initSoundtrack, soundtrack } from "../src/soundtrack.js";
+import { setLanguage } from "../src/i18n.js";
 
 function fixture(playImplementation = () => Promise.resolve()) {
   const elements = new Map();
@@ -49,6 +50,13 @@ await Promise.resolve();
 assert.equal(loaded.toggle.dataset.state, "playing");
 loaded.audio.pause();
 assert.equal(loaded.toggle.dataset.state, "paused", "系统暂停必须同步到控件");
+const callsBeforeLanguage = loaded.audio.calls;
+setLanguage("en");
+assert.equal(loaded.label.textContent, "Turn music on");
+assert.equal(loaded.audio.paused, true);
+assert.equal(loaded.audio.calls, callsBeforeLanguage, "切换语言不能重新启动音乐");
+setLanguage("zh");
+assert.equal(loaded.label.textContent, "开启音乐");
 
 let denied = true;
 const blocked = fixture(() => denied ? Promise.reject(Object.assign(new Error("Gesture needed"), { name: "NotAllowedError" })) : Promise.resolve());
